@@ -16,7 +16,7 @@ erasure_type_value, bool adaptive_mode_MDS_value, int flag) {
     flag_for_estimation_cycle=1;
     if (erasure_type != 5) {
         fec_decoder = new siphon::Variable_Rate_FEC_Decoder(max_payload, OUTPUTDATAFILE, ERASURE_RECORDER);
-        fec_decoderTemp = new siphon::Variable_Rate_FEC_Decoder(max_payload, OUTPUTDATAFILE, ERASURE_RECORDER);
+//        fec_decoderTemp = new siphon::Variable_Rate_FEC_Decoder(max_payload, OUTPUTDATAFILE, ERASURE_RECORDER);
     }
     else
         fec_decoder = new siphon::Variable_Rate_FEC_Decoder(max_payload, OUTPUTDATAFILE, 0);   //do not record if the
@@ -27,23 +27,23 @@ erasure_type_value, bool adaptive_mode_MDS_value, int flag) {
     codeword = (unsigned char *) malloc(
             sizeof(unsigned char) * (max_payload + 12) * 4 * T_TOT); //4-byte sequence number + 4-byte
     // coding parameters
-    codeword_vector = (unsigned char **) malloc(sizeof(unsigned char *) * (T_TOT+1));
-    codeword_new_vector=(unsigned char **) malloc(sizeof(unsigned char *) * (T_TOT+1));
-    codeword_vector_store_in_burst=(unsigned char **) malloc(sizeof(unsigned char *) * (T_TOT+1));
-
-    temp_erasure_vector=(bool *) malloc(sizeof(bool)*T_TOT);
-    for (int i=0;i<T_TOT+1;i++){
-        codeword_vector[i]=(unsigned char *) malloc(
-                sizeof(unsigned char) * (max_payload + 12) * 4 * T_TOT); //4-byte sequence number + 4-byte
-        memset(codeword_vector[i],'\000',(max_payload + 12) * 4 * T_TOT);
-        codeword_new_vector[i]=(unsigned char *) malloc(sizeof(unsigned char) * (max_payload + 12) * 4 * T_TOT); //4-byte sequence number + 4-byte
-        codeword_vector_store_in_burst[i]=(unsigned char *) malloc(sizeof(unsigned char) * (max_payload + 12) * 4 * T_TOT); //4-byte sequence number + 4-byte
-        //memset(codeword_new_vector[i],'\000',(max_payload + 12) * 4 * T_INITIAL);
-        temp_erasure_vector[i]=0;
-    }
+//    codeword_vector = (unsigned char **) malloc(sizeof(unsigned char *) * (T_TOT+1));
+//    codeword_new_vector=(unsigned char **) malloc(sizeof(unsigned char *) * (T_TOT+1));
+//    codeword_vector_store_in_burst=(unsigned char **) malloc(sizeof(unsigned char *) * (T_TOT+1));
+//
+//    temp_erasure_vector=(bool *) malloc(sizeof(bool)*T_TOT);
+//    for (int i=0;i<T_TOT+1;i++){
+//        codeword_vector[i]=(unsigned char *) malloc(
+//                sizeof(unsigned char) * (max_payload + 12) * 4 * T_TOT); //4-byte sequence number + 4-byte
+//        memset(codeword_vector[i],'\000',(max_payload + 12) * 4 * T_TOT);
+//        codeword_new_vector[i]=(unsigned char *) malloc(sizeof(unsigned char) * (max_payload + 12) * 4 * T_TOT); //4-byte sequence number + 4-byte
+//        codeword_vector_store_in_burst[i]=(unsigned char *) malloc(sizeof(unsigned char) * (max_payload + 12) * 4 * T_TOT); //4-byte sequence number + 4-byte
+//        //memset(codeword_new_vector[i],'\000',(max_payload + 12) * 4 * T_INITIAL);
+//        temp_erasure_vector[i]=0;
+//    }
 
     //codeword_new_vector[T_INITIAL]=(unsigned char *) malloc(sizeof(unsigned char) * (max_payload + 12) * 4 * T_INITIAL); //4-byte sequence number + 4-byte
-    memset(codeword_new_symbol_wise,'\000',(max_payload + 12) * 4 * T_TOT);
+//    memset(codeword_new_symbol_wise,'\000',(max_payload + 12) * 4 * T_TOT);
 
     connection_manager = new ConnectionManager(Tx, Rx,flag);
 
@@ -55,16 +55,16 @@ erasure_type_value, bool adaptive_mode_MDS_value, int flag) {
 
 Application_Layer_Receiver::~Application_Layer_Receiver() {
     free(codeword);
-    for (int i=0;i<T_TOT;i++) {
-        free(codeword_vector[i]);
-        free(codeword_new_vector[i]);
-    }
+//    for (int i=0;i<T_TOT;i++) {
+//        free(codeword_vector[i]);
+//        free(codeword_new_vector[i]);
+//    }
     delete fec_message;
     delete fec_messageTemp;
     delete estimator;
     delete background_estimator;
     delete fec_decoder;
-    delete fec_decoderTemp;
+//    delete fec_decoderTemp;
     delete connection_manager;
 }
 

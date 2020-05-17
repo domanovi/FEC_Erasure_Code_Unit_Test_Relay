@@ -136,8 +136,10 @@ namespace siphon {
     }
 
     void Variable_Rate_FEC_Decoder::receive_message_and_symbol_wise_encode(FEC_Message *message,int n,int k,int n2,int k2,int temp_size) {
-        if (seq_start == -1) //initialize the decoder upon receiving the first packet
+        if (seq_start == -1) { //initialize the decoder upon receiving the first packet
             initialize_decoder(message);
+            encoder = new Encoder(n2 - 1, n2 - k2, n2 - k2, max_payload);
+        }
         int received_seq = message->seq_number;
 
         if (received_seq < latest_seq) { //if an out-of-order sequence is received, just discard it
@@ -160,7 +162,7 @@ namespace siphon {
                 memset(codeword_vector[n - 1], '\000', (300 + 12) * 4 * T_TOT);//ELAD - 300=max_payload
                 temp_erasure_vector[n - 1] = 1;
                 DEBUG_MSG("\033[1;34m" << "Burst: packet dropped in (s,r) #" << seq << ": " << "\033[0m");
-                symbol_wise_encode(k, n, decoder_current->decoder->getG(), temp_size,k2,n2); // decode past codewords
+                symbol_wise_encode(k, n, decoder_current->decoder->getG(),encoder->getG(), temp_size,k2,n2); // decode past codewords
                 memcpy(codeword_vector_store_in_burst[n - 1], codeword_new_vector[n - 1], temp_size);
                 display_udp_statistics(seq);
             }
@@ -179,7 +181,7 @@ namespace siphon {
                 memset(codeword_vector[n - 1], '\000', (300 + 12) * 4 * T_TOT);//ELAD - 300=max_payload
                 temp_erasure_vector[n - 1] = 1;
                 DEBUG_MSG("\033[1;34m" << "Packet dropped in (s,r) #" << seq << ": " << "\033[0m");
-                symbol_wise_encode(k, n, decoder_current->decoder->getG(), temp_size,k2,n2); // decode past codewords
+                symbol_wise_encode(k, n, decoder_current->decoder->getG(),encoder->getG(), temp_size,k2,n2); // decode past codewords
                 display_udp_statistics(seq);
             }
         }
@@ -194,8 +196,8 @@ namespace siphon {
         memcpy(codeword_vector[n-1],message->buffer,temp_size);
         temp_erasure_vector[n-1]=0;
 
-        symbol_wise_encode(k,n,decoder_current->decoder->getG(),temp_size,k2,n2);
-        memcpy(codeword_new_symbol_wise,codeword_new_vector[n-1],temp_size);//ELAD - to change
+        symbol_wise_encode(k,n,decoder_current->decoder->getG(),encoder->getG(),temp_size,k2,n2);
+        memcpy(codeword_new_symbol_wise,codeword_new_vector[n2-1],temp_size);//ELAD - to change
         display_udp_statistics(received_seq);
         display_fec_statistics(received_seq);
 
@@ -205,7 +207,7 @@ namespace siphon {
         //return received_seq;//ELAD to change
     }
 
-    void Variable_Rate_FEC_Decoder::symbol_wise_encode(int k,int n,unsigned char *generator, int temp_size,int k2, int n2){
+    void Variable_Rate_FEC_Decoder::symbol_wise_encode(int k,int n,unsigned char *generator_s_r,unsigned char *generator_r_d, int temp_size,int k2, int n2){
         int erasure_counter=0;
         for (int i=0;i<n;i++){
             if (temp_erasure_vector[i]==1)
@@ -228,7 +230,7 @@ namespace siphon {
             if (erasure_counter>0 && erasure_counter<(n-k+1)){
                 for (int aa=0;aa<n-1;aa++)
                     stam_erasure_vector[aa]=temp_erasure_vector[aa];
-                decodeBlock(&temp_codeword[0], generator, &temp_codeword[0], stam_erasure_vector,  k,  n,n-1,0);// T=n-1
+                decodeBlock(&temp_codeword[0], generator_s_r, &temp_codeword[0], stam_erasure_vector,  k,  n,n-1,0);// T=n-1
             }else if (erasure_counter>=(n-k+1)){
                 flag=true;
             }
@@ -253,7 +255,7 @@ namespace siphon {
                 temp_codeword[i]=codeword_new_vector[i][2+j*n2+i]; // temp_codeword holds the diagonal (c_0,b_0,a_0...)!!!
             }
             memcpy(temp_encoded_codeword,temp_codeword,k*sizeof(unsigned char));
-            encodeBlock(&temp_codeword[0], generator, &temp_encoded_codeword[0], k2, n2, k2-1);
+            encodeBlock(&temp_codeword[0], generator_r_d, &temp_encoded_codeword[0], k2, n2, k2-1);
             for (int i = k2; i < n2; i++) {
                 codeword_new_vector[i][2+j*n2+i]=temp_encoded_codeword[i];
                 //codeword_new_symbol_wise[10+j*n+i]=temp_encoded_codeword[i];

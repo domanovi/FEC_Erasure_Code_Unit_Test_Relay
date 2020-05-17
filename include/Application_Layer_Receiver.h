@@ -17,12 +17,12 @@ private:
     siphon::Parameter_Estimator *background_estimator;
     int flag_for_estimation_cycle;
 
-    siphon::Variable_Rate_FEC_Decoder *fec_decoderTemp;
+//    siphon::Variable_Rate_FEC_Decoder *fec_decoderTemp;
 
     unsigned char *codeword;
-    unsigned char **codeword_vector;
-
-    bool *temp_erasure_vector;
+//    unsigned char **codeword_vector;
+//
+//    bool *temp_erasure_vector;
 
     ConnectionManager *connection_manager;
 
@@ -61,17 +61,17 @@ public:
 
     void set_receiver_index(int index);
 
-    unsigned char codeword_new_symbol_wise[30000];
+//    unsigned char codeword_new_symbol_wise[30000];
     char response_from_dest_buffer[6];
     int latest_seq;
 
 
 
-    void symbol_wise_encode(int k, int n, unsigned char *generator, int temp_size,int k2, int n2);
-
-    void symbol_wise_decode(int k, int n, unsigned char *generator, int temp_size);
-    unsigned char **codeword_new_vector;
-    unsigned char **codeword_vector_store_in_burst;
+//    void symbol_wise_encode(int k, int n, unsigned char *generator, int temp_size,int k2, int n2);
+//
+//    void symbol_wise_decode(int k, int n, unsigned char *generator, int temp_size);
+//    unsigned char **codeword_new_vector;
+//    unsigned char **codeword_vector_store_in_burst;
 
     int temp_size;
 };

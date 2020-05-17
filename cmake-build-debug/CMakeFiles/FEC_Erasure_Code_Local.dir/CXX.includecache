@@ -143,6 +143,8 @@ FEC_Decoder.h
 ../include/FEC_Decoder.h
 Memory_Allocator.h
 ../include/Memory_Allocator.h
+Encoder.h
+../include/Encoder.h
 
 ../include/Variable_Rate_FEC_Encoder.h
 FEC_Encoder.h

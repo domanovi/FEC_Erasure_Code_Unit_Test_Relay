@@ -16,6 +16,16 @@ Decoder_Block_Code.h
 
 ../include/Decoder_Block_Code.h
 
+../include/Encoder.h
+Encoder_Basic.h
+../include/Encoder_Basic.h
+
+../include/Encoder_Basic.h
+Encoder_Block_Code.h
+../include/Encoder_Block_Code.h
+
+../include/Encoder_Block_Code.h
+
 ../include/FEC_Decoder.h
 random
 -
@@ -49,6 +59,8 @@ FEC_Decoder.h
 ../include/FEC_Decoder.h
 Memory_Allocator.h
 ../include/Memory_Allocator.h
+Encoder.h
+../include/Encoder.h
 
 ../include/basicOperations.h
 FEC_Macro.h

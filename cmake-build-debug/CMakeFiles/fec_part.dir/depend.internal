@@ -7,6 +7,9 @@ CMakeFiles/fec_part.dir/src/Application_Layer_Receiver.cpp.o
  ../include/Decoder.h
  ../include/Decoder_Basic.h
  ../include/Decoder_Block_Code.h
+ ../include/Encoder.h
+ ../include/Encoder_Basic.h
+ ../include/Encoder_Block_Code.h
  ../include/Erasure_Simulator.h
  ../include/FEC_Decoder.h
  ../include/FEC_Macro.h
@@ -119,6 +122,9 @@ CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Decoder.cpp.o
  ../include/Decoder.h
  ../include/Decoder_Basic.h
  ../include/Decoder_Block_Code.h
+ ../include/Encoder.h
+ ../include/Encoder_Basic.h
+ ../include/Encoder_Block_Code.h
  ../include/FEC_Decoder.h
  ../include/FEC_Macro.h
  ../include/FEC_Message.h

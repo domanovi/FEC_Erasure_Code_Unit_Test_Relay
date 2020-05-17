@@ -20,6 +20,7 @@
 
 #include "FEC_Decoder.h"
 #include "Memory_Allocator.h"
+#include "Encoder.h"
 
 namespace siphon {
 
@@ -101,6 +102,8 @@ namespace siphon {
         unsigned char *codeword;
         unsigned char **codeword_vector;
 
+        Encoder *encoder;
+
         bool *temp_erasure_vector;
 
         /**
@@ -117,7 +120,7 @@ namespace siphon {
 
         int erasure_length_cap;
 
-        void symbol_wise_encode(int k, int n, unsigned char *generator, int temp_size, int k2, int n2);
+        void symbol_wise_encode(int k, int n, unsigned char *generator_s_r, unsigned char *generator_r_d, int temp_size, int k2, int n2);
 
         void symbol_wise_decode(int k, int n, unsigned char *generator, int temp_seq);
 
