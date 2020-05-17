@@ -147,6 +147,8 @@ namespace siphon {
         if (received_seq>latest_seq+n-1) {
             // in case of a burst longer than n fill codeword_vector with zeros and store codeword_new_vector in codeword_vector_store_in_burst
             for (int seq = latest_seq; seq < latest_seq + n ; seq++) {
+                UDP_loss_counter_++;
+                final_UDP_loss_counter_++;
                 for (int i = 0; i < n - 1; i++) {
                     memcpy(codeword_vector[i], codeword_vector[i + 1], temp_size);
                     memcpy(codeword_vector_store_in_burst[i], codeword_vector_store_in_burst[i + 1], temp_size);
@@ -160,12 +162,14 @@ namespace siphon {
                 DEBUG_MSG("\033[1;34m" << "Burst: packet dropped in (s,r) #" << seq << ": " << "\033[0m");
                 symbol_wise_encode(k, n, decoder_current->decoder->getG(), temp_size,k2,n2); // decode past codewords
                 memcpy(codeword_vector_store_in_burst[n - 1], codeword_new_vector[n - 1], temp_size);
-
+                display_udp_statistics(seq);
             }
             for (int i=0;i<n-1;i++)// zero the output (after storing)
                 memset(codeword_new_vector[i], '\000', (300 + 12) * 4 * T_TOT);//ELAD - 300=max_payload
         }else {
             for (int seq = latest_seq; seq < received_seq; seq++) {// need to handle bursts longer than n
+                UDP_loss_counter_++;
+                final_UDP_loss_counter_++;
                 for (int i = 0; i < n - 1; i++) {
                     memcpy(codeword_vector[i], codeword_vector[i + 1], temp_size);
                     temp_erasure_vector[i] = temp_erasure_vector[i + 1];//ELAD to check...
@@ -176,6 +180,7 @@ namespace siphon {
                 temp_erasure_vector[n - 1] = 1;
                 DEBUG_MSG("\033[1;34m" << "Packet dropped in (s,r) #" << seq << ": " << "\033[0m");
                 symbol_wise_encode(k, n, decoder_current->decoder->getG(), temp_size,k2,n2); // decode past codewords
+                display_udp_statistics(seq);
             }
         }
 
@@ -191,6 +196,10 @@ namespace siphon {
 
         symbol_wise_encode(k,n,decoder_current->decoder->getG(),temp_size,k2,n2);
         memcpy(codeword_new_symbol_wise,codeword_new_vector[n-1],temp_size);//ELAD - to change
+        display_udp_statistics(received_seq);
+        display_fec_statistics(received_seq);
+
+        counter_++; //Elad - need to check
 
         latest_seq = received_seq + 1;
         //return received_seq;//ELAD to change
@@ -208,6 +217,7 @@ namespace siphon {
         unsigned char temp_encoded_codeword[n2];
         //memset(codeword_new_vector[T_INITIAL],'\000',(300 + 12) * 4 * T_INITIAL);//ELAD maxpayload
         bool *stam_erasure_vector=(bool *) malloc(sizeof(bool)*T_TOT);
+        bool flag=false;
         for (int j=0;j<100;j++) {
             for (int i = 0; i < n; i++) {
                 // Need to add decoding
@@ -219,11 +229,18 @@ namespace siphon {
                 for (int aa=0;aa<n-1;aa++)
                     stam_erasure_vector[aa]=temp_erasure_vector[aa];
                 decodeBlock(&temp_codeword[0], generator, &temp_codeword[0], stam_erasure_vector,  k,  n,n-1,0);// T=n-1
+            }else if (erasure_counter>=(n-k+1)){
+                flag=true;
             }
             for (int i=0;i<k;i++)
                 codeword_new_symbol_wise[2+(j)*n+i]=temp_codeword[k-1-i];
         }
+        if (flag){
+            loss_counter_++;
+            final_loss_counter_++;
+        }
         free(stam_erasure_vector);
+
         // Encoding
         for (int j=0;j<100;j++) {
             for (int i = 0; i < k; i++) {
@@ -242,6 +259,94 @@ namespace siphon {
                 //codeword_new_symbol_wise[10+j*n+i]=temp_encoded_codeword[i];
             }
         }
+    }
+
+    void Variable_Rate_FEC_Decoder::receive_message_and_symbol_wise_decode(FEC_Message *message,int n,int k,int temp_size) {
+        if (seq_start == -1) //initialize the decoder upon receiving the first packet
+            initialize_decoder(message);
+        int received_seq = message->seq_number;
+
+        if (received_seq < latest_seq) { //if an out-of-order sequence is received, just discard it
+            //cout << "\033[1;31mOut-of-sequence packet: #" << received_seq << "\033[0m" << endl;
+            return;
+        }
+        // rotate pointers
+        for (int seq = latest_seq; seq < received_seq; seq++) {// need to handle bursts longer than n
+            UDP_loss_counter_++;
+            final_UDP_loss_counter_++;
+            for (int i = 0; i < n - 1; i++) {
+                memcpy(codeword_vector[i], codeword_vector[i + 1], temp_size);
+                temp_erasure_vector[i] = temp_erasure_vector[i + 1];//ELAD to check...
+            }
+            memset(codeword_vector[n - 1], '\000', (300 + 12) * 4 * T_TOT);//ELAD - 300=max_payload
+            temp_erasure_vector[n - 1] = 1;
+            DEBUG_MSG("\033[1;34m" << "Packet dropped in (r,d)) #" << seq << ": " << "\033[0m");
+            symbol_wise_decode(k,n,decoder_current->decoder->getG(),seq);// decode past messages (taking erasure in (r,d) into account)
+            display_udp_statistics(seq);
+        }
+        // push current codeword
+        for (int i = 0; i < n - 1; i++) {
+            memcpy(codeword_vector[i], codeword_vector[i + 1], temp_size);
+            temp_erasure_vector[i] = temp_erasure_vector[i + 1];//ELAD to check...
+        }
+        memcpy(codeword_vector[n-1],message->buffer,temp_size);
+        temp_erasure_vector[n-1]=0;
+
+        symbol_wise_decode(k,n,decoder_current->decoder->getG(),received_seq);
+
+        display_udp_statistics(received_seq);
+        display_fec_statistics(received_seq);
+
+        latest_seq = received_seq + 1;
+    }
+
+    void Variable_Rate_FEC_Decoder::symbol_wise_decode(int k,int n,unsigned char *generator,int temp_seq){
+        int erasure_counter=0;
+        for (int i=0;i<n;i++){
+            if (temp_erasure_vector[i]==1)
+                erasure_counter++;
+        }
+        // Extract the relevant parts from the coded message
+        // If no erasures:
+
+        unsigned char buffer[30000];
+        unsigned char temp_codeword[n];
+        bool *stam_erasure_vector=(bool *) malloc(sizeof(bool)*T_INITIAL);
+        bool flag=false;
+        for (int j=0;j<100;j++) {
+            for (int i = 0; i < n; i++) {
+                temp_codeword[n-1-i] = codeword_vector[n -1 - i][2+(j+1)*n-1 - i];// code word is [c_0,b_0,a_0,...]
+                //buffer[(j)*n+i] = codeword_vector[n -1 - i][10+(j+1)*n-(n-k) - i];
+            }
+            if (erasure_counter>0 && erasure_counter<(n-k+1)) {
+                for (int aa = 0; aa < n-1; aa++)
+                    stam_erasure_vector[aa] = temp_erasure_vector[aa];
+                decodeBlock(&temp_codeword[0], generator, &temp_codeword[0], stam_erasure_vector, k, n, n-1, 0);// T=n-1
+            }else if (erasure_counter>=(n-k+1)){
+                flag=true;
+            }
+            for (int i=0;i<n;i++){
+                buffer[(j)*n+i]=temp_codeword[n-1-i]; //code word in [X,a_0,b_0,c_0]
+            }
+        }
+        if (flag) {
+            loss_counter_++;
+            final_loss_counter_++;
+        }
+        // decoding
+
+        // temp extraction of data
+        unsigned char temp_buffer[30000];
+        int ind=0;
+        for (int j=0;j<100;j++) {
+            for (int i = 0; i < k; i++) {
+                temp_buffer[ind++]=buffer[(j) * n + n-k + i];
+            }
+        }
+        // Need to add decoding...
+        DEBUG_MSG("\033[1;34m" << "Message recovered at destination from symbol-wise DF #" << temp_seq << ": " << "\033[0m");
+        counter_++;
+        printMatrix(&temp_buffer[2], 1, 300);
     }
 
     void Variable_Rate_FEC_Decoder::decode(FEC_Message *message) {
@@ -568,10 +673,14 @@ namespace siphon {
             total_session_counter++;
 
             double udp_loss_rate = (double) UDP_loss_counter_ / report_window_size;
-            if (RELAYING_TYPE==0 || receiver_index==0)
+            if (RELAYING_TYPE==0)
                 cout << "Instantaneous UDP loss rate = " << udp_loss_rate << endl;
-            else
-                cout << "Instantaneous UDP loss rate (r,d) = " << udp_loss_rate << endl;
+            else {
+                if (receiver_index == 0)
+                    cout << "Instantaneous UDP loss rate (s,r) = " << udp_loss_rate << endl;
+                else
+                    cout << "Instantaneous UDP loss rate (r,d) = " << udp_loss_rate << endl;
+            }
 
             if (udp_loss_rate > 0.1)
                 low_fidelity_session_counter_UDP++;
@@ -635,17 +744,23 @@ namespace siphon {
             last_report_time_ = boost::posix_time::microsec_clock::universal_time();
 
             double loss_rate = (double) loss_counter_ / counter_;
-            if (receiver_index==0)
+            if (RELAYING_TYPE==0)
                 cout << "FEC loss rate over " << report_window_size << " packets ending at seq " << seq
                      << " = " << loss_rate << endl;
             else {
-                cout << "FEC loss rate over both links " << report_window_size << " packets ending at seq " << seq
-                     << " = " << loss_rate << endl;
-//                double loss_rate_two_seg = (double) loss_counter_two_seg_ / counter_;
-//                cout << "FEC loss rate over 2nd segment " << report_window_size << " packets ending at seq " << seq
-//                     << " = " << loss_rate_two_seg << endl;
-//                loss_counter_two_seg_=0;
+                if (receiver_index == 0)
+                    cout << "FEC loss rate over (s,r) " << report_window_size << " packets ending at seq " << seq
+                         << " = " << loss_rate << endl;
+                else{
+                    if (RELAYING_TYPE==1)
+                        cout << "FEC loss rate over both links " << report_window_size << " packets ending at seq " << seq
+                                << " = " << loss_rate << endl;
+                    else
+                        cout << "FEC loss rate over (r,d) " << report_window_size << " packets ending at seq " << seq
+                                << " = " << loss_rate << endl;
+                }
             }
+
             if (loss_rate > 0.1)
                 low_fidelity_session_counter_FEC++;
             if (loss_rate > 0.2)

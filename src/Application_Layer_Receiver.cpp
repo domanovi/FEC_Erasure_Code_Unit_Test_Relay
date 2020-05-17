@@ -104,7 +104,6 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_encode(unsigned 
 //    int k=T_INITIAL-N_INITIAL+1; //Elad - to change
 //    int n=T_INITIAL+1; //Elad - to change
 
-    fec_decoder->receive_message_and_symbol_wise_encode(fec_message,n,k,n2,k2,temp_size);
 
 //    if (temp_seq==0){//ELAD - need to handle the cases where packet 0 not arriving !!!
 //        fec_decoder->initialize_decoder(fec_message);
@@ -116,12 +115,15 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_encode(unsigned 
 //        return -1; // ELAD to chage to perform estimation send back !!!
 //    }
 //
-//    if (erasure_type != 0) {
-//        if ((temp_seq < NUMBER_OF_ITERATIONS + T_TOT) &&
-//            ((erasure_simulator->is_erasure(temp_seq) == true))) {//artificial erasure
-//            return -1;
-//        }
-//    }
+    if (erasure_type != 0) {
+        if ((temp_seq < NUMBER_OF_ITERATIONS + T_TOT) &&
+            ((erasure_simulator->is_erasure(temp_seq) == true))) {//artificial erasure
+            return -1;
+        }
+    }
+
+    fec_decoder->receive_message_and_symbol_wise_encode(fec_message,n,k,n2,k2,temp_size);
+
 //    // rotate pointers
 //    int lim_for_code;
 //    if (temp_seq>latest_seq+n-1) {
@@ -176,53 +178,53 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_encode(unsigned 
     return temp_seq;//ELAD to change
 }
 
-void Application_Layer_Receiver::symbol_wise_encode(int k,int n,unsigned char *generator, int temp_size,int k2, int n2){
-    int erasure_counter=0;
-    for (int i=0;i<n;i++){
-        if (temp_erasure_vector[i]==1)
-            erasure_counter++;
-    }
-    // Extract the relevant parts from the coded message
-
-    unsigned char temp_codeword[n];
-    unsigned char temp_encoded_codeword[n2];
-    //memset(codeword_new_vector[T_INITIAL],'\000',(300 + 12) * 4 * T_INITIAL);//ELAD maxpayload
-    bool *stam_erasure_vector=(bool *) malloc(sizeof(bool)*T_TOT);
-    for (int j=0;j<100;j++) {
-        for (int i = 0; i < n; i++) {
-            // Need to add decoding
-            //codeword_new_symbol_wise[10+(j)*n+i] = codeword_vector[n -1 - i][10+(j+1)*n-(n-k) - i];
-            temp_codeword[i]=codeword_vector[i][10+j*n+i]; // temp_codeword holds the diagonal (a_0,b_1,c_2...)!!!
-        }
-        // Decoding
-        if (erasure_counter>0 && erasure_counter<(n-k+1)){
-            for (int aa=0;aa<n-1;aa++)
-                stam_erasure_vector[aa]=temp_erasure_vector[aa];
-            decodeBlock(&temp_codeword[0], generator, &temp_codeword[0], stam_erasure_vector,  k,  n,n-1,0);// T=n-1
-        }
-        for (int i=0;i<k;i++)
-            codeword_new_symbol_wise[10+(j)*n+i]=temp_codeword[k-1-i];
-    }
-    free(stam_erasure_vector);
-    // Encoding
-    for (int j=0;j<100;j++) {
-        for (int i = 0; i < k; i++) {
-            codeword_new_vector[n2-1][10+(j)*n2+i]=codeword_new_symbol_wise[10+(j)*n+i];
-        }
-    }
-    //memcpy(codeword_new_vector[n2-1],codeword_new_symbol_wise,temp_size);//ELAD - to change
-    for (int j=0;j<100;j++) {
-        for (int i = 0; i < k; i++) {
-            temp_codeword[i]=codeword_new_vector[i][10+j*n2+i]; // temp_codeword holds the diagonal (c_0,b_0,a_0...)!!!
-        }
-        memcpy(temp_encoded_codeword,temp_codeword,k*sizeof(unsigned char));
-        encodeBlock(&temp_codeword[0], generator, &temp_encoded_codeword[0], k2, n2, k2-1);
-        for (int i = k2; i < n2; i++) {
-            codeword_new_vector[i][10+j*n2+i]=temp_encoded_codeword[i];
-            //codeword_new_symbol_wise[10+j*n+i]=temp_encoded_codeword[i];
-        }
-    }
-}
+//void Application_Layer_Receiver::symbol_wise_encode(int k,int n,unsigned char *generator, int temp_size,int k2, int n2){
+//    int erasure_counter=0;
+//    for (int i=0;i<n;i++){
+//        if (temp_erasure_vector[i]==1)
+//            erasure_counter++;
+//    }
+//    // Extract the relevant parts from the coded message
+//
+//    unsigned char temp_codeword[n];
+//    unsigned char temp_encoded_codeword[n2];
+//    //memset(codeword_new_vector[T_INITIAL],'\000',(300 + 12) * 4 * T_INITIAL);//ELAD maxpayload
+//    bool *stam_erasure_vector=(bool *) malloc(sizeof(bool)*T_TOT);
+//    for (int j=0;j<100;j++) {
+//        for (int i = 0; i < n; i++) {
+//            // Need to add decoding
+//            //codeword_new_symbol_wise[10+(j)*n+i] = codeword_vector[n -1 - i][10+(j+1)*n-(n-k) - i];
+//            temp_codeword[i]=codeword_vector[i][10+j*n+i]; // temp_codeword holds the diagonal (a_0,b_1,c_2...)!!!
+//        }
+//        // Decoding
+//        if (erasure_counter>0 && erasure_counter<(n-k+1)){
+//            for (int aa=0;aa<n-1;aa++)
+//                stam_erasure_vector[aa]=temp_erasure_vector[aa];
+//            decodeBlock(&temp_codeword[0], generator, &temp_codeword[0], stam_erasure_vector,  k,  n,n-1,0);// T=n-1
+//        }
+//        for (int i=0;i<k;i++)
+//            codeword_new_symbol_wise[10+(j)*n+i]=temp_codeword[k-1-i];
+//    }
+//    free(stam_erasure_vector);
+//    // Encoding
+//    for (int j=0;j<100;j++) {
+//        for (int i = 0; i < k; i++) {
+//            codeword_new_vector[n2-1][10+(j)*n2+i]=codeword_new_symbol_wise[10+(j)*n+i];
+//        }
+//    }
+//    //memcpy(codeword_new_vector[n2-1],codeword_new_symbol_wise,temp_size);//ELAD - to change
+//    for (int j=0;j<100;j++) {
+//        for (int i = 0; i < k; i++) {
+//            temp_codeword[i]=codeword_new_vector[i][10+j*n2+i]; // temp_codeword holds the diagonal (c_0,b_0,a_0...)!!!
+//        }
+//        memcpy(temp_encoded_codeword,temp_codeword,k*sizeof(unsigned char));
+//        encodeBlock(&temp_codeword[0], generator, &temp_encoded_codeword[0], k2, n2, k2-1);
+//        for (int i = k2; i < n2; i++) {
+//            codeword_new_vector[i][10+j*n2+i]=temp_encoded_codeword[i];
+//            //codeword_new_symbol_wise[10+j*n+i]=temp_encoded_codeword[i];
+//        }
+//    }
+//}
 
 int Application_Layer_Receiver::receive_message_and_symbol_wise_decode(unsigned char *udp_parameters, unsigned char *udp_codeword,
                                                                        int *udp_codeword_size, siphon::Erasure_Simulator
@@ -257,15 +259,15 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_decode(unsigned 
     int k=T_value-N_value+1;
     int n=T_value+1;
 
-    if (temp_seq==0){//ELAD - need to handle the cases where packet 0 not arriving !!!
-        fec_decoder->initialize_decoder(fec_message);
-    }
-    unsigned char* generator= fec_decoder->decoder_current->decoder->getG();
-
-    if (temp_seq < latest_seq) { //if an out-of-order sequence is received, just discard it
-        //cout << "\033[1;31mOut-of-sequence packet: #" << received_seq << "\033[0m" << endl;
-        return -1; // ELAD to chage to perform estimation send back !!!
-    }
+//    if (temp_seq==0){//ELAD - need to handle the cases where packet 0 not arriving !!!
+//        fec_decoder->initialize_decoder(fec_message);
+//    }
+//    unsigned char* generator= fec_decoder->decoder_current->decoder->getG();
+//
+//    if (temp_seq < latest_seq) { //if an out-of-order sequence is received, just discard it
+//        //cout << "\033[1;31mOut-of-sequence packet: #" << received_seq << "\033[0m" << endl;
+//        return -1; // ELAD to chage to perform estimation send back !!!
+//    }
 
     if (erasure_type != 0) {
         if ((temp_seq < NUMBER_OF_ITERATIONS + T_TOT) &&
@@ -274,72 +276,74 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_decode(unsigned 
         }
     }
 
-    // rotate pointers
-    for (int seq = latest_seq; seq < temp_seq; seq++) {// need to handle bursts longer than n
-        for (int i = 0; i < n - 1; i++) {
-            memcpy(codeword_vector[i], codeword_vector[i + 1], temp_size);
-            temp_erasure_vector[i] = temp_erasure_vector[i + 1];//ELAD to check...
-        }
-        memset(codeword_vector[n - 1], '\000', (300 + 12) * 4 * T_TOT);//ELAD - 300=max_payload
-        temp_erasure_vector[n - 1] = 1;
-        DEBUG_MSG("\033[1;34m" << "Packet dropped in (r,d)) #" << seq << ": " << "\033[0m");
-        symbol_wise_decode(k,n,generator,seq);// decode past messages (taking erasure in (r,d) into account)
-    }
-    // push current codeword
-    for (int i = 0; i < n - 1; i++) {
-        memcpy(codeword_vector[i], codeword_vector[i + 1], temp_size);
-        temp_erasure_vector[i] = temp_erasure_vector[i + 1];//ELAD to check...
-    }
-    memcpy(codeword_vector[n-1],codeword,temp_size);
-    temp_erasure_vector[n-1]=0;
+    fec_decoder->receive_message_and_symbol_wise_decode(fec_message,n,k,temp_size);
 
-    symbol_wise_decode(k,n,generator,temp_seq);
-    latest_seq = temp_seq + 1;
+//    // rotate pointers
+//    for (int seq = latest_seq; seq < temp_seq; seq++) {// need to handle bursts longer than n
+//        for (int i = 0; i < n - 1; i++) {
+//            memcpy(codeword_vector[i], codeword_vector[i + 1], temp_size);
+//            temp_erasure_vector[i] = temp_erasure_vector[i + 1];//ELAD to check...
+//        }
+//        memset(codeword_vector[n - 1], '\000', (300 + 12) * 4 * T_TOT);//ELAD - 300=max_payload
+//        temp_erasure_vector[n - 1] = 1;
+//        DEBUG_MSG("\033[1;34m" << "Packet dropped in (r,d)) #" << seq << ": " << "\033[0m");
+//        symbol_wise_decode(k,n,generator,seq);// decode past messages (taking erasure in (r,d) into account)
+//    }
+//    // push current codeword
+//    for (int i = 0; i < n - 1; i++) {
+//        memcpy(codeword_vector[i], codeword_vector[i + 1], temp_size);
+//        temp_erasure_vector[i] = temp_erasure_vector[i + 1];//ELAD to check...
+//    }
+//    memcpy(codeword_vector[n-1],codeword,temp_size);
+//    temp_erasure_vector[n-1]=0;
+//
+//    symbol_wise_decode(k,n,generator,temp_seq);
+//    latest_seq = temp_seq + 1;
     return 0;//ELAD to change
 
 
 }
 
-void Application_Layer_Receiver::symbol_wise_decode(int k,int n,unsigned char *generator,int temp_seq){
-    int erasure_counter=0;
-    for (int i=0;i<n;i++){
-        if (temp_erasure_vector[i]==1)
-            erasure_counter++;
-    }
-    // Extract the relevant parts from the coded message
-    // If no erasures:
-
-    unsigned char buffer[30000];
-    unsigned char temp_codeword[n];
-    bool *stam_erasure_vector=(bool *) malloc(sizeof(bool)*T_INITIAL);
-    for (int j=0;j<100;j++) {
-        for (int i = 0; i < n; i++) {
-            temp_codeword[n-1-i] = codeword_vector[n -1 - i][10+(j+1)*n-1 - i];// code word is [c_0,b_0,a_0,...]
-            //buffer[(j)*n+i] = codeword_vector[n -1 - i][10+(j+1)*n-(n-k) - i];
-        }
-        if (erasure_counter>0 && erasure_counter<(n-k+1)) {
-            for (int aa = 0; aa < n-1; aa++)
-                stam_erasure_vector[aa] = temp_erasure_vector[aa];
-            decodeBlock(&temp_codeword[0], generator, &temp_codeword[0], stam_erasure_vector, k, n, n-1, 0);// T=n-1
-        }
-        for (int i=0;i<n;i++){
-            buffer[(j)*n+i]=temp_codeword[n-1-i]; //code word in [X,a_0,b_0,c_0]
-        }
-    }
-    // decoding
-
-    // temp extraction of data
-    unsigned char temp_buffer[30000];
-    int ind=0;
-    for (int j=0;j<100;j++) {
-        for (int i = 0; i < k; i++) {
-            temp_buffer[ind++]=buffer[(j) * n + n-k + i];
-        }
-    }
-    // Need to add decoding...
-    DEBUG_MSG("\033[1;34m" << "Message recovered at destination from symbol-wise DF #" << temp_seq << ": " << "\033[0m");
-    printMatrix(&temp_buffer[2], 1, 300);
-}
+//void Application_Layer_Receiver::symbol_wise_decode(int k,int n,unsigned char *generator,int temp_seq){
+//    int erasure_counter=0;
+//    for (int i=0;i<n;i++){
+//        if (temp_erasure_vector[i]==1)
+//            erasure_counter++;
+//    }
+//    // Extract the relevant parts from the coded message
+//    // If no erasures:
+//
+//    unsigned char buffer[30000];
+//    unsigned char temp_codeword[n];
+//    bool *stam_erasure_vector=(bool *) malloc(sizeof(bool)*T_INITIAL);
+//    for (int j=0;j<100;j++) {
+//        for (int i = 0; i < n; i++) {
+//            temp_codeword[n-1-i] = codeword_vector[n -1 - i][10+(j+1)*n-1 - i];// code word is [c_0,b_0,a_0,...]
+//            //buffer[(j)*n+i] = codeword_vector[n -1 - i][10+(j+1)*n-(n-k) - i];
+//        }
+//        if (erasure_counter>0 && erasure_counter<(n-k+1)) {
+//            for (int aa = 0; aa < n-1; aa++)
+//                stam_erasure_vector[aa] = temp_erasure_vector[aa];
+//            decodeBlock(&temp_codeword[0], generator, &temp_codeword[0], stam_erasure_vector, k, n, n-1, 0);// T=n-1
+//        }
+//        for (int i=0;i<n;i++){
+//            buffer[(j)*n+i]=temp_codeword[n-1-i]; //code word in [X,a_0,b_0,c_0]
+//        }
+//    }
+//    // decoding
+//
+//    // temp extraction of data
+//    unsigned char temp_buffer[30000];
+//    int ind=0;
+//    for (int j=0;j<100;j++) {
+//        for (int i = 0; i < k; i++) {
+//            temp_buffer[ind++]=buffer[(j) * n + n-k + i];
+//        }
+//    }
+//    // Need to add decoding...
+//    DEBUG_MSG("\033[1;34m" << "Message recovered at destination from symbol-wise DF #" << temp_seq << ": " << "\033[0m");
+//    printMatrix(&temp_buffer[2], 1, 300);
+//}
 
 int Application_Layer_Receiver::receive_message_and_decode(unsigned char *udp_parameters, unsigned char *udp_codeword,
                                                            int *udp_codeword_size, siphon::Erasure_Simulator

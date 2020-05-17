@@ -142,15 +142,15 @@ int main(int argc, const char *argv[]) {
 //    for (int i=0;i<1000;i++) {
 //        erasure_simulator2.erasure_seq[i] = '\000';
 //    }
-//    erasure_simulator.erasure_seq[1]='\001';
+//    erasure_simulator.erasure_seq[4]='\001';
 //    erasure_simulator.erasure_seq[6]='\001';
 //    erasure_simulator.erasure_seq[7]='\001';
 
 //    erasure_simulator.erasure_seq[2]='\001';
 //    erasure_simulator.erasure_seq[3]='\001';
 //    erasure_simulator.erasure_seq[4]='\001';
-//    erasure_simulator2.erasure_seq[5]='\001';
-//    erasure_simulator2.erasure_seq[6]='\001';
+    erasure_simulator2.erasure_seq[5]='\001';
+    erasure_simulator2.erasure_seq[6]='\001';
     cout << "Iteration = " << stream_duration << endl;
 
     int seq_number;
@@ -277,7 +277,7 @@ int main(int argc, const char *argv[]) {
                                     &buffer_size2,
                                     &erasure_simulator2);
                         }
-                        // send the message that was receieved after the burst
+                        // send the message that was received after the burst
                         application_layer_relay_sender.send_sym_wise_message(
                                 application_layer_relay_receiver->fec_decoder->codeword_new_vector[n2-1],
                                 new_temp_size, udp_parameters2, buffer2, &buffer_size2);

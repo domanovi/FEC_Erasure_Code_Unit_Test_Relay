@@ -166,9 +166,9 @@ void Application_Layer_Sender::send_sym_wise_message(unsigned char *encoded_symw
 
     // send(8 + message_transmitted->size, codeword, udp_codeword, udp_codeword_size);
     if (udp_parameters == nullptr)
-        connection_manager->UDPsend(encoded_symwise_word_size, codeword);
+        connection_manager->UDPsend(encoded_symwise_word_size+8, codeword);
     else{
-        *udp_codeword_size = encoded_symwise_word_size; //ELAD - to change...
+        *udp_codeword_size = encoded_symwise_word_size+8; //ELAD - to change...
         memcpy(udp_codeword,codeword, size_t(*udp_codeword_size));
     }
 
