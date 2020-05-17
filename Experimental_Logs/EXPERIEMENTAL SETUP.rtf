@@ -1,0 +1,32 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf200
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\pard\tx566\tx1133\tx1700\tx2267\tx2834\tx3401\tx3968\tx4535\tx5102\tx5669\tx6236\tx6803\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 From 29 Mar to 4 April, the following took place.\
+\
+Two computers with public IPs (Miami- 142.150.238.11 and Austin-142.150.238.9) were connected to the iqua network wirelessly in BA 1476. In all these experiments, the measured bandwidth of the connection between Miami and Austin is 30.2Mbit/s. The performance of adaptive FEC was evaluated over ten different congestion rates from 10-100%. No one was using the network during the process of evaluation. \
+\
+With each congestion rate, the experiment was run for 60 minutes once with adaptive coding and once with fixed coding. To ensure fairness, the experiment to evaluate fixed coding was run over the same erasure pattern recorded from adaptive coding. \
+\
+Since the experiment for fixed coding was run over the same erasure pattern, we performed the experiment on the wired connection between Cairo - 142.150.238.2 - and Paris - 142.150.238.10 - and speeded up the communication from 300B/10ms to 300B/2ms. So, basically it took 12 minutes instead of 60 minutes. \
+\
+The following metrics were evaluated:\
+1- UDP loss rate\
+	a.) Low fidelity Probability\
+	b.) Distribution Probability\
+2- Adaptive FEC loss rate\
+	a.) Low fidelity Probability\
+	b.) Distribution Probability\
+3- Fixed FEC loss rate\
+	a.) Low fidelity Probability\
+	b.) Distribution Probability\
+\
+Briefly, the results show a significant improvement in adaptive coding as compared to fixed coding. However, the loss rates for congestion rates of 10,20 and 30 under under 50^-(3), therefore, I think theses loss rates might have not converged. \
+\
+To access the results, the erasure patterns are in folder WiFiCongestionExperiements.zip named as erasure<xx>.bin with xx denoting the congestion rate it corresponds to. For the results of adaptive coding, you can see the logs and the values of the performance metrics in folder named \'93Adaptive\'94 under the format \'93<xx>-Congestion-Miami-AustinSender-Adaptive\'94 for the logs on the sender side and \'93<xx>-Congestion-Austin-MiamiReceiver-Adaptive\'94 for logs on the receiver side. For fixed coding, you will see the logs under folder named \'93Fixed\'94 with format \'93<xx>-Congestion-Cairo-ParisSender-Fixed\'94 for the logs on the sender side, and \'93<xx>-Congestion-Paris-CairoReceiver-Fixed\'94  for the logs on the receiver side.\
+\
+NB: Cairo was always the receiver and Paris was always the sender for fixed coding experiments. Miami was always the receiver and Austin was always the sender for adaptive coding. \
+}
