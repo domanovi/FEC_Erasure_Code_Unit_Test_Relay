@@ -132,6 +132,7 @@ namespace siphon {
             free(codeword_new_vector[i]);
             free(codeword_vector_store_in_burst[i]);
         }
+        free(encoder);
 
     }
 
@@ -146,28 +147,36 @@ namespace siphon {
             //cout << "\033[1;31mOut-of-sequence packet: #" << received_seq << "\033[0m" << endl;
             return;
         }
-        if (received_seq>latest_seq+n-1) {
+        if (received_seq>latest_seq+n2-1) {
             // in case of a burst longer than n fill codeword_vector with zeros and store codeword_new_vector in codeword_vector_store_in_burst
-            for (int seq = latest_seq; seq < latest_seq + n ; seq++) {
+            for (int seq = latest_seq; seq < latest_seq + n2 ; seq++) {
                 UDP_loss_counter_++;
                 final_UDP_loss_counter_++;
                 for (int i = 0; i < n - 1; i++) {
                     memcpy(codeword_vector[i], codeword_vector[i + 1], temp_size);
-                    memcpy(codeword_vector_store_in_burst[i], codeword_vector_store_in_burst[i + 1], temp_size);
-                    temp_erasure_vector[i] = temp_erasure_vector[i + 1];//ELAD to check...
+                    temp_erasure_vector[i] = temp_erasure_vector[i + 1];
                 }
-                for (int i=0;i<n2-1;i++)
+                for (int i=0;i<n2-1;i++) {
                     memcpy(codeword_new_vector[i], codeword_new_vector[i + 1], temp_size);
+                    memcpy(codeword_vector_store_in_burst[i], codeword_vector_store_in_burst[i + 1], temp_size);
+                }
                 // zero the input
                 memset(codeword_vector[n - 1], '\000', (300 + 12) * 4 * T_TOT);//ELAD - 300=max_payload
                 temp_erasure_vector[n - 1] = 1;
                 DEBUG_MSG("\033[1;34m" << "Burst: packet dropped in (s,r) #" << seq << ": " << "\033[0m");
                 symbol_wise_encode(k, n, decoder_current->decoder->getG(),encoder->getG(), temp_size,k2,n2); // decode past codewords
-                memcpy(codeword_vector_store_in_burst[n - 1], codeword_new_vector[n - 1], temp_size);
+                memcpy(codeword_vector_store_in_burst[n2 - 1], codeword_new_vector[n2 - 1], temp_size);
                 display_udp_statistics(seq);
             }
-            for (int i=0;i<n-1;i++)// zero the output (after storing)
-                memset(codeword_new_vector[i], '\000', (300 + 12) * 4 * T_TOT);//ELAD - 300=max_payload
+            for (int i=0;i<n2-1;i++)// zero the output (after storing)
+                memset(codeword_new_vector[i], '\000', (300 + 12) * 4 * T_TOT);//ELAD - 300=max_payloa
+            // go over the rest of the missing UDP packets
+            for (int seq = latest_seq + n2; seq < received_seq ; seq++) {
+                UDP_loss_counter_++;
+                final_UDP_loss_counter_++;
+                DEBUG_MSG("\033[1;34m" << "Burst: packet dropped in (s,r) #" << seq << ": " << "\033[0m");
+                display_udp_statistics(seq);
+            }
         }else {
             for (int seq = latest_seq; seq < received_seq; seq++) {// need to handle bursts longer than n
                 UDP_loss_counter_++;
@@ -251,15 +260,20 @@ namespace siphon {
         }
         //memcpy(codeword_new_vector[n2-1],codeword_new_symbol_wise,temp_size);//ELAD - to change
         for (int j=0;j<100;j++) {
-            for (int i = 0; i < k; i++) {
-                temp_codeword[i]=codeword_new_vector[i][2+j*n2+i]; // temp_codeword holds the diagonal (c_0,b_0,a_0...)!!!
+            for (int delta=0;delta<n2-k2;delta++) {//this is to fill all parity symbols in codeword_new_vector[n2 - 1]
+                for (int i = 0+delta; i < k+delta; i++) {
+                    temp_codeword[i] = codeword_new_vector[i][2 + j * n2 +
+                                                              i]; // temp_codeword holds the diagonal (c_0,b_0,a_0...)!!!
+                }
+                memcpy(temp_encoded_codeword, temp_codeword, k * sizeof(unsigned char));
+                encodeBlock(&temp_codeword[0], generator_r_d, &temp_encoded_codeword[0], k2, n2, k2 - 1);
+
+                codeword_new_vector[n2 - 1][2 + j * n2 + n2 - 1-delta] = temp_encoded_codeword[n2 - 1-delta];
             }
-            memcpy(temp_encoded_codeword,temp_codeword,k*sizeof(unsigned char));
-            encodeBlock(&temp_codeword[0], generator_r_d, &temp_encoded_codeword[0], k2, n2, k2-1);
-            for (int i = k2; i < n2; i++) {
-                codeword_new_vector[i][2+j*n2+i]=temp_encoded_codeword[i];
-                //codeword_new_symbol_wise[10+j*n+i]=temp_encoded_codeword[i];
-            }
+//            for (int i = k2; i < n2; i++) {
+//                codeword_new_vector[i][2+j*n2+i]=temp_encoded_codeword[i];
+//                //codeword_new_symbol_wise[10+j*n+i]=temp_encoded_codeword[i];
+//            }
         }
     }
 
@@ -282,7 +296,7 @@ namespace siphon {
             }
             memset(codeword_vector[n - 1], '\000', (300 + 12) * 4 * T_TOT);//ELAD - 300=max_payload
             temp_erasure_vector[n - 1] = 1;
-            DEBUG_MSG("\033[1;34m" << "Packet dropped in (r,d)) #" << seq << ": " << "\033[0m");
+            DEBUG_MSG("\033[1;34m" << "Packet dropped in (r,d) #" << seq << ": " << "\033[0m");
             symbol_wise_decode(k,n,decoder_current->decoder->getG(),seq);// decode past messages (taking erasure in (r,d) into account)
             display_udp_statistics(seq);
         }

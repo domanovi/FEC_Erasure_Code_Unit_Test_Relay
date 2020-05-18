@@ -125,10 +125,12 @@ void Application_Layer_Sender::generate_message_and_encode(unsigned char *udp_pa
 }
 
 void Application_Layer_Sender::send_sym_wise_message(unsigned char *encoded_symwise_word, int encoded_symwise_word_size, unsigned char *udp_parameters, unsigned char
-*udp_codeword, int *udp_codeword_size) {
+*udp_codeword, int *udp_codeword_size,int missing_packets) {
 
     int response_size;
     unsigned char response_buffer[6];
+
+    seq_number=seq_number+missing_packets;
 
     if (udp_parameters == nullptr)
         update_parameter(&response_size, response_buffer);

@@ -135,16 +135,19 @@ int main(int argc, const char *argv[]) {
 //    erasure_simulator.erasure_seq[4]='\001';
 //    erasure_simulator.erasure_seq[5]='\001';
 
-//    for (int i=0;i<1000;i++) {
-//        erasure_simulator.erasure_seq[i] = '\000';
-//    }
-//
-//    for (int i=0;i<1000;i++) {
-//        erasure_simulator2.erasure_seq[i] = '\000';
-//    }
+    for (int i=0;i<1000;i++) {
+        erasure_simulator.erasure_seq[i] = '\000';
+    }
+
+    for (int i=0;i<1000;i++) {
+        erasure_simulator2.erasure_seq[i] = '\000';
+    }
+//    erasure_simulator.erasure_seq[3]='\001';
 //    erasure_simulator.erasure_seq[4]='\001';
+//    erasure_simulator.erasure_seq[5]='\001';
 //    erasure_simulator.erasure_seq[6]='\001';
 //    erasure_simulator.erasure_seq[7]='\001';
+//    erasure_simulator.erasure_seq[8]='\001';
 
 //    erasure_simulator.erasure_seq[2]='\001';
 //    erasure_simulator.erasure_seq[3]='\001';
@@ -256,6 +259,7 @@ int main(int argc, const char *argv[]) {
 //                                                                                                 &erasure_simulator2);
                 //}
             } else if (relaying_type == 2) {
+                //int n=T_INITIAL+1;
                 int n2=T_INITIAL_2+1;
                 int k2=T_INITIAL_2-N_INITIAL_2+1;
                 int new_temp_size=n2*100+8;
@@ -271,7 +275,7 @@ int main(int argc, const char *argv[]) {
                             int index = seq;
                             application_layer_relay_sender.send_sym_wise_message(
                                     application_layer_relay_receiver->fec_decoder->codeword_vector_store_in_burst[index],
-                                    new_temp_size, udp_parameters2, buffer2, &buffer_size2);
+                                    new_temp_size, udp_parameters2, buffer2, &buffer_size2,0);
                             application_layer_destination_receiver->receive_message_and_symbol_wise_decode(
                                     udp_parameters2, buffer2,
                                     &buffer_size2,
@@ -280,7 +284,7 @@ int main(int argc, const char *argv[]) {
                         // send the message that was received after the burst
                         application_layer_relay_sender.send_sym_wise_message(
                                 application_layer_relay_receiver->fec_decoder->codeword_new_vector[n2-1],
-                                new_temp_size, udp_parameters2, buffer2, &buffer_size2);
+                                new_temp_size, udp_parameters2, buffer2, &buffer_size2,seq_number-last_seq_received_from_srouce-n2-1);
                         application_layer_destination_receiver->receive_message_and_symbol_wise_decode(
                                 udp_parameters2, buffer2,
                                 &buffer_size2,
@@ -292,7 +296,7 @@ int main(int argc, const char *argv[]) {
                             int index = n2 - (seq_number - seq);
                             application_layer_relay_sender.send_sym_wise_message(
                                     application_layer_relay_receiver->fec_decoder->codeword_new_vector[index],
-                                    new_temp_size, udp_parameters2, buffer2, &buffer_size2);
+                                    new_temp_size, udp_parameters2, buffer2, &buffer_size2,0);
                             application_layer_destination_receiver->receive_message_and_symbol_wise_decode(
                                     udp_parameters2, buffer2,
                                     &buffer_size2,
