@@ -64,9 +64,16 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_encode(unsigned 
     int temp_seq = int(codeword[3]) + 256 * int(codeword[2]) + 256 * 256 * int(codeword[1]) + 256 * 256 * 256 * int
             (codeword[0]);
 
+    if (erasure_type != 0) {
+        if ((temp_seq < NUMBER_OF_ITERATIONS + T_TOT) &&
+            ((erasure_simulator->is_erasure(temp_seq) == true))) {//artificial erasure
+            return -1;
+        }
+    }
+
     // Perform estimation
     fec_message->set_parameters(temp_seq, int(codeword[4]), int(codeword[5]), int(codeword[6]),
-                                temp_size - 8, codeword + 8);
+                                temp_size - 12, codeword + 12);
     fec_message->counter_for_start_and_end = int(codeword[7]);
 
     estimator->estimate(fec_message);
@@ -78,16 +85,34 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_encode(unsigned 
     int k=T_value-N_value+1;
     int n=T_value+1;
 
-    if (erasure_type != 0) {
-        if ((temp_seq < NUMBER_OF_ITERATIONS + T_TOT) &&
-            ((erasure_simulator->is_erasure(temp_seq) == true))) {//artificial erasure
-            return -1;
-        }
-    }
+
 
     fec_decoder->receive_message_and_symbol_wise_encode(fec_message,n,k,n2,k2,temp_size);
 
-    return temp_seq;//ELAD to change
+    unsigned char temp_parameters2[12];
+    //recommended T, B and N
+    temp_parameters2[0] = (unsigned char) (estimator->T);
+    temp_parameters2[1] = (unsigned char) (estimator->B_current);
+    temp_parameters2[2] = (unsigned char) (estimator->N_current);
+    //acknowledgment of T, B and N
+    temp_parameters2[3] = (unsigned char) (fec_message->T);
+    temp_parameters2[4] = (unsigned char) (fec_message->B);
+    temp_parameters2[5] = (unsigned char) (fec_message->N);
+    for (int i=6;i<12;i++)
+        temp_parameters2[i]=response_from_dest_buffer[i-6];
+    if (udp_parameters == nullptr) {
+        connection_manager->UDPsendResponse(temp_parameters2, 12);
+        cout << "Sending 12 bytes from relay" << endl;
+        printMatrix(temp_parameters2, 1, 12);
+    }else{
+        // Need to add...
+        for (int i=0;i<12;i++)
+            udp_parameters[i]=temp_parameters2[i];
+        cout << "Sending 12 bytes from relay" << endl;
+        printMatrix(udp_parameters,1,12);
+    }
+
+    return temp_seq;//TODO symbol-wise check return temp_seq at receive_message_and_symbol_wise_encode()
 }
 
 int Application_Layer_Receiver::receive_message_and_symbol_wise_decode(unsigned char *udp_parameters, unsigned char *udp_codeword,
@@ -109,6 +134,13 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_decode(unsigned 
     int temp_seq = int(codeword[3]) + 256 * int(codeword[2]) + 256 * 256 * int(codeword[1]) + 256 * 256 * 256 * int
             (codeword[0]);
 
+    if (erasure_type != 0) {
+        if ((temp_seq < NUMBER_OF_ITERATIONS + T_TOT) &&
+            ((erasure_simulator->is_erasure(temp_seq) == true))) {//artificial erasure
+            return -1;
+        }
+    }
+
     // Perform estimation
     fec_message->set_parameters(temp_seq, int(codeword[4]), int(codeword[5]), int(codeword[6]),
                                 temp_size - 8, codeword + 8);
@@ -123,16 +155,36 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_decode(unsigned 
     int k=T_value-N_value+1;
     int n=T_value+1;
 
-    if (erasure_type != 0) {
-        if ((temp_seq < NUMBER_OF_ITERATIONS + T_TOT) &&
-            ((erasure_simulator->is_erasure(temp_seq) == true))) {//artificial erasure
-            return -1;
-        }
-    }
-
     fec_decoder->receive_message_and_symbol_wise_decode(fec_message,n,k,temp_size);
 
-    return 0;//ELAD to change
+    unsigned char temp_parameters[6];
+    //recommended T, B and N
+    temp_parameters[0] = (unsigned char) (estimator->T);
+    temp_parameters[1] = (unsigned char) (estimator->B_current);
+    temp_parameters[2] = (unsigned char) (estimator->N_current);
+    //acknowledgment of T, B and N
+    temp_parameters[3] = (unsigned char) (fec_message->T);
+    temp_parameters[4] = (unsigned char) (fec_message->B);
+    temp_parameters[5] = (unsigned char) (fec_message->N);
+
+    if (udp_parameters == nullptr) {
+        connection_manager->UDPsendResponse(temp_parameters, 6);
+        cout << "Sending 6 bytes from destination" << endl;
+        printMatrix(temp_parameters, 1, 6);
+    }else {
+        //recommended T, B and N
+        udp_parameters[0] = (unsigned char) (estimator->T);
+        udp_parameters[1] = (unsigned char) (estimator->B_current);
+        udp_parameters[2] = (unsigned char) (estimator->N_current);
+        //acknowledgment of T, B and N
+        udp_parameters[3] = (unsigned char) (fec_message->T);
+        udp_parameters[4] = (unsigned char) (fec_message->B);
+        udp_parameters[5] = (unsigned char) (fec_message->N);
+        cout << "Sending 6 bytes from destination" << endl;
+        printMatrix(udp_parameters,1,6);
+    }
+
+    return 0;//TODO symbols-wise: check if return 0 at receive_message_and_symbol_wise_decode()
 
 
 }
@@ -173,7 +225,7 @@ int Application_Layer_Receiver::receive_message_and_decode(unsigned char *udp_pa
         estimator->estimate(fec_message);
         background_estimator->estimate(fec_message);
 
-    }else{
+    }else if (RELAYING_TYPE==1){
         second_seg_seq= int(codeword[7]) + 256 * int(codeword[6]) + 256 * 256 * int(codeword[5]) + 256 * 256 * 256 * int
                     (codeword[4]);
         fec_message->set_parameters(second_seg_seq, int(codeword[8]), int(codeword[9]), int(codeword[10]),
@@ -263,26 +315,26 @@ int Application_Layer_Receiver::receive_message_and_decode(unsigned char *udp_pa
     return received_seq;
 }
 
-void Application_Layer_Receiver::get_current_packet(unsigned char *received_data,int T,int i,int seq_number,int curr_seq_num){
-
-    if (i>=T && fec_message->buffer==NULL){
-        // Elad - this is a case the relay fails to decode the packet hence it sends all-zeros packet
-        std::cout << "Elad: Erased packet"<< std::endl;
-        memset(received_data,'\000',300);
-//        for (int t=0;t<300;t++) {
-//            received_data[t] = '\000';
-//        }
-        DEBUG_MSG("\033[1;34m" << "Generated dummy message at relay #" << curr_seq_num << ": " << "\033[0m");
-        printMatrix(received_data, 1, 300);
-    }
-    else if  (i>=T && seq_number==0){
-        std::memcpy(received_data,fec_messageTemp->buffer,fec_messageTemp->size*sizeof(unsigned char));
-        DEBUG_MSG("\033[1;34m" << "Recovered message at relay #" << fec_messageTemp->seq_number << ": " << "\033[0m");
-        printMatrix(received_data, 1, fec_messageTemp->size);
-    }
-    else if (i>=T){
-        std::memcpy(received_data,fec_message->buffer,fec_message->size*sizeof(unsigned char));
-        DEBUG_MSG("\033[1;34m" << "Recovered message at relay #" << fec_message->seq_number << ": " << "\033[0m");
-        printMatrix(received_data, 1, fec_message->size);
-    }
-}
+//void Application_Layer_Receiver::get_current_packet(unsigned char *received_data,int T,int i,int seq_number,int curr_seq_num){
+//
+//    if (i>=T && fec_message->buffer==NULL){
+//        // Elad - this is a case the relay fails to decode the packet hence it sends all-zeros packet
+//        std::cout << "Elad: Erased packet"<< std::endl;
+//        memset(received_data,'\000',300);
+////        for (int t=0;t<300;t++) {
+////            received_data[t] = '\000';
+////        }
+//        DEBUG_MSG("\033[1;34m" << "Generated dummy message at relay #" << curr_seq_num << ": " << "\033[0m");
+//        printMatrix(received_data, 1, 300);
+//    }
+//    else if  (i>=T && seq_number==0){
+//        std::memcpy(received_data,fec_messageTemp->buffer,fec_messageTemp->size*sizeof(unsigned char));
+//        DEBUG_MSG("\033[1;34m" << "Recovered message at relay #" << fec_messageTemp->seq_number << ": " << "\033[0m");
+//        printMatrix(received_data, 1, fec_messageTemp->size);
+//    }
+//    else if (i>=T){
+//        std::memcpy(received_data,fec_message->buffer,fec_message->size*sizeof(unsigned char));
+//        DEBUG_MSG("\033[1;34m" << "Recovered message at relay #" << fec_message->seq_number << ": " << "\033[0m");
+//        printMatrix(received_data, 1, fec_message->size);
+//    }
+//}

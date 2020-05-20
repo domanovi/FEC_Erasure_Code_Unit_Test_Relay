@@ -6,11 +6,13 @@ CMakeFiles/fec_part.dir/src/Application_Layer_Receiver.cpp.o: ../include/Connect
 CMakeFiles/fec_part.dir/src/Application_Layer_Receiver.cpp.o: ../include/Decoder.h
 CMakeFiles/fec_part.dir/src/Application_Layer_Receiver.cpp.o: ../include/Decoder_Basic.h
 CMakeFiles/fec_part.dir/src/Application_Layer_Receiver.cpp.o: ../include/Decoder_Block_Code.h
+CMakeFiles/fec_part.dir/src/Application_Layer_Receiver.cpp.o: ../include/Decoder_Symbol_Wise.h
 CMakeFiles/fec_part.dir/src/Application_Layer_Receiver.cpp.o: ../include/Encoder.h
 CMakeFiles/fec_part.dir/src/Application_Layer_Receiver.cpp.o: ../include/Encoder_Basic.h
 CMakeFiles/fec_part.dir/src/Application_Layer_Receiver.cpp.o: ../include/Encoder_Block_Code.h
 CMakeFiles/fec_part.dir/src/Application_Layer_Receiver.cpp.o: ../include/Erasure_Simulator.h
 CMakeFiles/fec_part.dir/src/Application_Layer_Receiver.cpp.o: ../include/FEC_Decoder.h
+CMakeFiles/fec_part.dir/src/Application_Layer_Receiver.cpp.o: ../include/FEC_Encoder.h
 CMakeFiles/fec_part.dir/src/Application_Layer_Receiver.cpp.o: ../include/FEC_Macro.h
 CMakeFiles/fec_part.dir/src/Application_Layer_Receiver.cpp.o: ../include/FEC_Message.h
 CMakeFiles/fec_part.dir/src/Application_Layer_Receiver.cpp.o: ../include/Memory_Allocator.h
@@ -22,9 +24,14 @@ CMakeFiles/fec_part.dir/src/Application_Layer_Receiver.cpp.o: ../src/Application
 
 CMakeFiles/fec_part.dir/src/Application_Layer_Sender.cpp.o: ../include/Application_Layer_Sender.h
 CMakeFiles/fec_part.dir/src/Application_Layer_Sender.cpp.o: ../include/ConnectionManager.h
+CMakeFiles/fec_part.dir/src/Application_Layer_Sender.cpp.o: ../include/Decoder.h
+CMakeFiles/fec_part.dir/src/Application_Layer_Sender.cpp.o: ../include/Decoder_Basic.h
+CMakeFiles/fec_part.dir/src/Application_Layer_Sender.cpp.o: ../include/Decoder_Block_Code.h
+CMakeFiles/fec_part.dir/src/Application_Layer_Sender.cpp.o: ../include/Decoder_Symbol_Wise.h
 CMakeFiles/fec_part.dir/src/Application_Layer_Sender.cpp.o: ../include/Encoder.h
 CMakeFiles/fec_part.dir/src/Application_Layer_Sender.cpp.o: ../include/Encoder_Basic.h
 CMakeFiles/fec_part.dir/src/Application_Layer_Sender.cpp.o: ../include/Encoder_Block_Code.h
+CMakeFiles/fec_part.dir/src/Application_Layer_Sender.cpp.o: ../include/FEC_Decoder.h
 CMakeFiles/fec_part.dir/src/Application_Layer_Sender.cpp.o: ../include/FEC_Encoder.h
 CMakeFiles/fec_part.dir/src/Application_Layer_Sender.cpp.o: ../include/FEC_Macro.h
 CMakeFiles/fec_part.dir/src/Application_Layer_Sender.cpp.o: ../include/FEC_Message.h
@@ -54,6 +61,22 @@ CMakeFiles/fec_part.dir/src/Decoder_Block_Code.cpp.o: ../include/FEC_Macro.h
 CMakeFiles/fec_part.dir/src/Decoder_Block_Code.cpp.o: ../include/basicOperations.h
 CMakeFiles/fec_part.dir/src/Decoder_Block_Code.cpp.o: ../include/codingOperations.h
 CMakeFiles/fec_part.dir/src/Decoder_Block_Code.cpp.o: ../src/Decoder_Block_Code.cpp
+
+CMakeFiles/fec_part.dir/src/Decoder_Symbol_Wise.cpp.o: ../include/Decoder.h
+CMakeFiles/fec_part.dir/src/Decoder_Symbol_Wise.cpp.o: ../include/Decoder_Basic.h
+CMakeFiles/fec_part.dir/src/Decoder_Symbol_Wise.cpp.o: ../include/Decoder_Block_Code.h
+CMakeFiles/fec_part.dir/src/Decoder_Symbol_Wise.cpp.o: ../include/Decoder_Symbol_Wise.h
+CMakeFiles/fec_part.dir/src/Decoder_Symbol_Wise.cpp.o: ../include/Encoder.h
+CMakeFiles/fec_part.dir/src/Decoder_Symbol_Wise.cpp.o: ../include/Encoder_Basic.h
+CMakeFiles/fec_part.dir/src/Decoder_Symbol_Wise.cpp.o: ../include/Encoder_Block_Code.h
+CMakeFiles/fec_part.dir/src/Decoder_Symbol_Wise.cpp.o: ../include/FEC_Decoder.h
+CMakeFiles/fec_part.dir/src/Decoder_Symbol_Wise.cpp.o: ../include/FEC_Encoder.h
+CMakeFiles/fec_part.dir/src/Decoder_Symbol_Wise.cpp.o: ../include/FEC_Macro.h
+CMakeFiles/fec_part.dir/src/Decoder_Symbol_Wise.cpp.o: ../include/FEC_Message.h
+CMakeFiles/fec_part.dir/src/Decoder_Symbol_Wise.cpp.o: ../include/Memory_Allocator.h
+CMakeFiles/fec_part.dir/src/Decoder_Symbol_Wise.cpp.o: ../include/basicOperations.h
+CMakeFiles/fec_part.dir/src/Decoder_Symbol_Wise.cpp.o: ../include/codingOperations.h
+CMakeFiles/fec_part.dir/src/Decoder_Symbol_Wise.cpp.o: ../src/Decoder_Symbol_Wise.cpp
 
 CMakeFiles/fec_part.dir/src/Encoder.cpp.o: ../include/Encoder.h
 CMakeFiles/fec_part.dir/src/Encoder.cpp.o: ../include/Encoder_Basic.h
@@ -121,10 +144,12 @@ CMakeFiles/fec_part.dir/src/Payload_Simulator.cpp.o: ../src/Payload_Simulator.cp
 CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Decoder.cpp.o: ../include/Decoder.h
 CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Decoder.cpp.o: ../include/Decoder_Basic.h
 CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Decoder.cpp.o: ../include/Decoder_Block_Code.h
+CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Decoder.cpp.o: ../include/Decoder_Symbol_Wise.h
 CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Decoder.cpp.o: ../include/Encoder.h
 CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Decoder.cpp.o: ../include/Encoder_Basic.h
 CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Decoder.cpp.o: ../include/Encoder_Block_Code.h
 CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Decoder.cpp.o: ../include/FEC_Decoder.h
+CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Decoder.cpp.o: ../include/FEC_Encoder.h
 CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Decoder.cpp.o: ../include/FEC_Macro.h
 CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Decoder.cpp.o: ../include/FEC_Message.h
 CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Decoder.cpp.o: ../include/Memory_Allocator.h
@@ -133,9 +158,14 @@ CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Decoder.cpp.o: ../include/basicOpe
 CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Decoder.cpp.o: ../include/codingOperations.h
 CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Decoder.cpp.o: ../src/Variable_Rate_FEC_Decoder.cpp
 
+CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Encoder.cpp.o: ../include/Decoder.h
+CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Encoder.cpp.o: ../include/Decoder_Basic.h
+CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Encoder.cpp.o: ../include/Decoder_Block_Code.h
+CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Encoder.cpp.o: ../include/Decoder_Symbol_Wise.h
 CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Encoder.cpp.o: ../include/Encoder.h
 CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Encoder.cpp.o: ../include/Encoder_Basic.h
 CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Encoder.cpp.o: ../include/Encoder_Block_Code.h
+CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Encoder.cpp.o: ../include/FEC_Decoder.h
 CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Encoder.cpp.o: ../include/FEC_Encoder.h
 CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Encoder.cpp.o: ../include/FEC_Macro.h
 CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Encoder.cpp.o: ../include/FEC_Message.h

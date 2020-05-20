@@ -55,7 +55,7 @@ public:
                                       unsigned char *udp_codeword, int *udp_codeword_size,unsigned char *response_buffer);
 
     void send_sym_wise_message(unsigned char string[30000], int i, unsigned char *string1, unsigned char string2[30000],
-                               int *pInt,int missing_packets);
+                               int *pInt,int missing_packets,unsigned char *response_buffer);
 };
 
 

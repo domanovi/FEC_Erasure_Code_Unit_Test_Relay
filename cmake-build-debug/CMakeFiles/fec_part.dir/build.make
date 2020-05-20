@@ -135,9 +135,22 @@ CMakeFiles/fec_part.dir/src/Decoder_Block_Code.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/fec_part.dir/src/Decoder_Block_Code.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/Decoder_Block_Code.cpp -o CMakeFiles/fec_part.dir/src/Decoder_Block_Code.cpp.s
 
+CMakeFiles/fec_part.dir/src/Decoder_Symbol_Wise.cpp.o: CMakeFiles/fec_part.dir/flags.make
+CMakeFiles/fec_part.dir/src/Decoder_Symbol_Wise.cpp.o: ../src/Decoder_Symbol_Wise.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/fec_part.dir/src/Decoder_Symbol_Wise.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/fec_part.dir/src/Decoder_Symbol_Wise.cpp.o -c /home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/Decoder_Symbol_Wise.cpp
+
+CMakeFiles/fec_part.dir/src/Decoder_Symbol_Wise.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/fec_part.dir/src/Decoder_Symbol_Wise.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/Decoder_Symbol_Wise.cpp > CMakeFiles/fec_part.dir/src/Decoder_Symbol_Wise.cpp.i
+
+CMakeFiles/fec_part.dir/src/Decoder_Symbol_Wise.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/fec_part.dir/src/Decoder_Symbol_Wise.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/Decoder_Symbol_Wise.cpp -o CMakeFiles/fec_part.dir/src/Decoder_Symbol_Wise.cpp.s
+
 CMakeFiles/fec_part.dir/src/Encoder.cpp.o: CMakeFiles/fec_part.dir/flags.make
 CMakeFiles/fec_part.dir/src/Encoder.cpp.o: ../src/Encoder.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/fec_part.dir/src/Encoder.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/fec_part.dir/src/Encoder.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/fec_part.dir/src/Encoder.cpp.o -c /home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/Encoder.cpp
 
 CMakeFiles/fec_part.dir/src/Encoder.cpp.i: cmake_force
@@ -150,7 +163,7 @@ CMakeFiles/fec_part.dir/src/Encoder.cpp.s: cmake_force
 
 CMakeFiles/fec_part.dir/src/Encoder_Basic.cpp.o: CMakeFiles/fec_part.dir/flags.make
 CMakeFiles/fec_part.dir/src/Encoder_Basic.cpp.o: ../src/Encoder_Basic.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/fec_part.dir/src/Encoder_Basic.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/fec_part.dir/src/Encoder_Basic.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/fec_part.dir/src/Encoder_Basic.cpp.o -c /home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/Encoder_Basic.cpp
 
 CMakeFiles/fec_part.dir/src/Encoder_Basic.cpp.i: cmake_force
@@ -163,7 +176,7 @@ CMakeFiles/fec_part.dir/src/Encoder_Basic.cpp.s: cmake_force
 
 CMakeFiles/fec_part.dir/src/Encoder_Block_Code.cpp.o: CMakeFiles/fec_part.dir/flags.make
 CMakeFiles/fec_part.dir/src/Encoder_Block_Code.cpp.o: ../src/Encoder_Block_Code.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/fec_part.dir/src/Encoder_Block_Code.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/fec_part.dir/src/Encoder_Block_Code.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/fec_part.dir/src/Encoder_Block_Code.cpp.o -c /home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/Encoder_Block_Code.cpp
 
 CMakeFiles/fec_part.dir/src/Encoder_Block_Code.cpp.i: cmake_force
@@ -176,7 +189,7 @@ CMakeFiles/fec_part.dir/src/Encoder_Block_Code.cpp.s: cmake_force
 
 CMakeFiles/fec_part.dir/src/Erasure_File_Generator.cpp.o: CMakeFiles/fec_part.dir/flags.make
 CMakeFiles/fec_part.dir/src/Erasure_File_Generator.cpp.o: ../src/Erasure_File_Generator.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/fec_part.dir/src/Erasure_File_Generator.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/fec_part.dir/src/Erasure_File_Generator.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/fec_part.dir/src/Erasure_File_Generator.cpp.o -c /home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/Erasure_File_Generator.cpp
 
 CMakeFiles/fec_part.dir/src/Erasure_File_Generator.cpp.i: cmake_force
@@ -189,7 +202,7 @@ CMakeFiles/fec_part.dir/src/Erasure_File_Generator.cpp.s: cmake_force
 
 CMakeFiles/fec_part.dir/src/Erasure_Simulator.cpp.o: CMakeFiles/fec_part.dir/flags.make
 CMakeFiles/fec_part.dir/src/Erasure_Simulator.cpp.o: ../src/Erasure_Simulator.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/fec_part.dir/src/Erasure_Simulator.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/fec_part.dir/src/Erasure_Simulator.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/fec_part.dir/src/Erasure_Simulator.cpp.o -c /home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/Erasure_Simulator.cpp
 
 CMakeFiles/fec_part.dir/src/Erasure_Simulator.cpp.i: cmake_force
@@ -202,7 +215,7 @@ CMakeFiles/fec_part.dir/src/Erasure_Simulator.cpp.s: cmake_force
 
 CMakeFiles/fec_part.dir/src/FEC_Decoder.cpp.o: CMakeFiles/fec_part.dir/flags.make
 CMakeFiles/fec_part.dir/src/FEC_Decoder.cpp.o: ../src/FEC_Decoder.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/fec_part.dir/src/FEC_Decoder.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/fec_part.dir/src/FEC_Decoder.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/fec_part.dir/src/FEC_Decoder.cpp.o -c /home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/FEC_Decoder.cpp
 
 CMakeFiles/fec_part.dir/src/FEC_Decoder.cpp.i: cmake_force
@@ -215,7 +228,7 @@ CMakeFiles/fec_part.dir/src/FEC_Decoder.cpp.s: cmake_force
 
 CMakeFiles/fec_part.dir/src/FEC_Encoder.cpp.o: CMakeFiles/fec_part.dir/flags.make
 CMakeFiles/fec_part.dir/src/FEC_Encoder.cpp.o: ../src/FEC_Encoder.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/fec_part.dir/src/FEC_Encoder.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/fec_part.dir/src/FEC_Encoder.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/fec_part.dir/src/FEC_Encoder.cpp.o -c /home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/FEC_Encoder.cpp
 
 CMakeFiles/fec_part.dir/src/FEC_Encoder.cpp.i: cmake_force
@@ -228,7 +241,7 @@ CMakeFiles/fec_part.dir/src/FEC_Encoder.cpp.s: cmake_force
 
 CMakeFiles/fec_part.dir/src/FEC_Message.cpp.o: CMakeFiles/fec_part.dir/flags.make
 CMakeFiles/fec_part.dir/src/FEC_Message.cpp.o: ../src/FEC_Message.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/fec_part.dir/src/FEC_Message.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object CMakeFiles/fec_part.dir/src/FEC_Message.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/fec_part.dir/src/FEC_Message.cpp.o -c /home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/FEC_Message.cpp
 
 CMakeFiles/fec_part.dir/src/FEC_Message.cpp.i: cmake_force
@@ -241,7 +254,7 @@ CMakeFiles/fec_part.dir/src/FEC_Message.cpp.s: cmake_force
 
 CMakeFiles/fec_part.dir/src/Memory_Allocator.cpp.o: CMakeFiles/fec_part.dir/flags.make
 CMakeFiles/fec_part.dir/src/Memory_Allocator.cpp.o: ../src/Memory_Allocator.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Building CXX object CMakeFiles/fec_part.dir/src/Memory_Allocator.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object CMakeFiles/fec_part.dir/src/Memory_Allocator.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/fec_part.dir/src/Memory_Allocator.cpp.o -c /home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/Memory_Allocator.cpp
 
 CMakeFiles/fec_part.dir/src/Memory_Allocator.cpp.i: cmake_force
@@ -254,7 +267,7 @@ CMakeFiles/fec_part.dir/src/Memory_Allocator.cpp.s: cmake_force
 
 CMakeFiles/fec_part.dir/src/Parameter_Estimator.cpp.o: CMakeFiles/fec_part.dir/flags.make
 CMakeFiles/fec_part.dir/src/Parameter_Estimator.cpp.o: ../src/Parameter_Estimator.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_16) "Building CXX object CMakeFiles/fec_part.dir/src/Parameter_Estimator.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building CXX object CMakeFiles/fec_part.dir/src/Parameter_Estimator.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/fec_part.dir/src/Parameter_Estimator.cpp.o -c /home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/Parameter_Estimator.cpp
 
 CMakeFiles/fec_part.dir/src/Parameter_Estimator.cpp.i: cmake_force
@@ -267,7 +280,7 @@ CMakeFiles/fec_part.dir/src/Parameter_Estimator.cpp.s: cmake_force
 
 CMakeFiles/fec_part.dir/src/Payload_Simulator.cpp.o: CMakeFiles/fec_part.dir/flags.make
 CMakeFiles/fec_part.dir/src/Payload_Simulator.cpp.o: ../src/Payload_Simulator.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_17) "Building CXX object CMakeFiles/fec_part.dir/src/Payload_Simulator.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building CXX object CMakeFiles/fec_part.dir/src/Payload_Simulator.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/fec_part.dir/src/Payload_Simulator.cpp.o -c /home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/Payload_Simulator.cpp
 
 CMakeFiles/fec_part.dir/src/Payload_Simulator.cpp.i: cmake_force
@@ -280,7 +293,7 @@ CMakeFiles/fec_part.dir/src/Payload_Simulator.cpp.s: cmake_force
 
 CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Decoder.cpp.o: CMakeFiles/fec_part.dir/flags.make
 CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Decoder.cpp.o: ../src/Variable_Rate_FEC_Decoder.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building CXX object CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Decoder.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building CXX object CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Decoder.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Decoder.cpp.o -c /home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/Variable_Rate_FEC_Decoder.cpp
 
 CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Decoder.cpp.i: cmake_force
@@ -293,7 +306,7 @@ CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Decoder.cpp.s: cmake_force
 
 CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Encoder.cpp.o: CMakeFiles/fec_part.dir/flags.make
 CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Encoder.cpp.o: ../src/Variable_Rate_FEC_Encoder.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building CXX object CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Encoder.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building CXX object CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Encoder.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Encoder.cpp.o -c /home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/Variable_Rate_FEC_Encoder.cpp
 
 CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Encoder.cpp.i: cmake_force
@@ -306,7 +319,7 @@ CMakeFiles/fec_part.dir/src/Variable_Rate_FEC_Encoder.cpp.s: cmake_force
 
 CMakeFiles/fec_part.dir/src/basicOperations.cpp.o: CMakeFiles/fec_part.dir/flags.make
 CMakeFiles/fec_part.dir/src/basicOperations.cpp.o: ../src/basicOperations.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building CXX object CMakeFiles/fec_part.dir/src/basicOperations.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building CXX object CMakeFiles/fec_part.dir/src/basicOperations.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/fec_part.dir/src/basicOperations.cpp.o -c /home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/basicOperations.cpp
 
 CMakeFiles/fec_part.dir/src/basicOperations.cpp.i: cmake_force
@@ -319,7 +332,7 @@ CMakeFiles/fec_part.dir/src/basicOperations.cpp.s: cmake_force
 
 CMakeFiles/fec_part.dir/src/codingOperations.cpp.o: CMakeFiles/fec_part.dir/flags.make
 CMakeFiles/fec_part.dir/src/codingOperations.cpp.o: ../src/codingOperations.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building CXX object CMakeFiles/fec_part.dir/src/codingOperations.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building CXX object CMakeFiles/fec_part.dir/src/codingOperations.cpp.o"
 	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/fec_part.dir/src/codingOperations.cpp.o -c /home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/codingOperations.cpp
 
 CMakeFiles/fec_part.dir/src/codingOperations.cpp.i: cmake_force
@@ -338,6 +351,7 @@ fec_part_OBJECTS = \
 "CMakeFiles/fec_part.dir/src/Decoder.cpp.o" \
 "CMakeFiles/fec_part.dir/src/Decoder_Basic.cpp.o" \
 "CMakeFiles/fec_part.dir/src/Decoder_Block_Code.cpp.o" \
+"CMakeFiles/fec_part.dir/src/Decoder_Symbol_Wise.cpp.o" \
 "CMakeFiles/fec_part.dir/src/Encoder.cpp.o" \
 "CMakeFiles/fec_part.dir/src/Encoder_Basic.cpp.o" \
 "CMakeFiles/fec_part.dir/src/Encoder_Block_Code.cpp.o" \
@@ -363,6 +377,7 @@ libfec_part.a: CMakeFiles/fec_part.dir/src/ConnectionManager.cpp.o
 libfec_part.a: CMakeFiles/fec_part.dir/src/Decoder.cpp.o
 libfec_part.a: CMakeFiles/fec_part.dir/src/Decoder_Basic.cpp.o
 libfec_part.a: CMakeFiles/fec_part.dir/src/Decoder_Block_Code.cpp.o
+libfec_part.a: CMakeFiles/fec_part.dir/src/Decoder_Symbol_Wise.cpp.o
 libfec_part.a: CMakeFiles/fec_part.dir/src/Encoder.cpp.o
 libfec_part.a: CMakeFiles/fec_part.dir/src/Encoder_Basic.cpp.o
 libfec_part.a: CMakeFiles/fec_part.dir/src/Encoder_Block_Code.cpp.o
@@ -380,7 +395,7 @@ libfec_part.a: CMakeFiles/fec_part.dir/src/basicOperations.cpp.o
 libfec_part.a: CMakeFiles/fec_part.dir/src/codingOperations.cpp.o
 libfec_part.a: CMakeFiles/fec_part.dir/build.make
 libfec_part.a: CMakeFiles/fec_part.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Linking CXX static library libfec_part.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Linking CXX static library libfec_part.a"
 	$(CMAKE_COMMAND) -P CMakeFiles/fec_part.dir/cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/fec_part.dir/link.txt --verbose=$(VERBOSE)
 

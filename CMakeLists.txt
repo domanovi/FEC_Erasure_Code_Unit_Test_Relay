@@ -34,7 +34,7 @@ file (GLOB FEC_PARTIAL_SOURCES "${PROJECT_SOURCE_DIR}/*.cpp")
 link_directories("/usr/local/lib")
 link_directories("/usr/lib")
 
-add_library (fec_part "${FEC_PARTIAL_SOURCES}")
+add_library (fec_part "${FEC_PARTIAL_SOURCES}" src/Decoder_Symbol_Wise.cpp)
 
 #relay_main.cpp
 add_executable (FEC_Erasure_Code_Relay
@@ -62,7 +62,7 @@ target_link_libraries (FEC_Erasure_Code_Receiver
 
 #local_simulation_main.cpp
 add_executable (FEC_Erasure_Code_Local
-        ${PROJECT_ROOT_DIR}/application_local_simulation.cpp)
+        ${PROJECT_ROOT_DIR}/application_local_simulation.cpp include/Decoder_Symbol_Wise.h)
 target_link_libraries (FEC_Erasure_Code_Local
         fec_part
         ${Boost_LIBRARIES}

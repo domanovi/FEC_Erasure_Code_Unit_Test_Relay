@@ -17,6 +17,7 @@
 #include "FEC_Encoder.h"
 #include "Memory_Allocator.h"
 #include "FEC_Message.h"
+#include "Decoder_Symbol_Wise.h"
 #include <fstream>
 #include <string>
 
@@ -37,9 +38,9 @@ namespace siphon {
 
         int T2_ack, B2_ack, N2_ack;
 
-    private:
-
         int T, B, N, max_payload;                 //transition counter varies from 0 to T; if it is < T, that means the old FEC_Encoder still has a codeword to transmit (concatenated to the new codeword); if it equals T, that means the old FEC_Encoder has nothing to send
+
+    private:
 
         int B_old, N_old;
 

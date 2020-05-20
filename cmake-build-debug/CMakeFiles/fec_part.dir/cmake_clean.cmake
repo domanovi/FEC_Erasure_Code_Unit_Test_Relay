@@ -5,6 +5,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/fec_part.dir/src/Decoder.cpp.o"
   "CMakeFiles/fec_part.dir/src/Decoder_Basic.cpp.o"
   "CMakeFiles/fec_part.dir/src/Decoder_Block_Code.cpp.o"
+  "CMakeFiles/fec_part.dir/src/Decoder_Symbol_Wise.cpp.o"
   "CMakeFiles/fec_part.dir/src/Encoder.cpp.o"
   "CMakeFiles/fec_part.dir/src/Encoder_Basic.cpp.o"
   "CMakeFiles/fec_part.dir/src/Encoder_Block_Code.cpp.o"

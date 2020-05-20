@@ -68,6 +68,7 @@ void Application_Layer_Sender::generate_message_and_encode(unsigned char *udp_pa
 
     int response_size;
     unsigned char response_buffer[12];
+    int T2,B2,N2;
     int T2_ack,B2_ack,N2_ack;
 
     if (udp_parameters == nullptr)
@@ -82,6 +83,9 @@ void Application_Layer_Sender::generate_message_and_encode(unsigned char *udp_pa
             T_ack = (int) udp_parameters[3];
             B_ack = (int) udp_parameters[4];
             N_ack = (int) udp_parameters[5];
+            T2 = (int) udp_parameters[6];
+            B2 = (int) udp_parameters[7];
+            N2 = (int) udp_parameters[8];
             T2_ack = (int) udp_parameters[9];
             B2_ack = (int) udp_parameters[10];
             N2_ack = (int) udp_parameters[11];
@@ -100,24 +104,52 @@ void Application_Layer_Sender::generate_message_and_encode(unsigned char *udp_pa
     //   for (int i = 0; i < message_transmitted->size; i++)
     //  codeword[8 + i] = (message_transmitted->buffer)[i];
 
-    memcpy(codeword + 8, message_transmitted->buffer, message_transmitted->size);
+    if (RELAYING_TYPE==2){
+        memcpy(codeword + 12, message_transmitted->buffer, message_transmitted->size);
 
-    codeword[7] = (unsigned char) (message_transmitted->counter_for_start_and_end);
-    codeword[6] = (unsigned char) (message_transmitted->N);
-    codeword[5] = (unsigned char) (message_transmitted->B);
-    codeword[4] = (unsigned char) (message_transmitted->T);
+        codeword[11] = (unsigned char) (0);//TODO: understand counter_for_start_and_end and change
+        codeword[10] = (unsigned char) (N2);
+        codeword[9] = (unsigned char) (B2);
+        codeword[8] = (unsigned char) (T2);
 
-    codeword[3] = (unsigned char) (seq_number % 256);
-    codeword[2] = (unsigned char) ((seq_number / 256) % 256);
-    codeword[1] = (unsigned char) ((seq_number / 256 / 256) % 256);
-    codeword[0] = (unsigned char) ((seq_number / 256 / 256 / 256) % 256);
+        codeword[7] = (unsigned char) (message_transmitted->counter_for_start_and_end);
+        codeword[6] = (unsigned char) (message_transmitted->N);
+        codeword[5] = (unsigned char) (message_transmitted->B);
+        codeword[4] = (unsigned char) (message_transmitted->T);
 
-    // send(8 + message_transmitted->size, codeword, udp_codeword, udp_codeword_size);
-    if (udp_parameters == nullptr)
-        connection_manager->UDPsend(8 + message_transmitted->size, codeword);
-    else{
-        *udp_codeword_size = 8 + message_transmitted->size;//ELAD to change 300
-        memcpy(udp_codeword,codeword, size_t(*udp_codeword_size));
+        codeword[3] = (unsigned char) (seq_number % 256);
+        codeword[2] = (unsigned char) ((seq_number / 256) % 256);
+        codeword[1] = (unsigned char) ((seq_number / 256 / 256) % 256);
+        codeword[0] = (unsigned char) ((seq_number / 256 / 256 / 256) % 256);
+
+        // send(8 + message_transmitted->size, codeword, udp_codeword, udp_codeword_size);
+        if (udp_parameters == nullptr)
+            connection_manager->UDPsend(12 + message_transmitted->size, codeword);
+        else {
+            *udp_codeword_size = 12 + message_transmitted->size;
+            memcpy(udp_codeword, codeword, size_t(*udp_codeword_size));
+        }
+    }else {
+
+        memcpy(codeword + 8, message_transmitted->buffer, message_transmitted->size);
+
+        codeword[7] = (unsigned char) (message_transmitted->counter_for_start_and_end);
+        codeword[6] = (unsigned char) (message_transmitted->N);
+        codeword[5] = (unsigned char) (message_transmitted->B);
+        codeword[4] = (unsigned char) (message_transmitted->T);
+
+        codeword[3] = (unsigned char) (seq_number % 256);
+        codeword[2] = (unsigned char) ((seq_number / 256) % 256);
+        codeword[1] = (unsigned char) ((seq_number / 256 / 256) % 256);
+        codeword[0] = (unsigned char) ((seq_number / 256 / 256 / 256) % 256);
+
+        // send(8 + message_transmitted->size, codeword, udp_codeword, udp_codeword_size);
+        if (udp_parameters == nullptr)
+            connection_manager->UDPsend(8 + message_transmitted->size, codeword);
+        else {
+            *udp_codeword_size = 8 + message_transmitted->size;//ELAD to change 300
+            memcpy(udp_codeword, codeword, size_t(*udp_codeword_size));
+        }
     }
 
     seq_number++;
@@ -125,16 +157,18 @@ void Application_Layer_Sender::generate_message_and_encode(unsigned char *udp_pa
 }
 
 void Application_Layer_Sender::send_sym_wise_message(unsigned char *encoded_symwise_word, int encoded_symwise_word_size, unsigned char *udp_parameters, unsigned char
-*udp_codeword, int *udp_codeword_size,int missing_packets) {
+*udp_codeword, int *udp_codeword_size,int missing_packets,unsigned char *response_buffer) {
 
     int response_size;
-    unsigned char response_buffer[6];
+    //unsigned char response_buffer[6];
 
     seq_number=seq_number+missing_packets;
 
     if (udp_parameters == nullptr)
         update_parameter(&response_size, response_buffer);
     else{
+        for (int i=0;i<6;i++)
+            response_buffer[i]=udp_parameters[i];
         if((adaptive_coding == 1)&& ((int) udp_parameters[0]!=0)) {
             T = (int) udp_parameters[0];
             B = (int) udp_parameters[1];
@@ -154,9 +188,9 @@ void Application_Layer_Sender::send_sym_wise_message(unsigned char *encoded_symw
     memcpy(codeword + 8, encoded_symwise_word, encoded_symwise_word_size);
     //memcpy(codeword , encoded_symwise_word, encoded_symwise_word_size);
 
-    int counter_for_start_and_end=0;//Elad - to change !!!
+    int counter_for_start_and_end=0;//TODO understand counter_for_start_and_end in send_sym_wise_message()
 
-    codeword[7] = (unsigned char) (counter_for_start_and_end); //Elad - to change !!!
+    codeword[7] = (unsigned char) (counter_for_start_and_end); //TODO understand counter_for_start_and_end in send_sym_wise_message()
     codeword[6] = (unsigned char) (N);
     codeword[5] = (unsigned char) (B);
     codeword[4] = (unsigned char) (T);
@@ -170,7 +204,7 @@ void Application_Layer_Sender::send_sym_wise_message(unsigned char *encoded_symw
     if (udp_parameters == nullptr)
         connection_manager->UDPsend(encoded_symwise_word_size+8, codeword);
     else{
-        *udp_codeword_size = encoded_symwise_word_size+8; //ELAD - to change...
+        *udp_codeword_size = encoded_symwise_word_size+8;
         memcpy(udp_codeword,codeword, size_t(*udp_codeword_size));
     }
 
