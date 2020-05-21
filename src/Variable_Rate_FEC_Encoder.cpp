@@ -93,6 +93,10 @@ namespace siphon {
                 B = message->B;
                 N = message->N;
 
+                T2 = T_TOT-N;
+                B2 = B2;
+                N2 = N2;
+
                 transition_flag = 1; //set transition flag
                 double_coding_flag = 1;  //set double coding flag
 

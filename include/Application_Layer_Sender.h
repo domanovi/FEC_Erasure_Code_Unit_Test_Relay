@@ -15,6 +15,7 @@ class Application_Layer_Sender {
 
 private:
     int seq_number, T, B, N, max_payload;                   //seq_number, T, B, N and counter are used to generate an
+    int T2,B2,N2;
     // FEC
     // message
 
@@ -55,7 +56,7 @@ public:
                                       unsigned char *udp_codeword, int *udp_codeword_size,unsigned char *response_buffer);
 
     void send_sym_wise_message(unsigned char string[30000], int i, unsigned char *string1, unsigned char string2[30000],
-                               int *pInt,int missing_packets,unsigned char *response_buffer);
+                               int *pInt,int missing_packets,unsigned char *response_buffer,int k2,int n2);
 };
 
 

@@ -70,17 +70,20 @@ namespace siphon {
 
 
 
-        void receive_message_and_symbol_wise_encode(FEC_Message *message, int n, int k, int n2, int k2, int temp_size);
+        void receive_message_and_symbol_wise_encode(FEC_Message *message, int n, int k, int n2, int k2, int temp_size,int *codeword_size_final);
 
         void receive_message_and_symbol_wise_decode(FEC_Message *message, int n, int k, int temp_size);
 
         Decoder_Symbol_Wise *decoder_Symbol_Wise;
         Decoder_Symbol_Wise *decoder_Symbol_Wise_new;
 
+        int n2_old;
     private:
 
         int T{}, B{}, N{}, max_payload;
+        int T2, B2, N2;
         int n_old,k_old;
+        int k2_old;
 
 
         int latest_seq;
@@ -134,6 +137,8 @@ namespace siphon {
 
         void symbol_wise_decode(int k, int n, unsigned char *generator, int temp_seq);
 
+        void symbol_wise_decode(int k, int n, unsigned char *generator, int temp_seq, size_t *loss_counter_,
+                                size_t *final_loss_counter_);
     };
 
 }

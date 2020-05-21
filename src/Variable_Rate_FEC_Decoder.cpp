@@ -145,7 +145,8 @@ namespace siphon {
 
     }
 
-    void Variable_Rate_FEC_Decoder::receive_message_and_symbol_wise_encode(FEC_Message *message,int n,int k,int n2,int k2,int temp_size) {
+    void Variable_Rate_FEC_Decoder::receive_message_and_symbol_wise_encode(FEC_Message *message,int n,int k,int n2,
+                                                                           int k2,int temp_size,int *codeword_size_final) {
         if (seq_start == -1) { //initialize the decoder upon receiving the first packet
             decoder_Symbol_Wise->decoder_current=new Decoder(n-1, n-k, n-k, max_payload);
             decoder_Symbol_Wise->encoder_current=new Encoder(n2-1, n2-k2, n2-k2, max_payload);
@@ -156,6 +157,8 @@ namespace siphon {
             N = message->N;
             seq_start=0;
             latest_seq = seq_start;
+            k2_old=k2;
+            n2_old=n2;
         }
         int received_seq = message->seq_number;
 
@@ -182,37 +185,40 @@ namespace siphon {
 //                &loss_counter_,&final_loss_counter_,temp_size,
 //                decoder_current->decoder->getG(),encoder->getG());
 
+        int codeword_r_d_size_old= ceil(float(max_payload + 2) / k2_old) * n2_old;
+        int codeword_r_d_size_current= ceil(float(max_payload + 2) / k2) * n2;
 
         if (received_seq>latest_seq+n2-1) {
-            // in case of a burst longer than n fill codeword_vector with zeros and store codeword_new_vector in codeword_vector_store_in_burst
-            for (int seq = latest_seq; seq < latest_seq + n2 ; seq++) {
-                UDP_loss_counter_++;
-                final_UDP_loss_counter_++;
-                for (int i = 0; i < n - 1; i++) {
-                    memcpy(codeword_vector[i], codeword_vector[i + 1], temp_size);
-                    temp_erasure_vector[i] = temp_erasure_vector[i + 1];
-                }
-                for (int i=0;i<n2-1;i++) {
-                    memcpy(codeword_new_vector[i], codeword_new_vector[i + 1], temp_size);
-                    memcpy(codeword_vector_store_in_burst[i], codeword_vector_store_in_burst[i + 1], temp_size);
-                }
-                // zero the input
-                memset(codeword_vector[n - 1], '\000', (300 + 12) * 4 * T_TOT);//ELAD - 300=max_payload
-                temp_erasure_vector[n - 1] = 1;
-                DEBUG_MSG("\033[1;34m" << "Burst: packet dropped in (s,r) #" << seq << ": " << "\033[0m");
-                symbol_wise_encode(k, n, decoder_current->decoder->getG(),encoder->getG(), temp_size,k2,n2); // decode past codewords
-                memcpy(codeword_vector_store_in_burst[n2 - 1], codeword_new_vector[n2 - 1], temp_size);
-                display_udp_statistics(seq);
-            }
-            for (int i=0;i<n2-1;i++)// zero the output (after storing)
-                memset(codeword_new_vector[i], '\000', (300 + 12) * 4 * T_TOT);//ELAD - 300=max_payloa
-            // go over the rest of the missing UDP packets
-            for (int seq = latest_seq + n2; seq < received_seq ; seq++) {
-                UDP_loss_counter_++;
-                final_UDP_loss_counter_++;
-                DEBUG_MSG("\033[1;34m" << "Burst: packet dropped in (s,r) #" << seq << ": " << "\033[0m");
-                display_udp_statistics(seq);
-            }
+            //TODO handle a burst...
+//            // in case of a burst longer than n fill codeword_vector with zeros and store codeword_new_vector in codeword_vector_store_in_burst
+//            for (int seq = latest_seq; seq < latest_seq + n2 ; seq++) {
+//                UDP_loss_counter_++;
+//                final_UDP_loss_counter_++;
+//                for (int i = 0; i < n - 1; i++) {
+//                    memcpy(codeword_vector[i], codeword_vector[i + 1], temp_size);
+//                    temp_erasure_vector[i] = temp_erasure_vector[i + 1];
+//                }
+//                for (int i=0;i<n2-1;i++) {
+//                    memcpy(codeword_new_vector[i], codeword_new_vector[i + 1], temp_size);
+//                    memcpy(codeword_vector_store_in_burst[i], codeword_vector_store_in_burst[i + 1], temp_size);
+//                }
+//                // zero the input
+//                memset(codeword_vector[n - 1], '\000', (300 + 12) * 4 * T_TOT);//ELAD - 300=max_payload
+//                temp_erasure_vector[n - 1] = 1;
+//                DEBUG_MSG("\033[1;34m" << "Burst: packet dropped in (s,r) #" << seq << ": " << "\033[0m");
+//                symbol_wise_encode(k, n, decoder_current->decoder->getG(),encoder->getG(), temp_size,k2,n2); // decode past codewords
+//                memcpy(codeword_vector_store_in_burst[n2 - 1], codeword_new_vector[n2 - 1], temp_size);
+//                display_udp_statistics(seq);
+//            }
+//            for (int i=0;i<n2-1;i++)// zero the output (after storing)
+//                memset(codeword_new_vector[i], '\000', (300 + 12) * 4 * T_TOT);//ELAD - 300=max_payloa
+//            // go over the rest of the missing UDP packets
+//            for (int seq = latest_seq + n2; seq < received_seq ; seq++) {
+//                UDP_loss_counter_++;
+//                final_UDP_loss_counter_++;
+//                DEBUG_MSG("\033[1;34m" << "Burst: packet dropped in (s,r) #" << seq << ": " << "\033[0m");
+//                display_udp_statistics(seq);
+//            }
         }else {
             for (int seq = latest_seq; seq < received_seq; seq++) {// need to handle bursts longer than n
                 UDP_loss_counter_++;
@@ -237,44 +243,213 @@ namespace siphon {
                 }
 
                 if (double_coding_flag == 0) {
-//                    for (int i = 0; i < n - 1; i++) {
-//                        memcpy(codeword_vector[i], codeword_vector[i + 1], temp_size);
-//                        temp_erasure_vector[i] = temp_erasure_vector[i + 1];//ELAD to check...
-//                    }
-//                    for (int i = 0; i < n2 - 1; i++)
-//                        memcpy(codeword_new_vector[i], codeword_new_vector[i + 1], temp_size);
-//                    memset(codeword_vector[n - 1], '\000', (300 + 12) * 4 * T_TOT);//TODO change 300 to max payload?
-//                    temp_erasure_vector[n - 1] = 1;
-                    decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n,n2,temp_size);
+                    decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n,n2,temp_size,codeword_r_d_size_current);
                     DEBUG_MSG("\033[1;34m" << "Packet dropped in (s,r) #" << seq << ": " << "\033[0m");
-                    decoder_Symbol_Wise->symbol_wise_encode_1(k,n,temp_size,k2,
-                                                              n2,&loss_counter_,&final_loss_counter_);
-//                    symbol_wise_encode(k, n, decoder_current->decoder->getG(), encoder->getG(), temp_size, k2,
-//                                       n2); // decode past codewords
+                    decoder_Symbol_Wise->symbol_wise_encode_1(k,n,k2,n2,&loss_counter_,&final_loss_counter_);
+                    char codeword_final[30000];
+                    int codeword_size_final_temp = codeword_r_d_size_current;
+                    codeword_final[1] = (unsigned char) (codeword_r_d_size_current);
+                    codeword_final[0] = (unsigned char) ((codeword_r_d_size_current) / 256);
+                    memcpy(codeword_final + 2, decoder_Symbol_Wise->codeword_new_vector[n2-1], size_t(codeword_r_d_size_current));
+                    memcpy(decoder_Symbol_Wise->codeword_new_vector[n2-1],codeword_final,size_t(codeword_size_final_temp));
                     display_udp_statistics(seq);
                 } else{
-                    decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n_old,n2,temp_size);
-                    decoder_Symbol_Wise_new->rotate_pointers_and_insert_zero_word(n,n2,temp_size);
-                    decoder_Symbol_Wise->symbol_wise_encode_1(k_old,n_old,temp_size,k2,n2,&loss_counter_,&final_loss_counter_);
-                    decoder_Symbol_Wise_new->symbol_wise_encode_1(k,n,temp_size,k2,n2,&loss_counter_,&final_loss_counter_);
+                    //TODO check codeword size in case of transition !!!
+                    decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n_old,n2,temp_size,codeword_r_d_size_current);
+                    decoder_Symbol_Wise_new->rotate_pointers_and_insert_zero_word(n,n2,temp_size,codeword_r_d_size_current);//TODO FIX!!!!!!
+                    decoder_Symbol_Wise->symbol_wise_encode_1(k_old,n_old,k2,n2,&loss_counter_,&final_loss_counter_);
+                    decoder_Symbol_Wise_new->symbol_wise_encode_1(k,n,k2,n2,&loss_counter_,&final_loss_counter_);
                     DEBUG_MSG("\033[1;34m" << "Packet dropped in (s,r) #" << seq << ": " << "\033[0m");
                     display_udp_statistics(seq);
                 }
             }
         }
 
-        // push current codeword
-//        for (int i = 0; i < n - 1; i++) {
-//            memcpy(codeword_vector[i], codeword_vector[i + 1], temp_size);
-//            temp_erasure_vector[i] = temp_erasure_vector[i + 1];//ELAD to check...
-//        }
-//        for (int i=0;i<n2-1;i++)
-//            memcpy(codeword_new_vector[i], codeword_new_vector[i + 1], temp_size);
-//        memcpy(codeword_vector[n-1],message->buffer,temp_size);
-//        temp_erasure_vector[n-1]=0;
         if ((received_seq > seq_end_double_coding) && (double_coding_flag == 1)) {
             double_coding_flag = 0;
             decoder_Symbol_Wise = decoder_Symbol_Wise_new;
+            n2_old=n2;
+            k2_old=k2;
+        }
+
+        if (received_seq == seq_start_double_coding) {
+            seq_end_double_coding = seq_start_double_coding + T - 1;//TODO need to make sure it use the right T...
+            if (decoder_Symbol_Wise_new != NULL)
+                delete decoder_Symbol_Wise_new;
+            k_old=T-N+1;
+            n_old=T+1;
+            T=message->T;
+            B=message->B;
+            N=message->N;
+
+            decoder_Symbol_Wise_new=new Decoder_Symbol_Wise(max_payload);
+            decoder_Symbol_Wise_new->decoder_current=new Decoder(T,B,N, max_payload);
+            decoder_Symbol_Wise_new->encoder_current=new Encoder(n2-1,n2-k2,n2-k2, max_payload);
+            double_coding_flag = 1;
+        }
+        if (double_coding_flag==0) {
+            decoder_Symbol_Wise->push_current_codeword(codeword_received, n, n2, size_received,codeword_r_d_size_current);
+            decoder_Symbol_Wise->symbol_wise_encode_1(k, n, k2,n2, &loss_counter_, &final_loss_counter_);
+            *codeword_size_final = codeword_r_d_size_old;  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
+            char codeword_final[30000];
+            int codeword_size_final_temp = codeword_r_d_size_current;
+            codeword_final[1] = (unsigned char) (codeword_r_d_size_current);
+            codeword_final[0] = (unsigned char) ((codeword_r_d_size_current) / 256);
+            memcpy(codeword_final + 2, decoder_Symbol_Wise->codeword_new_vector[n2-1], size_t(codeword_r_d_size_current));
+            memcpy(decoder_Symbol_Wise->codeword_new_vector[n2-1],codeword_final,size_t(codeword_size_final_temp));
+        }else{
+            decoder_Symbol_Wise->push_current_codeword(codeword_received_transition, n_old, n2_old, size_received_transition,codeword_r_d_size_old);
+            decoder_Symbol_Wise->symbol_wise_encode_1(k_old, n_old, k2_old,n2_old, &loss_counter_, &final_loss_counter_);
+            decoder_Symbol_Wise_new->push_current_codeword(codeword_received, n, n2, size_received,codeword_r_d_size_current);//TODO to fix !!!!!
+            decoder_Symbol_Wise_new->symbol_wise_encode_1(k, n, k2,n2, &loss_counter_, &final_loss_counter_);
+            int codeword_size_final_temp = codeword_r_d_size_current + codeword_r_d_size_old + 2;  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
+            *codeword_size_final = codeword_size_final_temp;
+
+
+//            int codeword_r_d_size_old=ceil(float(max_payload + 2) / k2_old) * n2_old;
+//            int codeword_r_d_size_current=ceil(float(max_payload + 2) / k2) * k2;
+
+//            int codeword_size_final = codeword_r_d_size_current + codeword_r_d_size_old +
+//                                      2;  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
+            char codeword_final[30000];
+            int temp_remainder;
+
+            memset(codeword_final, 0, size_t(codeword_size_final_temp));
+
+            temp_remainder = codeword_r_d_size_current % 256;
+            codeword_final[1] = (unsigned char) (temp_remainder);
+            codeword_final[0] = (unsigned char) ((codeword_r_d_size_current - temp_remainder) / 256);
+
+            memcpy(codeword_final + 2, decoder_Symbol_Wise_new->codeword_new_vector[n2-1], size_t(codeword_r_d_size_current));
+            memcpy(codeword_final + codeword_r_d_size_current + 2, decoder_Symbol_Wise->codeword_new_vector[n2_old - 1], size_t(codeword_r_d_size_old));
+            memcpy(decoder_Symbol_Wise->codeword_new_vector[n2_old-1],codeword_final,size_t(codeword_size_final_temp));
+
+        }
+
+        //memcpy(codeword_new_symbol_wise,codeword_new_vector[n2-1],temp_size);//ELAD - to change
+        display_udp_statistics(received_seq);
+        display_fec_statistics(received_seq);
+
+        counter_++; //Elad - need to check
+
+        latest_seq = received_seq + 1;
+        //return received_seq;//ELAD to change
+    }
+
+//    void Variable_Rate_FEC_Decoder::symbol_wise_encode(int k,int n,unsigned char *generator_s_r,unsigned char *generator_r_d, int temp_size,int k2, int n2){
+//        int erasure_counter=0;
+//        for (int i=0;i<n;i++){
+//            if (temp_erasure_vector[i]==1)
+//                erasure_counter++;
+//        }
+//        // Extract the relevant parts from the coded message
+//
+//        unsigned char temp_codeword[n];
+//        unsigned char temp_encoded_codeword[n2];
+//        //memset(codeword_new_vector[T_INITIAL],'\000',(300 + 12) * 4 * T_INITIAL);//ELAD maxpayload
+//        bool *stam_erasure_vector=(bool *) malloc(sizeof(bool)*T_TOT);
+//        bool flag=false;
+//        for (int j=0;j<100;j++) {
+//            for (int i = 0; i < n; i++) {
+//                // Need to add decoding
+//                //codeword_new_symbol_wise[10+(j)*n+i] = codeword_vector[n -1 - i][10+(j+1)*n-(n-k) - i];
+//                temp_codeword[i]=codeword_vector[i][2+j*n+i]; // temp_codeword holds the diagonal (a_0,b_1,c_2...)!!!
+//            }
+//            // Decoding
+//            if (erasure_counter>0 && erasure_counter<(n-k+1)){
+//                for (int aa=0;aa<n-1;aa++)
+//                    stam_erasure_vector[aa]=temp_erasure_vector[aa];
+//                decodeBlock(&temp_codeword[0], generator_s_r, &temp_codeword[0], stam_erasure_vector,  k,  n,n-1,0);// T=n-1
+//            }else if (erasure_counter>=(n-k+1)){
+//                flag=true;
+//            }
+//            for (int i=0;i<k;i++)
+//                codeword_new_symbol_wise[2+(j)*n+i]=temp_codeword[k-1-i];
+//        }
+//        if (flag){
+//            loss_counter_++;
+//            final_loss_counter_++;
+//        }
+//        free(stam_erasure_vector);
+//
+//        // Encoding
+//        for (int j=0;j<100;j++) {
+//            for (int i = 0; i < k; i++) {
+//                codeword_new_vector[n2-1][2+(j)*n2+i]=codeword_new_symbol_wise[2+(j)*n+i];
+//            }
+//        }
+//        //memcpy(codeword_new_vector[n2-1],codeword_new_symbol_wise,temp_size);//ELAD - to change
+//        for (int j=0;j<100;j++) {
+//            for (int delta=0;delta<n2-k2;delta++) {//this is to fill all parity symbols in codeword_new_vector[n2 - 1]
+//                for (int i = 0+delta; i < k+delta; i++) {
+//                    temp_codeword[i] = codeword_new_vector[i][2 + j * n2 +
+//                                                              i]; // temp_codeword holds the diagonal (c_0,b_0,a_0...)!!!
+//                }
+//                memcpy(temp_encoded_codeword, temp_codeword, k * sizeof(unsigned char));
+//                encodeBlock(&temp_codeword[0], generator_r_d, &temp_encoded_codeword[0], k2, n2, k2 - 1);
+//
+//                codeword_new_vector[n2 - 1][2 + j * n2 + n2 - 1-delta] = temp_encoded_codeword[n2 - 1-delta];
+//            }
+////            for (int i = k2; i < n2; i++) {
+////                codeword_new_vector[i][2+j*n2+i]=temp_encoded_codeword[i];
+////                //codeword_new_symbol_wise[10+j*n+i]=temp_encoded_codeword[i];
+////            }
+//        }
+//    }
+
+    void Variable_Rate_FEC_Decoder::receive_message_and_symbol_wise_decode(FEC_Message *message,int n,int k,int temp_size) {
+//        if (seq_start == -1) //initialize the decoder upon receiving the first packet
+//            initialize_decoder(message);
+        if (seq_start == -1) { //initialize the decoder upon receiving the first packet
+            decoder_Symbol_Wise->decoder_current=new Decoder(n-1, n-k, n-k, max_payload);
+//            decoder_Symbol_Wise->encoder_current=new Encoder(n2-1, n2-k2, n2-k2, max_payload);
+//            initialize_decoder(message);
+            //encoder = new Encoder(n2 - 1, n2 - k2, n2 - k2, max_payload);
+            T = message->T;
+            B = message->B;
+            N = message->N;
+            seq_start=0;
+            latest_seq = seq_start;
+        }
+        int received_seq = message->seq_number;
+
+        if (received_seq < latest_seq) { //if an out-of-order sequence is received, just discard it
+            //cout << "\033[1;31mOut-of-sequence packet: #" << received_seq << "\033[0m" << endl;
+            return;
+        }
+
+        if ((T != message->T) || (B != message->B) || (N != message->N)) //record when the double_coding begins
+            seq_start_double_coding = received_seq - message->counter_for_start_and_end;
+
+        unsigned char *codeword_received_with_header = message->buffer;
+//        unsigned char *codeword_received = codeword_received_with_header + 2;
+        unsigned char *codeword_received = codeword_received_with_header;
+        int size_received = int(codeword_received_with_header[0]) * 256 + int(codeword_received_with_header[1]);
+        unsigned char *codeword_received_transition = codeword_received + size_received;
+//        int size_received_transition = message->size - 2 - size_received;
+        int size_received_transition = message->size - size_received;
+
+        // rotate pointers
+        for (int seq = latest_seq; seq < received_seq; seq++) {// need to handle bursts longer than n
+            UDP_loss_counter_++;
+            final_UDP_loss_counter_++;
+            for (int i = 0; i < n - 1; i++) {
+                memcpy(codeword_vector[i], codeword_vector[i + 1], temp_size);
+                temp_erasure_vector[i] = temp_erasure_vector[i + 1];//ELAD to check...
+            }
+            memset(codeword_vector[n - 1], '\000', (300 + 12) * 4 * T_TOT);//ELAD - 300=max_payload
+            temp_erasure_vector[n - 1] = 1;
+            DEBUG_MSG("\033[1;34m" << "Packet dropped in (r,d) #" << seq << ": " << "\033[0m");
+            symbol_wise_decode(k,n,decoder_Symbol_Wise->decoder_current->getG(),seq);// decode past messages (taking erasure in (r,d) into account)
+            display_udp_statistics(seq);
+        }
+
+
+        if ((received_seq > seq_end_double_coding) && (double_coding_flag == 1)) {
+            double_coding_flag = 0;
+            decoder_Symbol_Wise = decoder_Symbol_Wise_new;
+//            n2_old=n2;
+//            k2_old=k2;
         }
 
         if (received_seq == seq_start_double_coding) {
@@ -291,119 +466,74 @@ namespace siphon {
             decoder_Symbol_Wise_new->decoder_current=new Decoder(T,B,N, max_payload);
             double_coding_flag = 1;
         }
+
+//        // push current codeword
+//        for (int i = 0; i < n - 1; i++) {
+//            memcpy(codeword_vector[i], codeword_vector[i + 1], temp_size);
+//            temp_erasure_vector[i] = temp_erasure_vector[i + 1];//ELAD to check...
+//        }
+//        memcpy(codeword_vector[n-1],message->buffer,temp_size);
+//        temp_erasure_vector[n-1]=0;
+        unsigned char buffer[30000];
+//        if (received_seq == seq_start_double_coding) {
+//            seq_end_double_coding = seq_start_double_coding + T - 1;//TODO need to make sure it use the right T...
+//            if (decoder_Symbol_Wise_new != NULL)
+//                delete decoder_Symbol_Wise_new;
+//            k_old=T-N+1;
+//            n_old=T+1;
+//            T=message->T;
+//            B=message->B;
+//            N=message->N;
+//
+//            decoder_Symbol_Wise_new=new Decoder_Symbol_Wise(max_payload);
+//            decoder_Symbol_Wise_new->decoder_current=new Decoder(T,B,N, max_payload);
+//            double_coding_flag = 1;
+//        }
         if (double_coding_flag==0) {
-            decoder_Symbol_Wise->push_current_codeword(codeword_received, n, n2, size_received);
-            decoder_Symbol_Wise->symbol_wise_encode_1(k, n,size_received, k2,n2, &loss_counter_, &final_loss_counter_);
-        }else{
-            decoder_Symbol_Wise->push_current_codeword(codeword_received_transition, n_old, n2, size_received_transition);
-            decoder_Symbol_Wise->symbol_wise_encode_1(k_old, n_old,size_received_transition, k2,n2, &loss_counter_, &final_loss_counter_);
-            decoder_Symbol_Wise_new->push_current_codeword(codeword_received, n, n2, size_received);
-            decoder_Symbol_Wise_new->symbol_wise_encode_1(k, n,size_received, k2,n2, &loss_counter_, &final_loss_counter_);
-        }
-
-        //memcpy(codeword_new_symbol_wise,codeword_new_vector[n2-1],temp_size);//ELAD - to change
-        display_udp_statistics(received_seq);
-        display_fec_statistics(received_seq);
-
-        counter_++; //Elad - need to check
-
-        latest_seq = received_seq + 1;
-        //return received_seq;//ELAD to change
-    }
-
-    void Variable_Rate_FEC_Decoder::symbol_wise_encode(int k,int n,unsigned char *generator_s_r,unsigned char *generator_r_d, int temp_size,int k2, int n2){
-        int erasure_counter=0;
-        for (int i=0;i<n;i++){
-            if (temp_erasure_vector[i]==1)
-                erasure_counter++;
-        }
-        // Extract the relevant parts from the coded message
-
-        unsigned char temp_codeword[n];
-        unsigned char temp_encoded_codeword[n2];
-        //memset(codeword_new_vector[T_INITIAL],'\000',(300 + 12) * 4 * T_INITIAL);//ELAD maxpayload
-        bool *stam_erasure_vector=(bool *) malloc(sizeof(bool)*T_TOT);
-        bool flag=false;
-        for (int j=0;j<100;j++) {
-            for (int i = 0; i < n; i++) {
-                // Need to add decoding
-                //codeword_new_symbol_wise[10+(j)*n+i] = codeword_vector[n -1 - i][10+(j+1)*n-(n-k) - i];
-                temp_codeword[i]=codeword_vector[i][2+j*n+i]; // temp_codeword holds the diagonal (a_0,b_1,c_2...)!!!
+            decoder_Symbol_Wise->push_current_codeword(codeword_received_with_header,n,0,size_received,0);
+            bool flag=false;
+            decoder_Symbol_Wise->symbol_wise_decode_1(buffer,&flag,k,n);
+            if (flag) {
+                loss_counter_++;
+                final_loss_counter_++;
             }
-            // Decoding
-            if (erasure_counter>0 && erasure_counter<(n-k+1)){
-                for (int aa=0;aa<n-1;aa++)
-                    stam_erasure_vector[aa]=temp_erasure_vector[aa];
-                decodeBlock(&temp_codeword[0], generator_s_r, &temp_codeword[0], stam_erasure_vector,  k,  n,n-1,0);// T=n-1
-            }else if (erasure_counter>=(n-k+1)){
-                flag=true;
-            }
-            for (int i=0;i<k;i++)
-                codeword_new_symbol_wise[2+(j)*n+i]=temp_codeword[k-1-i];
-        }
-        if (flag){
-            loss_counter_++;
-            final_loss_counter_++;
-        }
-        free(stam_erasure_vector);
-
-        // Encoding
-        for (int j=0;j<100;j++) {
-            for (int i = 0; i < k; i++) {
-                codeword_new_vector[n2-1][2+(j)*n2+i]=codeword_new_symbol_wise[2+(j)*n+i];
-            }
-        }
-        //memcpy(codeword_new_vector[n2-1],codeword_new_symbol_wise,temp_size);//ELAD - to change
-        for (int j=0;j<100;j++) {
-            for (int delta=0;delta<n2-k2;delta++) {//this is to fill all parity symbols in codeword_new_vector[n2 - 1]
-                for (int i = 0+delta; i < k+delta; i++) {
-                    temp_codeword[i] = codeword_new_vector[i][2 + j * n2 +
-                                                              i]; // temp_codeword holds the diagonal (c_0,b_0,a_0...)!!!
+            // temp extraction of data
+            unsigned char temp_buffer[30000];
+            int ind=0;
+            for (int j=0;j<100;j++) {
+                for (int i = 0; i < k; i++) {
+                    temp_buffer[ind++]=buffer[(j) * n + n-k + i];
                 }
-                memcpy(temp_encoded_codeword, temp_codeword, k * sizeof(unsigned char));
-                encodeBlock(&temp_codeword[0], generator_r_d, &temp_encoded_codeword[0], k2, n2, k2 - 1);
-
-                codeword_new_vector[n2 - 1][2 + j * n2 + n2 - 1-delta] = temp_encoded_codeword[n2 - 1-delta];
             }
-//            for (int i = k2; i < n2; i++) {
-//                codeword_new_vector[i][2+j*n2+i]=temp_encoded_codeword[i];
-//                //codeword_new_symbol_wise[10+j*n+i]=temp_encoded_codeword[i];
-//            }
-        }
-    }
+            // Need to add decoding...
+            DEBUG_MSG("\033[1;34m" << "Message recovered at destination from symbol-wise DF #" << received_seq << ": " << "\033[0m");
+            counter_++;
+            printMatrix(&temp_buffer[2], 1, 300);
+//            symbol_wise_decode(k, n, decoder_current->decoder->getG(), received_seq);
+        }else{
+            decoder_Symbol_Wise->push_current_codeword(codeword_received_transition,n_old,0,size_received_transition,0);
+            bool flag=false;
+            decoder_Symbol_Wise->symbol_wise_decode_1(buffer,&flag,k_old,n_old);
 
-    void Variable_Rate_FEC_Decoder::receive_message_and_symbol_wise_decode(FEC_Message *message,int n,int k,int temp_size) {
-        if (seq_start == -1) //initialize the decoder upon receiving the first packet
-            initialize_decoder(message);
-        int received_seq = message->seq_number;
-
-        if (received_seq < latest_seq) { //if an out-of-order sequence is received, just discard it
-            //cout << "\033[1;31mOut-of-sequence packet: #" << received_seq << "\033[0m" << endl;
-            return;
-        }
-        // rotate pointers
-        for (int seq = latest_seq; seq < received_seq; seq++) {// need to handle bursts longer than n
-            UDP_loss_counter_++;
-            final_UDP_loss_counter_++;
-            for (int i = 0; i < n - 1; i++) {
-                memcpy(codeword_vector[i], codeword_vector[i + 1], temp_size);
-                temp_erasure_vector[i] = temp_erasure_vector[i + 1];//ELAD to check...
+            if (flag) {
+                loss_counter_++;
+                final_loss_counter_++;
             }
-            memset(codeword_vector[n - 1], '\000', (300 + 12) * 4 * T_TOT);//ELAD - 300=max_payload
-            temp_erasure_vector[n - 1] = 1;
-            DEBUG_MSG("\033[1;34m" << "Packet dropped in (r,d) #" << seq << ": " << "\033[0m");
-            symbol_wise_decode(k,n,decoder_current->decoder->getG(),seq);// decode past messages (taking erasure in (r,d) into account)
-            display_udp_statistics(seq);
+            // temp extraction of data
+            unsigned char temp_buffer[30000];
+            int ind=0;
+            for (int j=0;j<100;j++) {
+                for (int i = 0; i < k; i++) {
+                    temp_buffer[ind++]=buffer[(j) * n_old + n-k + i];
+                }
+            }
+            // Need to add decoding...
+            DEBUG_MSG("\033[1;34m" << "Message recovered at destination from symbol-wise DF #" << received_seq << ": " << "\033[0m");
+            printMatrix(&temp_buffer[2], 1, 300);
+            counter_++;
+            decoder_Symbol_Wise_new->push_current_codeword(codeword_received_with_header,n,0,size_received,0);
+            decoder_Symbol_Wise_new->symbol_wise_decode_1(buffer,&flag,k,n);
         }
-        // push current codeword
-        for (int i = 0; i < n - 1; i++) {
-            memcpy(codeword_vector[i], codeword_vector[i + 1], temp_size);
-            temp_erasure_vector[i] = temp_erasure_vector[i + 1];//ELAD to check...
-        }
-        memcpy(codeword_vector[n-1],message->buffer,temp_size);
-        temp_erasure_vector[n-1]=0;
-
-        symbol_wise_decode(k,n,decoder_current->decoder->getG(),received_seq);
 
         display_udp_statistics(received_seq);
         display_fec_statistics(received_seq);

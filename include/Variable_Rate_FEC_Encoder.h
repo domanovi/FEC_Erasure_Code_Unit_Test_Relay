@@ -39,7 +39,7 @@ namespace siphon {
         int T2_ack, B2_ack, N2_ack;
 
         int T, B, N, max_payload;                 //transition counter varies from 0 to T; if it is < T, that means the old FEC_Encoder still has a codeword to transmit (concatenated to the new codeword); if it equals T, that means the old FEC_Encoder has nothing to send
-
+        int T2, B2, N2;
     private:
 
         int B_old, N_old;

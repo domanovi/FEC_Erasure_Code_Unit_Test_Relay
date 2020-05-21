@@ -62,6 +62,14 @@ Decoder_Block_Code.h
 
 ../include/Decoder_Block_Code.h
 
+../include/Decoder_Symbol_Wise.h
+FEC_Macro.h
+../include/FEC_Macro.h
+FEC_Decoder.h
+../include/FEC_Decoder.h
+FEC_Encoder.h
+../include/FEC_Encoder.h
+
 ../include/Encoder.h
 Encoder_Basic.h
 ../include/Encoder_Basic.h
@@ -143,6 +151,10 @@ FEC_Decoder.h
 ../include/FEC_Decoder.h
 Memory_Allocator.h
 ../include/Memory_Allocator.h
+Encoder.h
+../include/Encoder.h
+Decoder_Symbol_Wise.h
+../include/Decoder_Symbol_Wise.h
 
 ../include/Variable_Rate_FEC_Encoder.h
 FEC_Encoder.h
@@ -151,6 +163,8 @@ Memory_Allocator.h
 ../include/Memory_Allocator.h
 FEC_Message.h
 ../include/FEC_Message.h
+Decoder_Symbol_Wise.h
+../include/Decoder_Symbol_Wise.h
 fstream
 -
 string

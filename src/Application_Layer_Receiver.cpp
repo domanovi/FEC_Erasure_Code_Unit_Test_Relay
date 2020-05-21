@@ -51,7 +51,8 @@ void Application_Layer_Receiver::set_receiver_index(int index){
 }
 
 int Application_Layer_Receiver::receive_message_and_symbol_wise_encode(unsigned char *udp_parameters, unsigned char *udp_codeword,
-                                                                       int *udp_codeword_size, siphon::Erasure_Simulator *erasure_simulator, int k2, int n2) {
+                                                                       int *udp_codeword_size, siphon::Erasure_Simulator *erasure_simulator,
+                                                                       int k2, int n2,int *codeword_size_final,int *k2_out,int *n2_out) {
     //int temp_size;
 
     //receive(&temp_size, codeword, udp_codeword, udp_codeword_size);
@@ -82,12 +83,29 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_encode(unsigned 
     int B_value=int(codeword[5]);
     int N_value=int(codeword[6]);
 
+    int T_value_2=int(codeword[8]);
+    int B_value_2=int(codeword[9]);
+    int N_value_2=int(codeword[10]);
+
+
+
     int k=T_value-N_value+1;
     int n=T_value+1;
+    int k2_new;
+    int n2_new;
 
+    if (T_value_2==0){
+        k2_new=k2;
+        n2_new=n2;
+    }else {
+        k2_new = T_value_2 - N_value_2 + 1;
+        n2_new = T_value_2 + 1;
+    }
 
+    *k2_out=k2_new;
+    *n2_out=n2_new;
 
-    fec_decoder->receive_message_and_symbol_wise_encode(fec_message,n,k,n2,k2,temp_size);
+    fec_decoder->receive_message_and_symbol_wise_encode(fec_message,n,k,n2_new,k2_new,temp_size,codeword_size_final);
 
     unsigned char temp_parameters2[12];
     //recommended T, B and N
@@ -102,13 +120,13 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_encode(unsigned 
         temp_parameters2[i]=response_from_dest_buffer[i-6];
     if (udp_parameters == nullptr) {
         connection_manager->UDPsendResponse(temp_parameters2, 12);
-        cout << "Sending 12 bytes from relay" << endl;
+        cout << "Sending 12 bytes from relay to source" << endl;
         printMatrix(temp_parameters2, 1, 12);
     }else{
         // Need to add...
         for (int i=0;i<12;i++)
             udp_parameters[i]=temp_parameters2[i];
-        cout << "Sending 12 bytes from relay" << endl;
+        cout << "Sending 12 bytes from relay to source" << endl;
         printMatrix(udp_parameters,1,12);
     }
 
@@ -141,6 +159,8 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_decode(unsigned 
         }
     }
 
+
+
     // Perform estimation
     fec_message->set_parameters(temp_seq, int(codeword[4]), int(codeword[5]), int(codeword[6]),
                                 temp_size - 8, codeword + 8);
@@ -151,6 +171,10 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_decode(unsigned 
     int T_value=int(codeword[4]);
     int B_value=int(codeword[5]);
     int N_value=int(codeword[6]);
+
+//    int T_value2=int(codeword[8]);
+//    int B_value2=int(codeword[9]);
+//    int N_value2=int(codeword[10]);
 
     int k=T_value-N_value+1;
     int n=T_value+1;

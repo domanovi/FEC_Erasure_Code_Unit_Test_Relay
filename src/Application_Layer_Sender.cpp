@@ -68,7 +68,7 @@ void Application_Layer_Sender::generate_message_and_encode(unsigned char *udp_pa
 
     int response_size;
     unsigned char response_buffer[12];
-    int T2,B2,N2;
+
     int T2_ack,B2_ack,N2_ack;
 
     if (udp_parameters == nullptr)
@@ -95,9 +95,17 @@ void Application_Layer_Sender::generate_message_and_encode(unsigned char *udp_pa
     printMatrix(response_buffer, 1, 12);
 
     message_transmitted->set_parameters(seq_number, T, B, N, max_payload, raw_data);
+
     variable_rate_FEC_encoder->T2_ack=T2_ack;
     variable_rate_FEC_encoder->B2_ack=B2_ack;
     variable_rate_FEC_encoder->N2_ack=N2_ack;
+
+//    if ((N!=N_ack || N2!=N2_ack) && (N_ack+N2_ack<=T_TOT)){
+//        T=T_TOT-N2_ack;
+//        T_ack=T;
+//        T2=T_TOT-N_ack;
+//    }
+
 
     variable_rate_FEC_encoder->encode(message_transmitted, T_ack, B_ack, N_ack,flag);
 
@@ -107,10 +115,10 @@ void Application_Layer_Sender::generate_message_and_encode(unsigned char *udp_pa
     if (RELAYING_TYPE==2){
         memcpy(codeword + 12, message_transmitted->buffer, message_transmitted->size);
 
-        codeword[11] = (unsigned char) (0);//TODO: understand counter_for_start_and_end and change
-        codeword[10] = (unsigned char) (N2);
-        codeword[9] = (unsigned char) (B2);
-        codeword[8] = (unsigned char) (T2);
+        codeword[11] = (unsigned char) (message_transmitted->counter_for_start_and_end);
+        codeword[10] = (unsigned char) (variable_rate_FEC_encoder->N2);
+        codeword[9] = (unsigned char) (variable_rate_FEC_encoder->B2);
+        codeword[8] = (unsigned char) (variable_rate_FEC_encoder->T2);
 
         codeword[7] = (unsigned char) (message_transmitted->counter_for_start_and_end);
         codeword[6] = (unsigned char) (message_transmitted->N);
@@ -121,6 +129,9 @@ void Application_Layer_Sender::generate_message_and_encode(unsigned char *udp_pa
         codeword[2] = (unsigned char) ((seq_number / 256) % 256);
         codeword[1] = (unsigned char) ((seq_number / 256 / 256) % 256);
         codeword[0] = (unsigned char) ((seq_number / 256 / 256 / 256) % 256);
+
+        cout << "Sending from source to relay (in codeword)" << endl;
+        printMatrix(codeword, 1, 12);
 
         // send(8 + message_transmitted->size, codeword, udp_codeword, udp_codeword_size);
         if (udp_parameters == nullptr)
@@ -156,8 +167,9 @@ void Application_Layer_Sender::generate_message_and_encode(unsigned char *udp_pa
 
 }
 
-void Application_Layer_Sender::send_sym_wise_message(unsigned char *encoded_symwise_word, int encoded_symwise_word_size, unsigned char *udp_parameters, unsigned char
-*udp_codeword, int *udp_codeword_size,int missing_packets,unsigned char *response_buffer) {
+void Application_Layer_Sender::send_sym_wise_message(unsigned char *encoded_symwise_word, int encoded_symwise_word_size,
+        unsigned char *udp_parameters, unsigned char *udp_codeword, int *udp_codeword_size,int missing_packets,
+        unsigned char *response_buffer,int k2,int n2) {
 
     int response_size;
     //unsigned char response_buffer[6];
@@ -185,20 +197,24 @@ void Application_Layer_Sender::send_sym_wise_message(unsigned char *encoded_symw
     //   for (int i = 0; i < message_transmitted->size; i++)
     //  codeword[8 + i] = (message_transmitted->buffer)[i];
 
+
     memcpy(codeword + 8, encoded_symwise_word, encoded_symwise_word_size);
     //memcpy(codeword , encoded_symwise_word, encoded_symwise_word_size);
 
     int counter_for_start_and_end=0;//TODO understand counter_for_start_and_end in send_sym_wise_message()
 
     codeword[7] = (unsigned char) (counter_for_start_and_end); //TODO understand counter_for_start_and_end in send_sym_wise_message()
-    codeword[6] = (unsigned char) (N);
+    codeword[6] = (unsigned char) (n2-k2);
     codeword[5] = (unsigned char) (B);
-    codeword[4] = (unsigned char) (T);
+    codeword[4] = (unsigned char) (n2-1);
 
     codeword[3] = (unsigned char) (seq_number % 256);
     codeword[2] = (unsigned char) ((seq_number / 256) % 256);
     codeword[1] = (unsigned char) ((seq_number / 256 / 256) % 256);
     codeword[0] = (unsigned char) ((seq_number / 256 / 256 / 256) % 256);
+
+    cout << "Sending from relay to destination (in codeword)" << endl;
+    printMatrix(codeword, 1, 8);
 
     // send(8 + message_transmitted->size, codeword, udp_codeword, udp_codeword_size);
     if (udp_parameters == nullptr)
