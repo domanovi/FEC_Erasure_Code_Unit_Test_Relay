@@ -94,6 +94,12 @@ void Application_Layer_Sender::generate_message_and_encode(unsigned char *udp_pa
     cout << "Response at source" << endl;
     printMatrix(response_buffer, 1, 12);
 
+    if (RELAYING_TYPE==2 && N+N2<=T_TOT){
+        T=T_TOT-N2;
+        variable_rate_FEC_encoder->N2=N2;
+//        T2=T_TOT-N;
+    }
+
     message_transmitted->set_parameters(seq_number, T, B, N, max_payload, raw_data);
 
     variable_rate_FEC_encoder->T2_ack=T2_ack;
@@ -169,7 +175,7 @@ void Application_Layer_Sender::generate_message_and_encode(unsigned char *udp_pa
 
 void Application_Layer_Sender::send_sym_wise_message(unsigned char *encoded_symwise_word, int encoded_symwise_word_size,
         unsigned char *udp_parameters, unsigned char *udp_codeword, int *udp_codeword_size,int missing_packets,
-        unsigned char *response_buffer,int k2,int n2) {
+        unsigned char *response_buffer,int k2,int n2,int counter_for_start_and_end) {
 
     int response_size;
     //unsigned char response_buffer[6];
@@ -201,12 +207,12 @@ void Application_Layer_Sender::send_sym_wise_message(unsigned char *encoded_symw
     memcpy(codeword + 8, encoded_symwise_word, encoded_symwise_word_size);
     //memcpy(codeword , encoded_symwise_word, encoded_symwise_word_size);
 
-    int counter_for_start_and_end=0;//TODO understand counter_for_start_and_end in send_sym_wise_message()
+//    int counter_for_start_and_end=0;//TODO understand counter_for_start_and_end in send_sym_wise_message()
 
     codeword[7] = (unsigned char) (counter_for_start_and_end); //TODO understand counter_for_start_and_end in send_sym_wise_message()
-    codeword[6] = (unsigned char) (n2-k2);
-    codeword[5] = (unsigned char) (B);
-    codeword[4] = (unsigned char) (n2-1);
+    codeword[6] = (unsigned char) (n2-k2);//N
+    codeword[5] = (unsigned char) (n2-k2);//B
+    codeword[4] = (unsigned char) (n2-1);//T
 
     codeword[3] = (unsigned char) (seq_number % 256);
     codeword[2] = (unsigned char) ((seq_number / 256) % 256);

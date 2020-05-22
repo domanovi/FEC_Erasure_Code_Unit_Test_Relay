@@ -86,6 +86,9 @@ namespace siphon {
                 (transition_flag == 0) && (T_ack == T) && (B_ack == B) &&
                 (N_ack == N)) { //currently not in transition and the current coding parameters have been acknowledged
 
+                cout<<"Start double coding at the source"<<endl;
+
+                T_old = T;
                 B_old = B;
                 N_old = N;
 
@@ -128,19 +131,39 @@ namespace siphon {
 
         message->counter_for_start_and_end = counter_transition;
 
-        if (counter_transition <= T) {
+        if (RELAYING_TYPE==2){
+            if (counter_transition <= T_old) {
 
-            if (counter_transition == T)
-                double_coding_flag = 0;   //no need to use the old encoder to protect the data transmitted at T time slots ago
+                if (counter_transition == T_old) {
+                    double_coding_flag = 0;   //no need to use the old encoder to protect the data transmitted at T time slots ago
+                    cout<<"Stop double coding at the source"<<endl;
+                }
 
-            counter_transition++;
+                counter_transition++;
 
-            if ((encoder_old != NULL) && (double_coding_flag == 1))
-                codeword_old = encoder_old->onTransmit(message->buffer, message->size, message->seq_number,
-                                                       &codeword_size_old);
+                if ((encoder_old != NULL) && (double_coding_flag == 1))
+                    codeword_old = encoder_old->onTransmit(message->buffer, message->size, message->seq_number,
+                                                           &codeword_size_old);
 
-        } else
-            transition_flag = 0;
+            } else
+                transition_flag = 0;
+        }else {
+            if (counter_transition <= T) {
+
+                if (counter_transition == T) {
+                    double_coding_flag = 0;   //no need to use the old encoder to protect the data transmitted at T time slots ago
+                    cout<<"Stop double coding at the source"<<endl;
+                }
+
+                counter_transition++;
+
+                if ((encoder_old != NULL) && (double_coding_flag == 1))
+                    codeword_old = encoder_old->onTransmit(message->buffer, message->size, message->seq_number,
+                                                           &codeword_size_old);
+
+            } else
+                transition_flag = 0;
+        }
 
         // update the transmitted codeword
 

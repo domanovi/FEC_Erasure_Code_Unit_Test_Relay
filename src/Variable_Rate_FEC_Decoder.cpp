@@ -167,8 +167,10 @@ namespace siphon {
             return;
         }
 
-        if ((T != message->T) || (B != message->B) || (N != message->N)) //record when the double_coding begins
+        if ((T != message->T) || (B != message->B) || (N != message->N)) { //record when the double_coding begins
             seq_start_double_coding = received_seq - message->counter_for_start_and_end;
+            cout<<"Start double coding at the relay"<<endl;
+        }
 
         // first decode the old message using the old decoder
 
@@ -270,6 +272,7 @@ namespace siphon {
             decoder_Symbol_Wise = decoder_Symbol_Wise_new;
             n2_old=n2;
             k2_old=k2;
+            cout<<"Stopped double coding at the relay"<<endl;
         }
 
         if (received_seq == seq_start_double_coding) {
@@ -418,8 +421,10 @@ namespace siphon {
             return;
         }
 
-        if ((T != message->T) || (B != message->B) || (N != message->N)) //record when the double_coding begins
+        if ((T != message->T) || (B != message->B) || (N != message->N)){ //record when the double_coding begins
             seq_start_double_coding = received_seq - message->counter_for_start_and_end;
+            cout<<"Start double coding at the destination"<<endl;
+        }
 
         unsigned char *codeword_received_with_header = message->buffer;
 //        unsigned char *codeword_received = codeword_received_with_header + 2;
@@ -429,18 +434,34 @@ namespace siphon {
 //        int size_received_transition = message->size - 2 - size_received;
         int size_received_transition = message->size - size_received;
 
+        unsigned char buffer[30000];
+        bool flag;
+
         // rotate pointers
         for (int seq = latest_seq; seq < received_seq; seq++) {// need to handle bursts longer than n
             UDP_loss_counter_++;
             final_UDP_loss_counter_++;
-            for (int i = 0; i < n - 1; i++) {
-                memcpy(codeword_vector[i], codeword_vector[i + 1], temp_size);
-                temp_erasure_vector[i] = temp_erasure_vector[i + 1];//ELAD to check...
+            if (double_coding_flag==0){
+                decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n,0,size_received,0);
+                decoder_Symbol_Wise->symbol_wise_decode_1(buffer,&flag,k,n);
+
+            }else{
+                decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n_old,0,size_received_transition,0);
+                decoder_Symbol_Wise_new->rotate_pointers_and_insert_zero_word(n,0,size_received,0);
+                decoder_Symbol_Wise->symbol_wise_decode_1(buffer,&flag,k_old,n_old);
+                decoder_Symbol_Wise_new->symbol_wise_decode_1(buffer,&flag,k,n);
             }
-            memset(codeword_vector[n - 1], '\000', (300 + 12) * 4 * T_TOT);//ELAD - 300=max_payload
-            temp_erasure_vector[n - 1] = 1;
+//            for (int i = 0; i < n - 1; i++) {
+//                memcpy(codeword_vector[i], codeword_vector[i + 1], temp_size);
+//                temp_erasure_vector[i] = temp_erasure_vector[i + 1];//ELAD to check...
+//            }
+//            memset(codeword_vector[n - 1], '\000', (300 + 12) * 4 * T_TOT);//ELAD - 300=max_payload
+//            temp_erasure_vector[n - 1] = 1;
+//            DEBUG_MSG("\033[1;34m" << "Packet dropped in (r,d) #" << seq << ": " << "\033[0m");
+//            symbol_wise_decode(k,n,decoder_Symbol_Wise->decoder_current->getG(),seq);// decode past messages (taking erasure in (r,d) into account)
+//
             DEBUG_MSG("\033[1;34m" << "Packet dropped in (r,d) #" << seq << ": " << "\033[0m");
-            symbol_wise_decode(k,n,decoder_Symbol_Wise->decoder_current->getG(),seq);// decode past messages (taking erasure in (r,d) into account)
+            decoder_Symbol_Wise->extract_data(buffer,k,n,received_seq);
             display_udp_statistics(seq);
         }
 
@@ -448,6 +469,7 @@ namespace siphon {
         if ((received_seq > seq_end_double_coding) && (double_coding_flag == 1)) {
             double_coding_flag = 0;
             decoder_Symbol_Wise = decoder_Symbol_Wise_new;
+            cout<<"Stopped double coding at the destination"<<endl;
 //            n2_old=n2;
 //            k2_old=k2;
         }
@@ -474,7 +496,7 @@ namespace siphon {
 //        }
 //        memcpy(codeword_vector[n-1],message->buffer,temp_size);
 //        temp_erasure_vector[n-1]=0;
-        unsigned char buffer[30000];
+//        unsigned char buffer[30000];
 //        if (received_seq == seq_start_double_coding) {
 //            seq_end_double_coding = seq_start_double_coding + T - 1;//TODO need to make sure it use the right T...
 //            if (decoder_Symbol_Wise_new != NULL)
@@ -491,25 +513,26 @@ namespace siphon {
 //        }
         if (double_coding_flag==0) {
             decoder_Symbol_Wise->push_current_codeword(codeword_received_with_header,n,0,size_received,0);
-            bool flag=false;
+            flag=false;
             decoder_Symbol_Wise->symbol_wise_decode_1(buffer,&flag,k,n);
             if (flag) {
                 loss_counter_++;
                 final_loss_counter_++;
             }
-            // temp extraction of data
-            unsigned char temp_buffer[30000];
-            int ind=0;
-            for (int j=0;j<100;j++) {
-                for (int i = 0; i < k; i++) {
-                    temp_buffer[ind++]=buffer[(j) * n + n-k + i];
-                }
-            }
-            // Need to add decoding...
-            DEBUG_MSG("\033[1;34m" << "Message recovered at destination from symbol-wise DF #" << received_seq << ": " << "\033[0m");
+            decoder_Symbol_Wise->extract_data(buffer,k,n,received_seq);
+//            // temp extraction of data
+//            unsigned char temp_buffer[30000];
+//            int ind=0;
+//            for (int j=0;j<100;j++) {
+//                for (int i = 0; i < k; i++) {
+//                    temp_buffer[ind++]=buffer[(j) * n + n-k + i];
+//                }
+//            }
+//            // Need to add decoding...
+//            DEBUG_MSG("\033[1;34m" << "Message recovered at destination from symbol-wise DF #" << received_seq << ": " << "\033[0m");
+//            printMatrix(&temp_buffer[2], 1, 300);
             counter_++;
-            printMatrix(&temp_buffer[2], 1, 300);
-//            symbol_wise_decode(k, n, decoder_current->decoder->getG(), received_seq);
+            //            symbol_wise_decode(k, n, decoder_current->decoder->getG(), received_seq);
         }else{
             decoder_Symbol_Wise->push_current_codeword(codeword_received_transition,n_old,0,size_received_transition,0);
             bool flag=false;
@@ -519,17 +542,18 @@ namespace siphon {
                 loss_counter_++;
                 final_loss_counter_++;
             }
-            // temp extraction of data
-            unsigned char temp_buffer[30000];
-            int ind=0;
-            for (int j=0;j<100;j++) {
-                for (int i = 0; i < k; i++) {
-                    temp_buffer[ind++]=buffer[(j) * n_old + n-k + i];
-                }
-            }
-            // Need to add decoding...
-            DEBUG_MSG("\033[1;34m" << "Message recovered at destination from symbol-wise DF #" << received_seq << ": " << "\033[0m");
-            printMatrix(&temp_buffer[2], 1, 300);
+            decoder_Symbol_Wise->extract_data(buffer,k_old,n_old,received_seq);
+//            // temp extraction of data
+//            unsigned char temp_buffer[30000];
+//            int ind=0;
+//            for (int j=0;j<100;j++) {
+//                for (int i = 0; i < k; i++) {
+//                    temp_buffer[ind++]=buffer[(j) * n_old + n-k + i];
+//                }
+//            }
+//            // Need to add decoding...
+//            DEBUG_MSG("\033[1;34m" << "Message recovered at destination from symbol-wise DF #" << received_seq << ": " << "\033[0m");
+//            printMatrix(&temp_buffer[2], 1, 300);
             counter_++;
             decoder_Symbol_Wise_new->push_current_codeword(codeword_received_with_header,n,0,size_received,0);
             decoder_Symbol_Wise_new->symbol_wise_decode_1(buffer,&flag,k,n);

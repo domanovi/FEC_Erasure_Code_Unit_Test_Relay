@@ -133,7 +133,7 @@ namespace siphon {
 
 
     void Decoder_Symbol_Wise::symbol_wise_encode_1(int k,int n,int k2,
-                                                 int n2, size_t *loss_counter_,size_t *final_loss_counter_){
+                                                   int n2, size_t *loss_counter_,size_t *final_loss_counter_){
         int erasure_counter=0;
         for (int i=0;i<n;i++){
             if (temp_erasure_vector[i]==1)
@@ -235,6 +235,18 @@ namespace siphon {
             }
         }
     }
+
+    void Decoder_Symbol_Wise::extract_data(unsigned char *buffer,int k,int n,int received_seq){// temp extraction of data
+        unsigned char temp_buffer[30000];
+        int ind=0;
+        for (int j=0;j<100;j++) {
+            for (int i = 0; i < k; i++) {
+                temp_buffer[ind++]=buffer[(j) * n + n-k + i];
+            }
+        }
+// Need to add decoding...
+        DEBUG_MSG("\033[1;34m" << "Message recovered at destination from symbol-wise DF #" << received_seq << ": " << "\033[0m");
+        printMatrix(&temp_buffer[2], 1, 300);}
 
 
 }

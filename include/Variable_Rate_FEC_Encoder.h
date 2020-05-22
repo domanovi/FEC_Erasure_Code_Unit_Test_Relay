@@ -42,7 +42,7 @@ namespace siphon {
         int T2, B2, N2;
     private:
 
-        int B_old, N_old;
+        int B_old, N_old,T_old;
 
         int number_of_encoded_total,counter_encoded, final_number_of_encoded_total, final_counter_encoded;
 

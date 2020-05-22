@@ -57,6 +57,12 @@ public:
 
     void send_sym_wise_message(unsigned char string[30000], int i, unsigned char *string1, unsigned char string2[30000],
                                int *pInt,int missing_packets,unsigned char *response_buffer,int k2,int n2);
+
+    void
+    send_sym_wise_message(unsigned char *encoded_symwise_word, int encoded_symwise_word_size,
+                          unsigned char *udp_parameters,
+                          unsigned char *udp_codeword, int *udp_codeword_size, int missing_packets,
+                          unsigned char *response_buffer, int k2, int n2, int counter_for_start_and_end);
 };
 
 

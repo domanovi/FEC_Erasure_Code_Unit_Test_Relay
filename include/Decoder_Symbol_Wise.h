@@ -50,6 +50,8 @@ namespace siphon {
 
         void symbol_wise_decode_1(unsigned char *buffer, bool *flag, int k, int n);
 
+        void extract_data(unsigned char *buffer, int k, int n,int received_seq);
+
     private:
         int max_payload;
 
