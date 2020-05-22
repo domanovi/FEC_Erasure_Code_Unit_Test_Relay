@@ -293,7 +293,7 @@ namespace siphon {
         if (double_coding_flag==0) {
             decoder_Symbol_Wise->push_current_codeword(codeword_received, n, n2, size_received,codeword_r_d_size_current);
             decoder_Symbol_Wise->symbol_wise_encode_1(k, n, k2,n2, &loss_counter_, &final_loss_counter_);
-            *codeword_size_final = codeword_r_d_size_old;  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
+            *codeword_size_final = codeword_r_d_size_current;  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
             char codeword_final[30000];
             int codeword_size_final_temp = codeword_r_d_size_current;
             codeword_final[1] = (unsigned char) (codeword_r_d_size_current);

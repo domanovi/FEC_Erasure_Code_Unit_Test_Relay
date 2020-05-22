@@ -288,7 +288,8 @@ int main(int argc, const char *argv[]) {
             seq_number = application_layer_relay_receiver->receive_message_and_symbol_wise_encode(udp_parameters,buffer,
                                                                                                   &buffer_size,
                                                                                                   &erasure_simulator,k2,
-                                                                                                  n2,&codeword_size_final,&k2_new,&n2_new);
+                                                                                                  n2,&codeword_size_final,
+                                                                                                  &k2_new,&n2_new);
 
             if (seq_number>-1) {
                 if (seq_number-last_seq_received_from_srouce>n2) {
