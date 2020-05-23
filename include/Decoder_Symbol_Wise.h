@@ -52,6 +52,8 @@ namespace siphon {
 
         void extract_data(unsigned char *buffer, int k, int n,int received_seq);
 
+        void copy_elements(Decoder_Symbol_Wise *source);
+
     private:
         int max_payload;
 
