@@ -107,6 +107,11 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_encode(unsigned 
 
     fec_decoder->receive_message_and_symbol_wise_encode(fec_message,n,k,n2_new,k2_new,temp_size,codeword_size_final);
 
+//    if (temp_seq>10){
+//        estimator->B_current=0;
+//        estimator->N_current=0;
+//    }
+
     unsigned char temp_parameters2[12];
     //recommended T, B and N
     temp_parameters2[0] = (unsigned char) (estimator->T);
@@ -179,7 +184,12 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_decode(unsigned 
     int k=T_value-N_value+1;
     int n=T_value+1;
 
-    fec_decoder->receive_message_and_symbol_wise_decode(fec_message,n,k,temp_size);
+    fec_decoder->receive_message_and_symbol_wise_decode(fec_message,n,k,temp_size);\
+
+//    if (temp_seq>10){
+//        estimator->B_current=0;
+//        estimator->N_current=0;
+//    }
 
     unsigned char temp_parameters[6];
     //recommended T, B and N

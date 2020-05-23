@@ -69,6 +69,9 @@ namespace siphon {
             seq_start = 0;
         }
 
+        if (RELAYING_TYPE==2)
+            T = message->T;
+
         current_win_end = message->seq_number;
 
         int difference = current_win_end - previous_win_end;

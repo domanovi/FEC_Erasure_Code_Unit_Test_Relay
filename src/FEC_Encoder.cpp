@@ -39,7 +39,7 @@ FEC_Encoder::~FEC_Encoder() {
     delete encoder;
 }
 
-unsigned char *FEC_Encoder::onTransmit(unsigned char *data, int payload, int seq, int *codeword_size_value) {
+unsigned char *FEC_Encoder:: onTransmit(unsigned char *data, int payload, int seq, int *codeword_size_value) {
     //Elad:
     //data=message->buffer
     //payload=message->size

@@ -143,13 +143,13 @@ int main(int argc, const char *argv[]) {
 //    erasure_simulator.erasure_seq[4]='\001';
 //    erasure_simulator.erasure_seq[5]='\001';
 //
-    for (int i=0;i<1000;i++) {
-        erasure_simulator.erasure_seq[i] = '\000';
-    }
-
-    for (int i=0;i<1000;i++) {
-        erasure_simulator2.erasure_seq[i] = '\000';
-    }
+//    for (int i=0;i<1000;i++) {
+//        erasure_simulator.erasure_seq[i] = '\000';
+//    }
+//
+//    for (int i=0;i<1000;i++) {
+//        erasure_simulator2.erasure_seq[i] = '\000';
+//    }
 //    erasure_simulator.erasure_seq[1]='\001';
 //    erasure_simulator.erasure_seq[2]='\001';
 //    erasure_simulator.erasure_seq[7]='\001';
@@ -159,9 +159,9 @@ int main(int argc, const char *argv[]) {
 //    erasure_simulator.erasure_seq[7]='\001';
 //    erasure_simulator.erasure_seq[8]='\001';
 
-//    erasure_simulator2.erasure_seq[10]='\001';
-    erasure_simulator2.erasure_seq[2]='\001';
-    erasure_simulator2.erasure_seq[3]='\001';
+//    erasure_simulator2.erasure_seq[1]='\001';
+//    erasure_simulator2.erasure_seq[2]='\001';
+//    erasure_simulator2.erasure_seq[3]='\001';
 //    erasure_simulator.erasure_seq[4]='\001';
 //    erasure_simulator2.erasure_seq[1]='\001';
 //    erasure_simulator2.erasure_seq[6]='\001';

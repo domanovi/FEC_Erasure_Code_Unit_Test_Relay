@@ -232,10 +232,11 @@ namespace siphon {
                     decoder_Symbol_Wise->copy_elements(decoder_Symbol_Wise_new);
                     n2_old=n2;
                     k2_old=k2;
+                    cout<<"Stopped double coding at the relay"<<endl;
                 }
 
                 if (seq == seq_start_double_coding) {
-                    seq_end_double_coding = seq_start_double_coding + T - 1;//TODO need to make sure it use the right T...
+                    seq_end_double_coding = seq_start_double_coding + T_TOT - 1;//TODO need to make sure it use the right T...
                     if (decoder_Symbol_Wise_new != NULL)
                         delete decoder_Symbol_Wise_new;
                     T=message->T;
@@ -296,7 +297,7 @@ namespace siphon {
         }
 
         if (received_seq == seq_start_double_coding) {
-            seq_end_double_coding = seq_start_double_coding + T - 1;//TODO need to make sure it use the right T...
+            seq_end_double_coding = seq_start_double_coding + T_TOT - 1;//TODO need to make sure it use the right T...
             if (decoder_Symbol_Wise_new != NULL)
                 delete decoder_Symbol_Wise_new;
             k_old=T-N+1;
@@ -470,7 +471,7 @@ namespace siphon {
 //            k2_old=k2;
             }
             if (received_seq == seq_start_double_coding) {
-                seq_end_double_coding = seq_start_double_coding + T - 1;//TODO need to make sure it use the right T...
+                seq_end_double_coding = seq_start_double_coding + T_TOT - 1;//TODO need to make sure it use the right T...
                 if (decoder_Symbol_Wise_new != NULL)
                     delete decoder_Symbol_Wise_new;
                 k_old=T-N+1;
@@ -533,7 +534,7 @@ namespace siphon {
         }
 
         if (received_seq == seq_start_double_coding) {
-            seq_end_double_coding = seq_start_double_coding + T - 1;//TODO need to make sure it use the right T...
+            seq_end_double_coding = seq_start_double_coding + T_TOT - 1;//TODO need to make sure it use the right T...
             if (decoder_Symbol_Wise_new != NULL)
                 delete decoder_Symbol_Wise_new;
             k_old=T-N+1;
