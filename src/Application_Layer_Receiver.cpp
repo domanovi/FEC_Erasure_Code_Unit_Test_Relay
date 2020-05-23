@@ -11,6 +11,8 @@ erasure_type_value, bool adaptive_mode_MDS_value, int flag) {
 
     erasure_type = erasure_type_value;
 
+    temp_seq=-1;
+
     estimator = new siphon::Parameter_Estimator(T_TOT, adaptive_mode_MDS_value);
     background_estimator = new siphon::Parameter_Estimator(T_TOT, adaptive_mode_MDS_value);
     flag_for_estimation_cycle=1;
@@ -62,7 +64,11 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_encode(unsigned 
         temp_size = *udp_codeword_size;
         memcpy(codeword, udp_codeword, size_t(temp_size));
     }
-    int temp_seq = int(codeword[3]) + 256 * int(codeword[2]) + 256 * 256 * int(codeword[1]) + 256 * 256 * 256 * int
+    if (temp_seq==-1){
+        T_s_r=int(codeword[4]);
+        N_s_r=int(codeword[6]);
+    }
+    temp_seq = int(codeword[3]) + 256 * int(codeword[2]) + 256 * 256 * int(codeword[1]) + 256 * 256 * 256 * int
             (codeword[0]);
 
     if (erasure_type != 0) {
@@ -91,16 +97,27 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_encode(unsigned 
 
     int k=T_value-N_value+1;
     int n=T_value+1;
-    int k2_new;
-    int n2_new;
+//    int k2_new;
+//    int n2_new;
 
-    if (T_value_2==0){
-        k2_new=k2;
-        n2_new=n2;
-    }else {
+    if (T_s_r!=T_value || N_s_r!=N_value){//any change in T1,N1->change in T2,N2
+        T_s_r=T_value;
+        N_s_r=N_value;
         k2_new = T_value_2 - N_value_2 + 1;
         n2_new = T_value_2 + 1;
+    }else{
+        k2_new=k2;
+        n2_new=n2;
     }
+
+
+//    if (T_value_2==0){
+//        k2_new=k2;
+//        n2_new=n2;
+//    }else {
+//        k2_new = T_value_2 - N_value_2 + 1;
+//        n2_new = T_value_2 + 1;
+//    }
 
     *k2_out=k2_new;
     *n2_out=n2_new;

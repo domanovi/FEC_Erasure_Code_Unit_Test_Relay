@@ -30,6 +30,10 @@ private:
 
     int receiver_index;
 
+    int T_s_r,N_s_r;
+    int temp_seq;
+    int k2_new,n2_new;
+
 public:
     Application_Layer_Receiver(const char *Tx, const char *Rx, int max_payload, int erasure_type_value, bool
     adaptive_mode_MDS_value, int flag);

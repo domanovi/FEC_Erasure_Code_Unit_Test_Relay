@@ -139,8 +139,10 @@ namespace siphon {
             memcpy(codeword_vector[i], codeword_vector[i + 1], temp_size);
             temp_erasure_vector[i] = temp_erasure_vector[i + 1];//ELAD to check...
         }
-        for (int i=0;i<n2-1;i++)
+        for (int i=0;i<n2-1;i++) {
             memcpy(codeword_new_vector[i], codeword_new_vector[i + 1], codeword_r_d_size_current);
+            memcpy(codeword_vector_store_in_burst[i], codeword_vector_store_in_burst[i + 1], temp_size);
+        }
         memset(codeword_vector[n - 1], '\000', (300 + 12) * 4 * T_TOT);//ELAD - 300=max_payload
         temp_erasure_vector[n - 1] = 1;
     }
