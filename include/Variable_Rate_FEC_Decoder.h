@@ -76,6 +76,9 @@ namespace siphon {
 
         Decoder_Symbol_Wise *decoder_Symbol_Wise;
         Decoder_Symbol_Wise *decoder_Symbol_Wise_new;
+        Decoder_Symbol_Wise *decoder_Symbol_Backup;
+        bool trans_vec[50];
+
 
         int n2_old;
     private:

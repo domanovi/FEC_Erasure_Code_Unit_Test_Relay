@@ -24,9 +24,14 @@ public:
     virtual ~Encoder();
 
     unsigned char *getG();
+
+    int T;
+    int B;
+    int N;
+    int max_payload;
 private:
 
-    int T, B, N, k, n, max_payload, number_basic_encoder, max_blocklength, optimality;
+    int k, n, number_basic_encoder, max_blocklength, optimality;
 
     int max_payload_with_header;
 

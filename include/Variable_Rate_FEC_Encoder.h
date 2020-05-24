@@ -43,12 +43,15 @@ namespace siphon {
     private:
 
         int B_old, N_old,T_old;
+        int B2_old,N2_old,T2_old;
 
         int number_of_encoded_total,counter_encoded, final_number_of_encoded_total, final_counter_encoded;
 
         float sum_coding_rate, final_sum_coding_rate;
 
         float sum_coding_rate_min_2_seg, final_sum_coding_rate_min_2_seg;
+
+        float sum_coding_rate_seg2_symb_wise,final_sum_coding_rate_seg2_symb_wise;
 
         float MDS_percent, adaptive_percent, no_coding_percent;
 

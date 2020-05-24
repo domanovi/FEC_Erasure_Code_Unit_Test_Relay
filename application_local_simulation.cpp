@@ -143,17 +143,19 @@ int main(int argc, const char *argv[]) {
 //    erasure_simulator.erasure_seq[4]='\001';
 //    erasure_simulator.erasure_seq[5]='\001';
 //
-    for (int i=0;i<1000;i++) {
-        erasure_simulator.erasure_seq[i] = '\000';
-    }
-
-    for (int i=0;i<1000;i++) {
-        erasure_simulator2.erasure_seq[i] = '\000';
-    }
-    erasure_simulator.erasure_seq[1]='\001';
-    erasure_simulator.erasure_seq[2]='\001';
-    erasure_simulator.erasure_seq[3]='\001';
-    erasure_simulator.erasure_seq[4]='\001';
+//    for (int i=0;i<1000;i++) {
+//        erasure_simulator.erasure_seq[i] = '\000';
+//    }
+//
+//    for (int i=0;i<1000;i++) {
+//        erasure_simulator2.erasure_seq[i] = '\000';
+//    }
+//    erasure_simulator.erasure_seq[1]='\001';
+//    erasure_simulator.erasure_seq[2]='\001';
+//    erasure_simulator.erasure_seq[8]='\001';
+//    erasure_simulator.erasure_seq[11]='\001';
+//    erasure_simulator.erasure_seq[13]='\001';
+//    erasure_simulator.erasure_seq[14]='\001';
 //    erasure_simulator.erasure_seq[7]='\001';
 //    erasure_simulator.erasure_seq[4]='\001';
 //    erasure_simulator.erasure_seq[5]='\001';
@@ -304,7 +306,7 @@ int main(int argc, const char *argv[]) {
                                                                                                   &erasure_simulator,k2_new,
                                                                                                   n2_new,&codeword_size_final,
                                                                                                   &k2_new,&n2_new);
-
+            bool flag_for_using_backup=false;
             if (seq_number>-1) {
                 if (seq_number-last_seq_received_from_srouce>n2_new) {
                     //Need to send all codeword_vector_store_in_burst
@@ -330,13 +332,36 @@ int main(int argc, const char *argv[]) {
                             &erasure_simulator2);
                 }
                 else {
+                    int double_coding_sum=0;
+                    if (seq_number-last_seq_received_from_srouce>1){// packets erased in (s,r)
+                        // check if double-coding ended
+                        for (int k=0;k<seq_number-last_seq_received_from_srouce;k++){
+                            if (application_layer_relay_receiver->fec_decoder->trans_vec[k]==true)
+                                double_coding_sum++;
+                        }
+                        if (application_layer_relay_receiver->fec_decoder->trans_vec[0]==true && double_coding_sum>0 && double_coding_sum<seq_number-last_seq_received_from_srouce) {
+                            flag_for_using_backup = true;
+                            cout << "ELAD" << endl;
+                        }
+                    }
+                    int count=-1;
                     for (int seq = last_seq_received_from_srouce; seq < seq_number; seq++) {
                         //                    int n=T_INITIAL+1;
+                        count++;
                         int index = application_layer_relay_receiver->fec_decoder->n2_old - (seq_number - seq);
-                        application_layer_relay_sender.send_sym_wise_message(
-                                application_layer_relay_receiver->fec_decoder->decoder_Symbol_Wise->codeword_new_vector[index],
-                                codeword_size_final, udp_parameters2, buffer2, &buffer_size2,0,
-                                response_from_dest_buffer,k2_new,n2_new,application_layer_relay_receiver->fec_message->counter_for_start_and_end);
+                        if (flag_for_using_backup==true && count<double_coding_sum) {
+                            int n2_old_old=application_layer_relay_receiver->fec_decoder->decoder_Symbol_Backup->n;
+                            int size_of_codeword=application_layer_relay_receiver->fec_decoder->decoder_Symbol_Backup->codeword_size_vector[n2_old_old-count-1];
+                            application_layer_relay_sender.send_sym_wise_message(
+                                    application_layer_relay_receiver->fec_decoder->decoder_Symbol_Backup->codeword_new_vector[n2_old_old-count-1],
+                                    size_of_codeword, udp_parameters2, buffer2, &buffer_size2, 0,
+                                    response_from_dest_buffer, k2_new, n2_new,
+                                    application_layer_relay_receiver->fec_message->counter_for_start_and_end);
+                        }else
+                            application_layer_relay_sender.send_sym_wise_message(
+                                    application_layer_relay_receiver->fec_decoder->decoder_Symbol_Wise->codeword_new_vector[index],
+                                    codeword_size_final, udp_parameters2, buffer2, &buffer_size2,0,
+                                    response_from_dest_buffer,k2_new,n2_new,application_layer_relay_receiver->fec_message->counter_for_start_and_end);
                         application_layer_destination_receiver->receive_message_and_symbol_wise_decode(
                                 udp_parameters2, buffer2,
                                 &buffer_size2,

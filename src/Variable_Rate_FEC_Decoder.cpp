@@ -110,6 +110,9 @@ namespace siphon {
         }
 
         decoder_Symbol_Wise=new Decoder_Symbol_Wise(max_payload_value);
+        decoder_Symbol_Backup=new Decoder_Symbol_Wise(max_payload_value);
+        for (int i=0;i<50;i++)
+            trans_vec[i]=false;
 
     }
 
@@ -182,6 +185,7 @@ namespace siphon {
 //        int size_received_transition = message->size - 2 - size_received;
         int size_received_transition = message->size - size_received;
         char codeword_final[30000];
+        bool flag=false;
 
 //        decoder_Symbol_Wise->receive_message_and_symbol_wise_encode(message->buffer,received_seq,latest_seq,n,k,k2,
 //                n2,&UDP_loss_counter_,&final_UDP_loss_counter_,
@@ -201,7 +205,9 @@ namespace siphon {
                 if ((seq > seq_end_double_coding) && (double_coding_flag == 1)) {
                     double_coding_flag = 0;
 //                    decoder_Symbol_Wise = decoder_Symbol_Wise_new;
-                    decoder_Symbol_Wise->copy_elements(decoder_Symbol_Wise_new);
+                    decoder_Symbol_Backup->copy_elements(decoder_Symbol_Wise,true);
+                    decoder_Symbol_Backup->n=n2_old;
+                    decoder_Symbol_Wise->copy_elements(decoder_Symbol_Wise_new,true);
                     n2_old=n2;
                     k2_old=k2;
                     cout<<"Stopped double coding at the relay"<<endl;
@@ -234,9 +240,13 @@ namespace siphon {
 //                DEBUG_MSG("\033[1;34m" << "Burst: packet dropped in (s,r) #" << seq << ": " << "\033[0m");
 //                symbol_wise_encode(k, n, decoder_current->decoder->getG(),encoder->getG(), temp_size,k2,n2); // decode past codewords
                 if (double_coding_flag == 0) {
-                    decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n,n2,temp_size,codeword_r_d_size_current);
+                    decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n,n2,size_received,codeword_r_d_size_current);
 //                    DEBUG_MSG("\033[1;34m" << "Packet dropped in (s,r) #" << seq << ": " << "\033[0m");
-                    decoder_Symbol_Wise->symbol_wise_encode_1(k,n,k2,n2,&loss_counter_,&final_loss_counter_);
+                    decoder_Symbol_Wise->symbol_wise_encode_1(k,n,k2,n2,&flag);
+                    if (flag==true){
+                        loss_counter_++;
+                        final_loss_counter_++;
+                    }
                     *codeword_size_final = codeword_r_d_size_current;  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
                     int codeword_size_final_temp = codeword_r_d_size_current;
                     codeword_final[1] = (unsigned char) (codeword_r_d_size_current);
@@ -246,12 +256,17 @@ namespace siphon {
                     display_udp_statistics(seq);
                     memcpy(decoder_Symbol_Wise->codeword_vector_store_in_burst[n2 - 1],
                            decoder_Symbol_Wise->codeword_new_vector[n2 - 1], size_t(codeword_size_final_temp));
+                    decoder_Symbol_Wise->codeword_size_vector[n2-1]=codeword_size_final_temp;
                 } else{
                     //TODO check codeword size in case of transition !!!
-                    decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n_old,n2,temp_size,codeword_r_d_size_current);
-                    decoder_Symbol_Wise_new->rotate_pointers_and_insert_zero_word(n,n2,temp_size,codeword_r_d_size_current);//TODO FIX!!!!!!
-                    decoder_Symbol_Wise->symbol_wise_encode_1(k_old,n_old,k2,n2,&loss_counter_,&final_loss_counter_);
-                    decoder_Symbol_Wise_new->symbol_wise_encode_1(k,n,k2,n2,&loss_counter_,&final_loss_counter_);
+                    decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n_old,n2_old,size_received_transition,codeword_r_d_size_old);
+                    decoder_Symbol_Wise_new->rotate_pointers_and_insert_zero_word(n,n2,size_received,codeword_r_d_size_current);
+                    decoder_Symbol_Wise->symbol_wise_encode_1(k_old,n_old,k2_old,n2_old,&flag);
+                    if (flag==true){
+                        loss_counter_++;
+                        final_loss_counter_++;
+                    }
+                    decoder_Symbol_Wise_new->symbol_wise_encode_1(k,n,k2,n2,&flag);
 //                    DEBUG_MSG("\033[1;34m" << "Packet dropped in (s,r) #" << seq << ": " << "\033[0m");
                     int codeword_size_final_temp = codeword_r_d_size_current + codeword_r_d_size_old + 2;  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
                     *codeword_size_final = codeword_size_final_temp;
@@ -267,12 +282,12 @@ namespace siphon {
                     memcpy(codeword_final + 2, decoder_Symbol_Wise_new->codeword_new_vector[n2-1], size_t(codeword_r_d_size_current));
                     memcpy(codeword_final + codeword_r_d_size_current + 2, decoder_Symbol_Wise->codeword_new_vector[n2_old - 1], size_t(codeword_r_d_size_old));
                     memcpy(decoder_Symbol_Wise->codeword_new_vector[n2_old-1],codeword_final,size_t(codeword_size_final_temp));
-                    memcpy(decoder_Symbol_Wise->codeword_vector_store_in_burst[n2 - 1], decoder_Symbol_Wise->codeword_new_vector[n2 - 1], size_t(codeword_size_final_temp));
-
+                    memcpy(decoder_Symbol_Wise->codeword_vector_store_in_burst[n2_old - 1], decoder_Symbol_Wise->codeword_new_vector[n2 - 1], size_t(codeword_size_final_temp));
+                    decoder_Symbol_Wise->codeword_size_vector[n2_old-1]=codeword_size_final_temp;
                     display_udp_statistics(seq);
                 }
 
-                display_udp_statistics(seq);
+//                display_udp_statistics(seq);
             }
             for (int i=0;i<n2_old-1;i++)// zero the output (after storing)
                 memset(decoder_Symbol_Wise->codeword_new_vector[i], '\000', (300 + 12) * 4 * T_TOT);//ELAD - 300=max_payloa
@@ -290,11 +305,14 @@ namespace siphon {
                 if ((seq > seq_end_double_coding) && (double_coding_flag == 1)) {
                     double_coding_flag = 0;
 //                    decoder_Symbol_Wise = decoder_Symbol_Wise_new;
-                    decoder_Symbol_Wise->copy_elements(decoder_Symbol_Wise_new);
+                    decoder_Symbol_Backup->copy_elements(decoder_Symbol_Wise,true);
+                    decoder_Symbol_Backup->n=n2_old;
+                    decoder_Symbol_Wise->copy_elements(decoder_Symbol_Wise_new,true);
                     n2_old=n2;
                     k2_old=k2;
                     cout<<"Stopped double coding at the relay"<<endl;
                 }
+                trans_vec[seq-latest_seq]=double_coding_flag;
 
                 if (seq == seq_start_double_coding) {
                     seq_end_double_coding = seq_start_double_coding + T_TOT - 1;//TODO need to make sure it use the right T...
@@ -311,22 +329,31 @@ namespace siphon {
                 }
 
                 if (double_coding_flag == 0) {
-                    decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n,n2,temp_size,codeword_r_d_size_current);
+                    decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n,n2,size_received,codeword_r_d_size_current);
                     DEBUG_MSG("\033[1;34m" << "Packet dropped in (s,r) #" << seq << ": " << "\033[0m");
-                    decoder_Symbol_Wise->symbol_wise_encode_1(k,n,k2,n2,&loss_counter_,&final_loss_counter_);
+                    decoder_Symbol_Wise->symbol_wise_encode_1(k,n,k2,n2,&flag);
+                    if (flag==true){
+                        loss_counter_++;
+                        final_loss_counter_++;
+                    }
                     *codeword_size_final = codeword_r_d_size_current;  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
                     int codeword_size_final_temp = codeword_r_d_size_current;
                     codeword_final[1] = (unsigned char) (codeword_r_d_size_current);
                     codeword_final[0] = (unsigned char) ((codeword_r_d_size_current) / 256);
                     memcpy(codeword_final + 2, decoder_Symbol_Wise->codeword_new_vector[n2-1], size_t(codeword_r_d_size_current));
                     memcpy(decoder_Symbol_Wise->codeword_new_vector[n2-1],codeword_final,size_t(codeword_size_final_temp));
+                    decoder_Symbol_Wise->codeword_size_vector[n2-1]=codeword_size_final_temp;
                     display_udp_statistics(seq);
                 } else{
                     //TODO check codeword size in case of transition !!!
-                    decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n_old,n2,temp_size,codeword_r_d_size_current);
-                    decoder_Symbol_Wise_new->rotate_pointers_and_insert_zero_word(n,n2,temp_size,codeword_r_d_size_current);//TODO FIX!!!!!!
-                    decoder_Symbol_Wise->symbol_wise_encode_1(k_old,n_old,k2,n2,&loss_counter_,&final_loss_counter_);
-                    decoder_Symbol_Wise_new->symbol_wise_encode_1(k,n,k2,n2,&loss_counter_,&final_loss_counter_);
+                    decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n_old,n2_old,size_received_transition,codeword_r_d_size_old);
+                    decoder_Symbol_Wise_new->rotate_pointers_and_insert_zero_word(n,n2,size_received,codeword_r_d_size_current);
+                    decoder_Symbol_Wise->symbol_wise_encode_1(k_old,n_old,k2_old,n2_old,&flag);
+                    if (flag==true){
+                        loss_counter_++;
+                        final_loss_counter_++;
+                    }
+                    decoder_Symbol_Wise_new->symbol_wise_encode_1(k,n,k2,n2,&flag);
                     DEBUG_MSG("\033[1;34m" << "Packet dropped in (s,r) #" << seq << ": " << "\033[0m");
                     int codeword_size_final_temp = codeword_r_d_size_current + codeword_r_d_size_old + 2;  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
                     *codeword_size_final = codeword_size_final_temp;
@@ -342,6 +369,12 @@ namespace siphon {
                     memcpy(codeword_final + 2, decoder_Symbol_Wise_new->codeword_new_vector[n2-1], size_t(codeword_r_d_size_current));
                     memcpy(codeword_final + codeword_r_d_size_current + 2, decoder_Symbol_Wise->codeword_new_vector[n2_old - 1], size_t(codeword_r_d_size_old));
                     memcpy(decoder_Symbol_Wise->codeword_new_vector[n2_old-1],codeword_final,size_t(codeword_size_final_temp));
+                    decoder_Symbol_Wise->codeword_size_vector[n2_old-1]=codeword_size_final_temp;
+//                    // prepare decoder_Symbol_Wise_new->codeword_new_vector[n2-1] for sending if needed!!!
+//                    memcpy(codeword_final + 2, decoder_Symbol_Wise_new->codeword_new_vector[n2-1], size_t(codeword_r_d_size_current));
+//                    memcpy(decoder_Symbol_Wise_new->codeword_new_vector[n2-1],codeword_final,size_t(codeword_r_d_size_current+2));
+
+
 
                     display_udp_statistics(seq);
                 }
@@ -351,11 +384,14 @@ namespace siphon {
         if ((received_seq > seq_end_double_coding) && (double_coding_flag == 1)) {
             double_coding_flag = 0;
 //            decoder_Symbol_Wise = decoder_Symbol_Wise_new;
-            decoder_Symbol_Wise->copy_elements(decoder_Symbol_Wise_new);
+            decoder_Symbol_Backup->copy_elements(decoder_Symbol_Wise,true);
+            decoder_Symbol_Backup->n=n2_old;
+            decoder_Symbol_Wise->copy_elements(decoder_Symbol_Wise_new,true);
             n2_old=n2;
             k2_old=k2;
             cout<<"Stopped double coding at the relay"<<endl;
         }
+        trans_vec[received_seq-latest_seq]=double_coding_flag;
 
         if (received_seq == seq_start_double_coding) {
             seq_end_double_coding = seq_start_double_coding + T_TOT - 1;//TODO need to make sure it use the right T...
@@ -374,7 +410,11 @@ namespace siphon {
         }
         if (double_coding_flag==0) {
             decoder_Symbol_Wise->push_current_codeword(codeword_received, n, n2, size_received,codeword_r_d_size_current);
-            decoder_Symbol_Wise->symbol_wise_encode_1(k, n, k2,n2, &loss_counter_, &final_loss_counter_);
+            decoder_Symbol_Wise->symbol_wise_encode_1(k, n, k2,n2,&flag);
+            if (flag==true){
+                loss_counter_++;
+                final_loss_counter_++;
+            }
             *codeword_size_final = codeword_r_d_size_current;  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
 
             int codeword_size_final_temp = codeword_r_d_size_current;
@@ -382,11 +422,16 @@ namespace siphon {
             codeword_final[0] = (unsigned char) ((codeword_r_d_size_current) / 256);
             memcpy(codeword_final + 2, decoder_Symbol_Wise->codeword_new_vector[n2-1], size_t(codeword_r_d_size_current));
             memcpy(decoder_Symbol_Wise->codeword_new_vector[n2-1],codeword_final,size_t(codeword_size_final_temp));
+            decoder_Symbol_Wise->codeword_size_vector[n2-1]=codeword_size_final_temp;
         }else{
             decoder_Symbol_Wise->push_current_codeword(codeword_received_transition, n_old, n2_old, size_received_transition,codeword_r_d_size_old);
-            decoder_Symbol_Wise->symbol_wise_encode_1(k_old, n_old, k2_old,n2_old, &loss_counter_, &final_loss_counter_);
+            decoder_Symbol_Wise->symbol_wise_encode_1(k_old, n_old, k2_old,n2_old,&flag);
+            if (flag==true){
+                loss_counter_++;
+                final_loss_counter_++;
+            }
             decoder_Symbol_Wise_new->push_current_codeword(codeword_received, n, n2, size_received,codeword_r_d_size_current);//TODO to fix !!!!!
-            decoder_Symbol_Wise_new->symbol_wise_encode_1(k, n, k2,n2, &loss_counter_, &final_loss_counter_);
+            decoder_Symbol_Wise_new->symbol_wise_encode_1(k, n, k2,n2,&flag);
             int codeword_size_final_temp = codeword_r_d_size_current + codeword_r_d_size_old + 2;  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
             *codeword_size_final = codeword_size_final_temp;
 
@@ -407,7 +452,10 @@ namespace siphon {
             memcpy(codeword_final + 2, decoder_Symbol_Wise_new->codeword_new_vector[n2-1], size_t(codeword_r_d_size_current));
             memcpy(codeword_final + codeword_r_d_size_current + 2, decoder_Symbol_Wise->codeword_new_vector[n2_old - 1], size_t(codeword_r_d_size_old));
             memcpy(decoder_Symbol_Wise->codeword_new_vector[n2_old-1],codeword_final,size_t(codeword_size_final_temp));
-
+            decoder_Symbol_Wise->codeword_size_vector[n2_old-1]=codeword_size_final_temp;
+//            // prepare decoder_Symbol_Wise_new->codeword_new_vector[n2-1] for sending if needed!!!
+//            memcpy(codeword_final + 2, decoder_Symbol_Wise_new->codeword_new_vector[n2-1], size_t(codeword_r_d_size_current));
+//            memcpy(decoder_Symbol_Wise_new->codeword_new_vector[n2-1],codeword_final,size_t(codeword_r_d_size_current+2));
         }
 
         //memcpy(codeword_new_symbol_wise,codeword_new_vector[n2-1],temp_size);//ELAD - to change
@@ -526,7 +574,7 @@ namespace siphon {
             if ((seq > seq_end_double_coding) && (double_coding_flag == 1)) {
                 double_coding_flag = 0;
 //                decoder_Symbol_Wise = decoder_Symbol_Wise_new;
-                decoder_Symbol_Wise->copy_elements(decoder_Symbol_Wise_new);
+                decoder_Symbol_Wise->copy_elements(decoder_Symbol_Wise_new,false);
                 cout<<"Stopped double coding at the destination"<<endl;
 //            n2_old=n2;
 //            k2_old=k2;
@@ -588,7 +636,7 @@ namespace siphon {
         if ((received_seq > seq_end_double_coding) && (double_coding_flag == 1)) {
             double_coding_flag = 0;
 //            decoder_Symbol_Wise = decoder_Symbol_Wise_new;
-            decoder_Symbol_Wise->copy_elements(decoder_Symbol_Wise_new);
+            decoder_Symbol_Wise->copy_elements(decoder_Symbol_Wise_new,false);
             cout<<"Stopped double coding at the destination"<<endl;
 //            n2_old=n2;
 //            k2_old=k2;

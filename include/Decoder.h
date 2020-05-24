@@ -26,10 +26,14 @@ public:
 
     unsigned char *getG();
 
+    int T;
+    int B;
+    int N;
+    int max_payload;
 private:
 
-    int T, B, N, k, n, max_payload, max_payload_with_header, max_blocklength, number_basic_encoder;
-    
+    int k, n, max_payload_with_header, max_blocklength, number_basic_encoder;
+
     int latest_erasure_seq;
     
     unsigned char *G;

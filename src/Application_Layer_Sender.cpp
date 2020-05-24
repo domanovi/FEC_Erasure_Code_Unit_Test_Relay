@@ -94,14 +94,19 @@ void Application_Layer_Sender::generate_message_and_encode(unsigned char *udp_pa
     cout << "Response at source" << endl;
     printMatrix(response_buffer, 1, 12);
 
-    if (RELAYING_TYPE==2 && N+N2<=T_TOT){
-        T=T_TOT-N2;
-        variable_rate_FEC_encoder->N2=N2;
+    if (RELAYING_TYPE==2){
+        if (N+N2<=T_TOT) {
+            T = T_TOT - N2;
+            variable_rate_FEC_encoder->N2 = N2;
 //        T2=T_TOT-N;
+        }else
+            cout<<"N1="<<N << "+N2=" << N2 <<">T_TOT="<<T_TOT<<endl;
     }
 
-    message_transmitted->set_parameters(seq_number, T, B, N, max_payload, raw_data);
-
+    if (RELAYING_TYPE>0)// Currently supporting only arbitrary erasures
+        message_transmitted->set_parameters(seq_number, T, N, N, max_payload, raw_data);
+    else
+        message_transmitted->set_parameters(seq_number, T, B, N, max_payload, raw_data);
     variable_rate_FEC_encoder->T2_ack=T2_ack;
     variable_rate_FEC_encoder->B2_ack=B2_ack;
     variable_rate_FEC_encoder->N2_ack=N2_ack;

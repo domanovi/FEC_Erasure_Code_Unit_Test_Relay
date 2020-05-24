@@ -41,6 +41,8 @@ namespace siphon {
         final_number_of_encoded_total = 0;
         sum_coding_rate = 0;
         final_sum_coding_rate = 0;
+        sum_coding_rate_seg2_symb_wise=0;
+        final_sum_coding_rate_seg2_symb_wise=0;
         sum_coding_rate_min_2_seg=0;
         final_sum_coding_rate_min_2_seg = 0;
         MDS_percent = 0;
@@ -96,9 +98,13 @@ namespace siphon {
                 B = message->B;
                 N = message->N;
 
+                T2_old=T2;
+                B2_old=B2;
+                N2_old=N2;
+
                 T2 = T_TOT-N;
-                B2 = B2;
-                N2 = N2;
+//                B2 = B2;
+//                N2 = N2; // N2 is modified at Applicaiton_Layer_Sender
 
                 transition_flag = 1; //set transition flag
                 double_coding_flag = 1;  //set double coding flag
@@ -203,7 +209,23 @@ namespace siphon {
             final_sum_coding_rate +=
                     (float) (T - N + 1) / ((T - N + 1 + B) + (T - N_old + 1) + (T - N_old + 1 + B));
         }
-        if (RELAYING_TYPE==1 && T2_ack!=0 && flag==0){
+        if (RELAYING_TYPE==2){
+            if (double_coding_flag == false) {
+                sum_coding_rate_seg2_symb_wise+= (float) (T2 - N2 + 1) / (T2 - N2 + 1 + B2);
+                final_sum_coding_rate_seg2_symb_wise+= (float) (T2 - N2 + 1) / (T2 - N2 + 1 + B2);
+                sum_coding_rate_min_2_seg+=std::min((float) (T - N + 1) / (T - N + 1 + B),(float) (T2 - N2 + 1) / (T2 - N2 + 1 + B2));
+                final_sum_coding_rate_min_2_seg+=std::min((float) (T - N + 1) / (T - N + 1 + B),(float) (T2 - N2 + 1) / (T2 - N2 + 1 + B2));
+            } else {//TODO add T2_old into the rate calculations
+                sum_coding_rate_seg2_symb_wise+= (float) (T2 - N2 + 1) / ((T2 - N2 + 1 + B2) + (T2 - N2_old + 1) + (T2 - N2_old + 1 + B));
+                final_sum_coding_rate_seg2_symb_wise+= (float) (T2 - N2 + 1) / ((T2 - N2 + 1 + B2) + (T2 - N2_old + 1) + (T2 - N2_old + 1 + B));
+                sum_coding_rate_min_2_seg+=std::min((float) (T - N + 1) / ((T - N + 1 + B) + (T - N_old + 1) + (T - N_old + 1 + B)),
+                                                    (float) (T2 - N2 + 1) / ((T2 - N2 + 1 + B2) + (T2 - N2_old + 1) + (T2 - N2_old + 1 + B)));
+                final_sum_coding_rate_min_2_seg+=std::min((float) (T - N + 1) / ((T - N + 1 + B) + (T - N_old + 1) + (T - N_old + 1 + B)),
+                                                          (float) (T2 - N2 + 1) / ((T2 - N2 + 1 + B2) + (T2 - N2_old + 1) + (T2 - N2_old + 1 + B)));
+            }
+        }
+
+            if (RELAYING_TYPE==1 && T2_ack!=0 && flag==0){
             if (double_coding_flag == false) {
                 sum_coding_rate_min_2_seg += std::min((float) (T - N + 1) / (T - N + 1 + B),(float) (T2_ack - N2_ack + 1) / (T2_ack - N2_ack + 1 + B2_ack));
                 final_sum_coding_rate_min_2_seg += std::min((float) (T - N + 1) / (T - N + 1 + B),(float) (T2_ack - N2_ack + 1) / (T2_ack - N2_ack + 1 + B2_ack));
@@ -222,17 +244,26 @@ namespace siphon {
                 adaptive_percent += 1;
 
         if (number_of_encoded_total == NUMBER_OF_ITERATIONS) {
-            if (RELAYING_TYPE>0){
-                if (flag==0)
-                    cout << "Final coding rate in (s,r)= " << final_sum_coding_rate / final_number_of_encoded_total << endl;
+            if (RELAYING_TYPE==1){
+                if (flag==0) {
+                    cout << "Final coding rate in (s,r)= " << final_sum_coding_rate / final_number_of_encoded_total
+                         << endl;
+                    cout << "Final coding rate (min over two)= "
+                         << final_sum_coding_rate_min_2_seg / final_number_of_encoded_total << endl;
+                }
                 else
                     cout << "Final coding rate in (r,d)= " << final_sum_coding_rate / final_number_of_encoded_total << endl;
-            }else {
+            }else if (RELAYING_TYPE==0) {
                 cout << "Final coding rate = " << final_sum_coding_rate / final_number_of_encoded_total << endl;
+            }else if (RELAYING_TYPE==2){
+                cout << "Final coding rate in (s,r)= " << final_sum_coding_rate / final_number_of_encoded_total
+                     << endl;
+                cout << "Final coding rate in (r,d)= " << final_sum_coding_rate_seg2_symb_wise / final_number_of_encoded_total
+                     << endl;
+                cout << "Final coding rate (min over two)= " << final_sum_coding_rate_min_2_seg / final_number_of_encoded_total
+                     << endl;
             }
-            if (RELAYING_TYPE>0 && flag==0) {
-                cout << "Final coding rate (min over two)= " << final_sum_coding_rate_min_2_seg / final_number_of_encoded_total << endl;
-            }
+
             cout << "No coding fraction = " << no_coding_percent / final_number_of_encoded_total << endl;
             cout << "MDS fraction = " << MDS_percent/ final_number_of_encoded_total << endl;
             cout << "Non-MDS fraction = " << adaptive_percent/ final_number_of_encoded_total << endl << endl;
@@ -279,7 +310,7 @@ namespace siphon {
 
         if (display_final_coding_rate_flag && (counter_encoded == report_window_size)) {
             //reset counter; to display coding rate for every report_window_size of packets
-            if (RELAYING_TYPE>0){
+            if (RELAYING_TYPE==1){
                 if (flag==0){
                     cout << "Coding rate in (s,r) over " << report_window_size << " packets ending at seq " << message->seq_number
                          << " = " << sum_coding_rate / counter_encoded << endl;
@@ -290,14 +321,20 @@ namespace siphon {
                     cout << "Coding rate in (r,d) over " << report_window_size << " packets ending at seq " << message->seq_number
                         << " = " << sum_coding_rate / counter_encoded << endl;
                 }
-            }
-                else
-            {
+            }else if (RELAYING_TYPE==0){
                 cout << "Coding rate over " << report_window_size << " packets ending at seq " << message->seq_number
                      << " = " << sum_coding_rate / counter_encoded << endl;
-            }
+            }else if (RELAYING_TYPE==2){
+                cout << "Coding rate in (s,r) over " << report_window_size << " packets ending at seq " << message->seq_number
+                     << " = " << sum_coding_rate / counter_encoded << endl;
+                cout << "Coding rate in (r,d) over " << report_window_size << " packets ending at seq " << message->seq_number
+                     << " = " << sum_coding_rate_seg2_symb_wise / counter_encoded << endl;
+                cout << "Coding rate (min over the two hops) " << report_window_size << " packets ending at seq " << message->seq_number
+                     << " = " << sum_coding_rate_min_2_seg / counter_encoded << endl;
+        }
             sum_coding_rate = 0;
             sum_coding_rate_min_2_seg=0;
+            sum_coding_rate_seg2_symb_wise=0;
             counter_encoded = 0;
         }
 

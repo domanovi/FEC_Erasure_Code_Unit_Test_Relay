@@ -19,7 +19,7 @@
 //#define T_INITIAL 10
 //#define B_INITIAL -1
 //#define N_INITIAL -1
-#define T_TOT 3 // T_TOT needs to be >= T_INITAL+T_INTIAL_2
+#define T_TOT 5 // T_TOT needs to be >= T_INITAL+T_INTIAL_2
 #define T_INITIAL 3
 #define B_INITIAL -1
 #define N_INITIAL -1

@@ -84,6 +84,18 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_encode(unsigned 
     fec_message->counter_for_start_and_end = int(codeword[7]);
 
     estimator->estimate(fec_message);
+    background_estimator->estimate(fec_message);
+
+    if ((temp_seq + 1) >flag_for_estimation_cycle*ESTIMATION_WINDOW_SIZE/10){
+        cout << "Old (T,B,N) at relay receiver=" << "(" << estimator->T << "," << estimator->B_current << "," << estimator->N_current << ")" << endl;
+        free(estimator);
+        estimator=background_estimator;
+        for (int i = 0; i < 12; i++)
+            estimator->erasure[i] = background_estimator->erasure[i];
+        cout << "New (T,B,N) at relay receiver=" << "(" << estimator->T << "," << estimator->B_current << "," << estimator->N_current << ")" << endl;
+        background_estimator = new siphon::Parameter_Estimator(T_TOT, false);
+        flag_for_estimation_cycle=flag_for_estimation_cycle+1;
+    }
 
     int T_value=int(codeword[4]);
     int B_value=int(codeword[5]);
@@ -189,6 +201,18 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_decode(unsigned 
     fec_message->counter_for_start_and_end = int(codeword[7]);
 
     estimator->estimate(fec_message);
+    background_estimator->estimate(fec_message);
+
+    if ((temp_seq + 1) >flag_for_estimation_cycle*ESTIMATION_WINDOW_SIZE/10){
+        cout << "Old (T,B,N) at relay receiver=" << "(" << estimator->T << "," << estimator->B_current << "," << estimator->N_current << ")" << endl;
+        free(estimator);
+        estimator=background_estimator;
+        for (int i = 0; i < 12; i++)
+            estimator->erasure[i] = background_estimator->erasure[i];
+        cout << "New (T,B,N) at relay receiver=" << "(" << estimator->T << "," << estimator->B_current << "," << estimator->N_current << ")" << endl;
+        background_estimator = new siphon::Parameter_Estimator(T_TOT, false);
+        flag_for_estimation_cycle=flag_for_estimation_cycle+1;
+    }
 
     int T_value=int(codeword[4]);
     int B_value=int(codeword[5]);
@@ -201,7 +225,7 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_decode(unsigned 
     int k=T_value-N_value+1;
     int n=T_value+1;
 
-    fec_decoder->receive_message_and_symbol_wise_decode(fec_message,n,k,temp_size);\
+    fec_decoder->receive_message_and_symbol_wise_decode(fec_message,n,k,temp_size);
 
 //    if (temp_seq>10){
 //        estimator->B_current=0;
@@ -298,6 +322,8 @@ int Application_Layer_Receiver::receive_message_and_decode(unsigned char *udp_pa
             cout << "Old (T,B,N) at destination=" << "(" << estimator->T << "," << estimator->B_current << "," << estimator->N_current << ")" << endl;
         free(estimator);
         estimator=background_estimator;
+        for (int i = 0; i < 12; i++)
+            estimator->erasure[i] = background_estimator->erasure[i];
         if (RELAYING_TYPE==0 || receiver_index==0)
             cout << "New (T,B,N) at relay receiver=" << "(" << estimator->T << "," << estimator->B_current << "," << estimator->N_current << ")" << endl;
         else

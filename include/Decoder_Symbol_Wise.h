@@ -41,7 +41,7 @@ namespace siphon {
 //                                               unsigned char *generator_s_r, unsigned char *generator_r_d);
         void
         symbol_wise_encode_1(int k, int n,int k2,
-                             int n2, size_t *loss_counter_, size_t *final_loss_counter_);
+                             int n2, bool *flag);
 
 
         void rotate_pointers_and_insert_zero_word(int n, int n2, int temp_size,int codeword_r_d_size_current);
@@ -52,10 +52,14 @@ namespace siphon {
 
         void extract_data(unsigned char *buffer, int k, int n,int received_seq);
 
-        void copy_elements(Decoder_Symbol_Wise *source);
+        void copy_elements(Decoder_Symbol_Wise *source,bool encode);
+
+        int max_payload;
+        int k,n;
+        int codeword_size_vector[T_TOT];
 
     private:
-        int max_payload;
+
 
     };
 }
