@@ -212,7 +212,7 @@ namespace siphon {
                     k2_old=k2;
                     cout<<"Stopped double coding at the relay"<<endl;
                 }
-
+                trans_vec[seq-latest_seq]=double_coding_flag;
                 if (seq == seq_start_double_coding) {
                     seq_end_double_coding = seq_start_double_coding + T_TOT - 1;//TODO need to make sure it use the right T...
                     if (decoder_Symbol_Wise_new != NULL)
@@ -295,6 +295,17 @@ namespace siphon {
             for (int seq = latest_seq + n2_old; seq < received_seq ; seq++) {
                 UDP_loss_counter_++;
                 final_UDP_loss_counter_++;
+                if ((seq > seq_end_double_coding) && (double_coding_flag == 1)) {
+                    double_coding_flag = 0;
+//                    decoder_Symbol_Wise = decoder_Symbol_Wise_new;
+                    decoder_Symbol_Backup->copy_elements(decoder_Symbol_Wise,true);
+                    decoder_Symbol_Backup->n=n2_old;
+                    decoder_Symbol_Wise->copy_elements(decoder_Symbol_Wise_new,true);
+                    n2_old=n2;
+                    k2_old=k2;
+                    cout<<"Stopped double coding at the relay"<<endl;
+                }
+                trans_vec[seq-latest_seq]=double_coding_flag;
                 DEBUG_MSG("\033[1;34m" << "Burst: packet dropped in (s,r) #" << seq << ": " << "\033[0m");
                 display_udp_statistics(seq);
             }

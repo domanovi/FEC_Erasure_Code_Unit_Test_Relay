@@ -204,12 +204,12 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_decode(unsigned 
     background_estimator->estimate(fec_message);
 
     if ((temp_seq + 1) >flag_for_estimation_cycle*ESTIMATION_WINDOW_SIZE/10){
-        cout << "Old (T,B,N) at relay receiver=" << "(" << estimator->T << "," << estimator->B_current << "," << estimator->N_current << ")" << endl;
+        cout << "Old (T,B,N) at destination=" << "(" << estimator->T << "," << estimator->B_current << "," << estimator->N_current << ")" << endl;
         free(estimator);
         estimator=background_estimator;
         for (int i = 0; i < 12; i++)
             estimator->erasure[i] = background_estimator->erasure[i];
-        cout << "New (T,B,N) at relay receiver=" << "(" << estimator->T << "," << estimator->B_current << "," << estimator->N_current << ")" << endl;
+        cout << "New (T,B,N) at destination=" << "(" << estimator->T << "," << estimator->B_current << "," << estimator->N_current << ")" << endl;
         background_estimator = new siphon::Parameter_Estimator(T_TOT, false);
         flag_for_estimation_cycle=flag_for_estimation_cycle+1;
     }
