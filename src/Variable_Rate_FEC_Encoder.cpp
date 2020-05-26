@@ -138,9 +138,9 @@ namespace siphon {
         message->counter_for_start_and_end = counter_transition;
 
         if (RELAYING_TYPE==2){
-            if (counter_transition <= T_TOT) {
+            if (counter_transition <= T_TOT+1) {
 
-                if (counter_transition == T_TOT) {
+                if (counter_transition == T_TOT+1) {
                     double_coding_flag = 0;   //no need to use the old encoder to protect the data transmitted at T time slots ago
                     cout<<"Stop double coding at the source"<<endl;
                 }

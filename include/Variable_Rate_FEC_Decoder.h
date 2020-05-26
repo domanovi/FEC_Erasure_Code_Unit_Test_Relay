@@ -87,6 +87,7 @@ namespace siphon {
         int T2, B2, N2;
         int n_old,k_old;
         int k2_old;
+        int n_last_used,k_last_used;
 
 
         int latest_seq;

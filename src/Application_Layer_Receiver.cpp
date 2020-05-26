@@ -154,14 +154,18 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_encode(unsigned 
         temp_parameters2[i]=response_from_dest_buffer[i-6];
     if (udp_parameters == nullptr) {
         connection_manager->UDPsendResponse(temp_parameters2, 12);
-        cout << "Sending 12 bytes from relay to source" << endl;
-        printMatrix(temp_parameters2, 1, 12);
+        if (DEBUG_COMM==1) {
+            cout << "Sending 12 bytes from relay to source" << endl;
+            printMatrix(temp_parameters2, 1, 12);
+        }
     }else{
         // Need to add...
         for (int i=0;i<12;i++)
             udp_parameters[i]=temp_parameters2[i];
-        cout << "Sending 12 bytes from relay to source" << endl;
-        printMatrix(udp_parameters,1,12);
+        if (DEBUG_COMM==1) {
+            cout << "Sending 12 bytes from relay to source" << endl;
+            printMatrix(udp_parameters, 1, 12);
+        }
     }
 
     return temp_seq;//TODO symbol-wise check return temp_seq at receive_message_and_symbol_wise_encode()
@@ -244,8 +248,10 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_decode(unsigned 
 
     if (udp_parameters == nullptr) {
         connection_manager->UDPsendResponse(temp_parameters, 6);
-        cout << "Sending 6 bytes from destination" << endl;
-        printMatrix(temp_parameters, 1, 6);
+        if (DEBUG_COMM==1) {
+            cout << "Sending 6 bytes from destination" << endl;
+            printMatrix(temp_parameters, 1, 6);
+        }
     }else {
         //recommended T, B and N
         udp_parameters[0] = (unsigned char) (estimator->T);
@@ -255,8 +261,10 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_decode(unsigned 
         udp_parameters[3] = (unsigned char) (fec_message->T);
         udp_parameters[4] = (unsigned char) (fec_message->B);
         udp_parameters[5] = (unsigned char) (fec_message->N);
-        cout << "Sending 6 bytes from destination" << endl;
-        printMatrix(udp_parameters,1,6);
+        if (DEBUG_COMM==1) {
+            cout << "Sending 6 bytes from destination" << endl;
+            printMatrix(udp_parameters, 1, 6);
+        }
     }
 
     return 0;//TODO symbols-wise: check if return 0 at receive_message_and_symbol_wise_decode()
@@ -360,21 +368,27 @@ int Application_Layer_Receiver::receive_message_and_decode(unsigned char *udp_pa
             temp_parameters2[i]=response_from_dest_buffer[i-6];
         if (udp_parameters == nullptr) {
             connection_manager->UDPsendResponse(temp_parameters2, 12);
-            cout << "Sending 12 bytes from relay" << endl;
-            printMatrix(temp_parameters2,1,12);
+            if (DEBUG_COMM==1) {
+                cout << "Sending 12 bytes from relay" << endl;
+                printMatrix(temp_parameters2, 1, 12);
+            }
         }else{
             // Need to add...
             for (int i=0;i<12;i++)
                 udp_parameters[i]=temp_parameters2[i];
-            cout << "Sending 12 bytes from relay" << endl;
-            printMatrix(udp_parameters,1,12);
+            if (DEBUG_COMM==1) {
+                cout << "Sending 12 bytes from relay" << endl;
+                printMatrix(udp_parameters, 1, 12);
+            }
         }
 
     } else {
         if (udp_parameters == nullptr) {
             connection_manager->UDPsendResponse(temp_parameters, 6);
-            cout << "Sending 6 bytes from destination" << endl;
-            printMatrix(temp_parameters, 1, 6);
+            if (DEBUG_COMM==1) {
+                cout << "Sending 6 bytes from destination" << endl;
+                printMatrix(temp_parameters, 1, 6);
+            }
         }else {
             //recommended T, B and N
             udp_parameters[0] = (unsigned char) (estimator->T);
@@ -384,8 +398,10 @@ int Application_Layer_Receiver::receive_message_and_decode(unsigned char *udp_pa
             udp_parameters[3] = (unsigned char) (fec_message->T);
             udp_parameters[4] = (unsigned char) (fec_message->B);
             udp_parameters[5] = (unsigned char) (fec_message->N);
-            cout << "Sending 6 bytes from destination" << endl;
-            printMatrix(udp_parameters,1,6);
+            if (DEBUG_COMM==1) {
+                cout << "Sending 6 bytes from destination" << endl;
+                printMatrix(udp_parameters, 1, 6);
+            }
         }
     }
 

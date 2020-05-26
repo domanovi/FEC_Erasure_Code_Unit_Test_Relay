@@ -91,9 +91,10 @@ void Application_Layer_Sender::generate_message_and_encode(unsigned char *udp_pa
             N2_ack = (int) udp_parameters[11];
         }
     }
-    cout << "Response at source" << endl;
-    printMatrix(response_buffer, 1, 12);
-
+    if (DEBUG_COMM==1) {
+        cout << "Response at source" << endl;
+        printMatrix(response_buffer, 1, 12);
+    }
     if (RELAYING_TYPE==2){
         if (N+N2<=T_TOT) {
             T = T_TOT - N2;
@@ -140,9 +141,10 @@ void Application_Layer_Sender::generate_message_and_encode(unsigned char *udp_pa
         codeword[2] = (unsigned char) ((seq_number / 256) % 256);
         codeword[1] = (unsigned char) ((seq_number / 256 / 256) % 256);
         codeword[0] = (unsigned char) ((seq_number / 256 / 256 / 256) % 256);
-
-        cout << "Sending from source to relay (in codeword)" << endl;
-        printMatrix(codeword, 1, 12);
+        if (DEBUG_COMM==1) {
+            cout << "Sending from source to relay (in codeword)" << endl;
+            printMatrix(codeword, 1, 12);
+        }
 
         // send(8 + message_transmitted->size, codeword, udp_codeword, udp_codeword_size);
         if (udp_parameters == nullptr)
@@ -223,9 +225,10 @@ void Application_Layer_Sender::send_sym_wise_message(unsigned char *encoded_symw
     codeword[2] = (unsigned char) ((seq_number / 256) % 256);
     codeword[1] = (unsigned char) ((seq_number / 256 / 256) % 256);
     codeword[0] = (unsigned char) ((seq_number / 256 / 256 / 256) % 256);
-
-    cout << "Sending from relay to destination (in codeword)" << endl;
-    printMatrix(codeword, 1, 8);
+    if (DEBUG_COMM==1) {
+        cout << "Sending from relay to destination (in codeword)" << endl;
+        printMatrix(codeword, 1, 8);
+    }
 
     // send(8 + message_transmitted->size, codeword, udp_codeword, udp_codeword_size);
     if (udp_parameters == nullptr)
@@ -264,8 +267,10 @@ void Application_Layer_Sender::message_wise_encode_at_relay(unsigned char *recei
             N_ack = (int) udp_parameters[5];
         }
     }
-    cout << "Response at relay transmitter" << endl;
-    printMatrix(response_buffer, 1, 6);
+    if (DEBUG_COMM==1) {
+        cout << "Response at relay transmitter" << endl;
+        printMatrix(response_buffer, 1, 6);
+    }
 
     message_transmitted->set_parameters(orig_seq_num, T, B, N, max_payload, received_data);
     DEBUG_MSG("\033[1;36m" << "Relay->destination message #" << message_transmitted->seq_number << ": " << "\033[0m");

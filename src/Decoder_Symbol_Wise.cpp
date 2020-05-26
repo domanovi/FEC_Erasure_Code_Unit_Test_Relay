@@ -18,16 +18,19 @@ namespace siphon {
         codeword_vector = (unsigned char **) malloc(sizeof(unsigned char *) * (T_TOT + 1));
         codeword_new_vector = (unsigned char **) malloc(sizeof(unsigned char *) * (T_TOT + 1));
         codeword_vector_store_in_burst = (unsigned char **) malloc(sizeof(unsigned char *) * (T_TOT + 1));
+        codeword_vector_to_transmit = (unsigned char **) malloc(sizeof(unsigned char *) * (T_TOT + 1));
 
         temp_erasure_vector = (bool *) malloc(sizeof(bool) * T_TOT);
         for (int i = 0; i < T_TOT + 1; i++) {
             codeword_vector[i] = (unsigned char *) malloc(
-                    sizeof(unsigned char) * (max_payload + 12) * 4 * T_TOT); //4-byte sequence number + 4-byte
-            memset(codeword_vector[i], '\000', (max_payload + 12) * 4 * T_TOT);
+                    sizeof(unsigned char) * 10000); //4-byte sequence number + 4-byte
+            memset(codeword_vector[i], '\000', 10000);
             codeword_new_vector[i] = (unsigned char *) malloc(
-                    sizeof(unsigned char) * (max_payload + 12) * 4 * T_TOT); //4-byte sequence number + 4-byte
+                    sizeof(unsigned char) * 10000); //4-byte sequence number + 4-byte
             codeword_vector_store_in_burst[i] = (unsigned char *) malloc(
-                    sizeof(unsigned char) * (max_payload + 12) * 4 * T_TOT); //4-byte sequence number + 4-byte
+                    sizeof(unsigned char) * 10000); //4-byte sequence number + 4-byte
+            codeword_vector_to_transmit[i]=(unsigned char *) malloc(
+                    sizeof(unsigned char) * 10000); //4-byte sequence number + 4-byte
             //memset(codeword_new_vector[i],'\000',(max_payload + 12) * 4 * T_INITIAL);
             temp_erasure_vector[i] = 0;
         }
@@ -39,115 +42,50 @@ namespace siphon {
             free(codeword_vector[i]);
             free(codeword_new_vector[i]);
             free(codeword_vector_store_in_burst[i]);
+            free(codeword_vector_to_transmit[i]);
         }
     }
 
     void Decoder_Symbol_Wise::copy_elements(Decoder_Symbol_Wise *source,bool encode){
         for (int i = 0; i < T_TOT + 1; i++) {
-            for (int j = 0;j<(max_payload + 12) * 4 * T_TOT;j++) {
+            for (int j = 0;j<10000;j++) {
                 codeword_vector[i][j]=source->codeword_vector[i][j];
                 codeword_new_vector[i][j]=source->codeword_new_vector[i][j];
                 codeword_vector_store_in_burst[i][j]=source->codeword_vector_store_in_burst[i][j];
-                temp_erasure_vector[i]=source->temp_erasure_vector[i];
-                codeword_size_vector[i]=source->codeword_size_vector[i];
-            }
+                codeword_vector_to_transmit[i][j]=source->codeword_vector_store_in_burst[i][j];
+             }
+            temp_erasure_vector[i]=source->temp_erasure_vector[i];
+            codeword_size_vector[i]=source->codeword_size_vector[i];
         }
         decoder_current=new Decoder(source->decoder_current->T,source->decoder_current->B,source->decoder_current->N, source->decoder_current->max_payload);
         if (encode)
             encoder_current=new Encoder(source->encoder_current->T,source->encoder_current->B,source->encoder_current->N, source->encoder_current->max_payload);
     }
 
-//    void Decoder_Symbol_Wise::receive_message_and_symbol_wise_encode(unsigned char* message,int received_seq,int latest_seq,int n,int k,int k2,
-//                                                                    int n2,size_t *UDP_loss_counter_,size_t *final_UDP_loss_counter_,
-//                                                                     size_t *loss_counter_,size_t *final_loss_counter_,int temp_size,
-//                                                                    unsigned char *generator_s_r,unsigned char *generator_r_d){
-//        if (received_seq>latest_seq+n2-1) {
-//            // in case of a burst longer than n fill codeword_vector with zeros and store codeword_new_vector in codeword_vector_store_in_burst
-//            for (int seq = latest_seq; seq < latest_seq + n2 ; seq++) {
-//                UDP_loss_counter_++;
-//                final_UDP_loss_counter_++;
-//                for (int i = 0; i < n - 1; i++) {
-//                    memcpy(codeword_vector[i], codeword_vector[i + 1], temp_size);
-//                    temp_erasure_vector[i] = temp_erasure_vector[i + 1];
-//                }
-//                for (int i=0;i<n2-1;i++) {
-//                    memcpy(codeword_new_vector[i], codeword_new_vector[i + 1], temp_size);
-//                    memcpy(codeword_vector_store_in_burst[i], codeword_vector_store_in_burst[i + 1], temp_size);
-//                }
-//                // zero the input
-//                memset(codeword_vector[n - 1], '\000', (300 + 12) * 4 * T_TOT);//ELAD - 300=max_payload
-//                temp_erasure_vector[n - 1] = 1;
-//                DEBUG_MSG("\033[1;34m" << "Burst: packet dropped in (s,r) #" << seq << ": " << "\033[0m");
-//                symbol_wise_encode_1(k, n, generator_s_r,generator_r_d, temp_size,k2,n2,loss_counter_,final_loss_counter_); // decode past codewords
-//                memcpy(codeword_vector_store_in_burst[n2 - 1], codeword_new_vector[n2 - 1], temp_size);
-//                //display_udp_statistics(seq);
-//            }
-//            for (int i=0;i<n2-1;i++)// zero the output (after storing)
-//                memset(codeword_new_vector[i], '\000', (300 + 12) * 4 * T_TOT);//ELAD - 300=max_payloa
-//            // go over the rest of the missing UDP packets
-//            for (int seq = latest_seq + n2; seq < received_seq ; seq++) {
-//                UDP_loss_counter_++;
-//                final_UDP_loss_counter_++;
-//                DEBUG_MSG("\033[1;34m" << "Burst: packet dropped in (s,r) #" << seq << ": " << "\033[0m");
-//                //display_udp_statistics(seq);
-//            }
-//        }else {
-//            for (int seq = latest_seq; seq < received_seq; seq++) {// need to handle bursts longer than n
-//                UDP_loss_counter_++;
-//                final_UDP_loss_counter_++;
-////                for (int i = 0; i < n - 1; i++) {
-////                    memcpy(codeword_vector[i], codeword_vector[i + 1], temp_size);
-////                    temp_erasure_vector[i] = temp_erasure_vector[i + 1];//ELAD to check...
-////                }
-////                for (int i=0;i<n2-1;i++)
-////                    memcpy(codeword_new_vector[i], codeword_new_vector[i + 1], temp_size);
-////                memset(codeword_vector[n - 1], '\000', (300 + 12) * 4 * T_TOT);//ELAD - 300=max_payload
-////                temp_erasure_vector[n - 1] = 1;
-//                rotate_pointers_and_insert_zero_word(n,n2,temp_size);
-//                DEBUG_MSG("\033[1;34m" << "Packet dropped in (s,r) #" << seq << ": " << "\033[0m");
-//                symbol_wise_encode_1(k, n, generator_s_r,generator_r_d, temp_size,k2,n2,loss_counter_,final_loss_counter_); // decode past codewords
-//                //display_udp_statistics(seq);
-//            }
-//        }
-//
-//        // push current codeword
-//        for (int i = 0; i < n - 1; i++) {
-//            memcpy(codeword_vector[i], codeword_vector[i + 1], temp_size);
-//            temp_erasure_vector[i] = temp_erasure_vector[i + 1];//ELAD to check...
-//        }
-//        for (int i=0;i<n2-1;i++)
-//            memcpy(codeword_new_vector[i], codeword_new_vector[i + 1], temp_size);
-//        memcpy(codeword_vector[n-1],message,temp_size);
-//        temp_erasure_vector[n-1]=0;
-//
-//        symbol_wise_encode_1(k,n,generator_s_r,generator_r_d,temp_size,k2,n2,loss_counter_,final_loss_counter_);
-//        memcpy(codeword_new_symbol_wise,codeword_new_vector[n2-1],temp_size);//ELAD - to change
-//    }
-
     void Decoder_Symbol_Wise::push_current_codeword(unsigned char *message,int n,int n2, int temp_size,int codeword_r_d_size_current){
         for (int i = 0; i < n - 1; i++) {
-            memcpy(codeword_vector[i], codeword_vector[i + 1], temp_size);
+            memcpy(codeword_vector[i], codeword_vector[i + 1], 10000);
             temp_erasure_vector[i] = temp_erasure_vector[i + 1];//ELAD to check...
         }
         for (int i=0;i<n2-1;i++) {
-            memcpy(codeword_new_vector[i], codeword_new_vector[i + 1], codeword_r_d_size_current);
+            memcpy(codeword_new_vector[i], codeword_new_vector[i + 1], 10000);
             codeword_size_vector[i]=codeword_size_vector[i+1];
         }
-        memcpy(codeword_vector[n-1],message,temp_size);
+        memcpy(&codeword_vector[n-1][2],message,sizeof(unsigned char)*10000);
         temp_erasure_vector[n - 1] = 0;
     }
 
     void Decoder_Symbol_Wise::rotate_pointers_and_insert_zero_word(int n,int n2, int temp_size,int codeword_r_d_size_current){
         for (int i = 0; i < n - 1; i++) {
-            memcpy(codeword_vector[i], codeword_vector[i + 1], temp_size);
+            memcpy(codeword_vector[i], codeword_vector[i + 1], sizeof(unsigned char)*10000);
             temp_erasure_vector[i] = temp_erasure_vector[i + 1];//ELAD to check...
         }
         for (int i=0;i<n2-1;i++) {
-            memcpy(codeword_new_vector[i], codeword_new_vector[i + 1], codeword_r_d_size_current);
-            memcpy(codeword_vector_store_in_burst[i], codeword_vector_store_in_burst[i + 1], temp_size);
+            memcpy(codeword_new_vector[i], codeword_new_vector[i + 1], sizeof(unsigned char)*10000);
+            memcpy(codeword_vector_store_in_burst[i], codeword_vector_store_in_burst[i + 1], sizeof(unsigned char)*10000);
             codeword_size_vector[i] = codeword_size_vector[i+1];
         }
-        memset(codeword_vector[n - 1], '\000', (300 + 12) * 4 * T_TOT);//ELAD - 300=max_payload
+        memset(codeword_vector[n - 1], '\000', sizeof(unsigned char)*10000);//ELAD - 300=max_payload
         temp_erasure_vector[n - 1] = 1;
     }
 
@@ -209,8 +147,7 @@ namespace siphon {
         for (int j=0;j<100;j++) {
             for (int delta=0;delta<n2-k2;delta++) {//this is to fill all parity symbols in codeword_new_vector[n2 - 1]
                 for (int i = 0+delta; i < k_min+delta; i++) {
-                    temp_codeword[i] = codeword_new_vector[i][2 + j * n2 +
-                                                              i]; // temp_codeword holds the diagonal (c_0,b_0,a_0...)!!!
+                    temp_codeword[i-delta] = codeword_new_vector[i][2 + j * n2 +i-delta]; // temp_codeword holds the diagonal (c_0,b_0,a_0...)!!!
                 }
                 if (k2>=k)
                     memcpy(&temp_encoded_codeword[k2-k], temp_codeword, k * sizeof(unsigned char));
@@ -265,7 +202,7 @@ namespace siphon {
         int ind=0;
         for (int j=0;j<number_of_code_blocks;j++) {
             for (int i = 0; i < k; i++) {
-                temp_buffer[ind++]=buffer[(j) * n + n-k + i];
+                temp_buffer[ind++]=buffer[0+(j) * n + n-k + i];
             }
         }
 // Need to add decoding...

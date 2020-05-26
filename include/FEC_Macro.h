@@ -80,6 +80,7 @@
 /*************** The following is used for displaying debugging messages *******************/
 
 #define DEBUG_FEC 1 //debugging messages hidden if DEBUG_FEC is 0
+#define DEBUG_COMM 0
 
 #if DEBUG_FEC
 #define DEBUG_MSG(str) do {std::cout << str << std::endl; } while( false )

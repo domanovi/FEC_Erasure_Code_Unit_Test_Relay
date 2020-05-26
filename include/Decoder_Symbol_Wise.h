@@ -22,6 +22,7 @@ namespace siphon {
         unsigned char *codeword;
         unsigned char **codeword_vector;
         unsigned char **codeword_new_vector;
+        unsigned char **codeword_vector_to_transmit;
         unsigned char **codeword_vector_store_in_burst;
         unsigned char codeword_new_symbol_wise[30000];
         bool *temp_erasure_vector;
