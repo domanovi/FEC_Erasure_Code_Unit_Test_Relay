@@ -29,7 +29,8 @@ public:
     virtual ~Payload_Simulator();
     
     int generate_payload(unsigned char * payload_buffer) ;
-    
+
+    long current_file_position;
 private:
     
     int max_payload, interarrival_time;
@@ -40,7 +41,7 @@ private:
 
     ifstream file_read;
 
-    long fileSize, current_file_position;
+    long fileSize;
 
     boost::posix_time::ptime start_time;
 

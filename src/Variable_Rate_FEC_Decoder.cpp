@@ -12,6 +12,7 @@
  */
 
 #include <Decoder_Symbol_Wise.h>
+#include <Payload_Simulator.h>
 #include "Variable_Rate_FEC_Decoder.h"
 #include "codingOperations.h"
 #include "basicOperations.h"
@@ -64,6 +65,9 @@ namespace siphon {
         final_loss_counter_ = 0;
         final_UDP_loss_counter_ = 0;
 
+        counter_loss_of_char=0;
+        final_counter_loss_of_char=0;
+
         loss_counter_two_seg_=0;
         final_loss_counter_two_seg_=0;
 
@@ -114,6 +118,8 @@ namespace siphon {
         for (int i=0;i<50;i++)
             trans_vec[i]=false;
 
+        payload_simulator = new Payload_Simulator(NUMBER_OF_ITERATIONS, max_payload, 0,SOURCE_PCM_FILE);
+        raw_data = (unsigned char *) malloc(sizeof(unsigned char) * max_payload);
     }
 
     Variable_Rate_FEC_Decoder::~Variable_Rate_FEC_Decoder() {
@@ -145,6 +151,8 @@ namespace siphon {
             free(codeword_vector_store_in_burst[i]);
         }
         free(encoder);
+        free(raw_data);
+        delete payload_simulator;
 
     }
 
@@ -521,6 +529,7 @@ namespace siphon {
         int size_received_transition = message->size - size_received-2;
 
         unsigned char buffer[30000];
+        unsigned char temp_buffer[30000];
         bool flag;
 
         // rotate pointers
@@ -562,7 +571,29 @@ namespace siphon {
                     loss_counter_++;
                     final_loss_counter_++;
                 }
-                decoder_Symbol_Wise->extract_data(buffer,k,n,seq);
+                decoder_Symbol_Wise->extract_data(buffer,k,n,seq,temp_buffer);
+                if (DEBUG_CHAR==1) {
+                    while ((payload_simulator->current_file_position) / 300 < (seq + 1) - T_TOT)
+                        payload_simulator->generate_payload(raw_data);
+                    int count_char_errors = 0;
+                    int sum_of_chars=0;
+                    if (seq >= T_TOT) {
+                        for (int kk = 0; kk < 300; kk++) {
+                            if (temp_buffer[kk + 2] != raw_data[kk]) {
+                                if (kk<250)
+                                    sum_of_chars=sum_of_chars+(int)temp_buffer[kk + 2];
+                                count_char_errors++;
+                                counter_loss_of_char++;
+                                final_counter_loss_of_char++;
+                            }
+                        }
+//                DEBUG_MSG("\033[1;34m" << "% of bad chars " << (float)count_char_errors/300*100 << "% " << "\033[0m");
+//                DEBUG_MSG("\033[1;34m" << "Original Message #" << received_seq-T_TOT << ": " << "\033[0m");
+                        printMatrix(raw_data, 1, 300);
+                        if (sum_of_chars>0 && count_char_errors>200)
+                            cout<<"Elad";
+                    }
+                }
             }else{
                 decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n_old,0,size_received_transition,0);
                 flag=false;
@@ -571,7 +602,29 @@ namespace siphon {
                     loss_counter_++;
                     final_loss_counter_++;
                 }
-                decoder_Symbol_Wise->extract_data(buffer,k_old,n_old,seq);
+                decoder_Symbol_Wise->extract_data(buffer,k_old,n_old,seq,temp_buffer);
+                if (DEBUG_CHAR==1) {
+                    while ((payload_simulator->current_file_position) / 300 < (seq + 1) - T_TOT)
+                        payload_simulator->generate_payload(raw_data);
+                    int count_char_errors = 0;
+                    int sum_of_chars=0;
+                    if (seq >= T_TOT) {
+                        for (int kk = 0; kk < 300; kk++) {
+                            if (temp_buffer[kk + 2] != raw_data[kk]) {
+                                if (kk<250)
+                                    sum_of_chars=sum_of_chars+(int)raw_data[kk];
+                                count_char_errors++;
+                                counter_loss_of_char++;
+                                final_counter_loss_of_char++;
+                            }
+                        }
+//                DEBUG_MSG("\033[1;34m" << "% of bad chars " << (float)count_char_errors/300*100 << "% " << "\033[0m");
+//                DEBUG_MSG("\033[1;34m" << "Original Message #" << received_seq-T_TOT << ": " << "\033[0m");
+                        printMatrix(raw_data, 1, 300);
+                        if (sum_of_chars>0 && count_char_errors>200)
+                            cout<<"Elad";
+                    }
+                }
                 counter_++;
                 decoder_Symbol_Wise_new->rotate_pointers_and_insert_zero_word(n,0,size_received,0);
                 decoder_Symbol_Wise_new->symbol_wise_decode_1(buffer,&flag,k,n);
@@ -648,7 +701,30 @@ namespace siphon {
                 loss_counter_++;
                 final_loss_counter_++;
             }
-            decoder_Symbol_Wise->extract_data(buffer,k,n,received_seq);
+            decoder_Symbol_Wise->extract_data(buffer,k,n,received_seq,temp_buffer);
+            if (DEBUG_CHAR==1) {
+                while ((payload_simulator->current_file_position) / 300 < (received_seq + 1) - T_TOT)
+                    payload_simulator->generate_payload(raw_data);
+                int count_char_errors = 0;
+                int sum_of_chars=0;
+                if (received_seq >= T_TOT) {
+                    for (int kk = 0; kk < 300; kk++) {
+                        if (temp_buffer[kk + 2] != raw_data[kk]) {
+                            if (kk<250)
+                                sum_of_chars=sum_of_chars+(int)temp_buffer[kk + 2];
+                            count_char_errors++;
+                            counter_loss_of_char++;
+                            final_counter_loss_of_char++;
+                        }
+                    }
+//                DEBUG_MSG("\033[1;34m" << "% of bad chars " << (float)count_char_errors/300*100 << "% " << "\033[0m");
+//                DEBUG_MSG("\033[1;34m" << "Original Message #" << received_seq-T_TOT << ": " << "\033[0m");
+                    printMatrix(raw_data, 1, 300);
+                    if (sum_of_chars>0 && count_char_errors>200)
+                        cout<<"Elad";
+                }
+            }
+
 //            // temp extraction of data
 //            unsigned char temp_buffer[30000];
 //            int ind=0;
@@ -671,7 +747,7 @@ namespace siphon {
                 loss_counter_++;
                 final_loss_counter_++;
             }
-            decoder_Symbol_Wise->extract_data(buffer,k_old,n_old,received_seq);
+            decoder_Symbol_Wise->extract_data(buffer,k_old,n_old,received_seq,temp_buffer);
 //            // temp extraction of data
 //            unsigned char temp_buffer[30000];
 //            int ind=0;

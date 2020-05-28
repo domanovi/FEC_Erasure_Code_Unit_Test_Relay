@@ -69,6 +69,7 @@ namespace siphon {
         }
         for (int i=0;i<n2-1;i++) {
             memcpy(codeword_new_vector[i], codeword_new_vector[i + 1], 10000);
+            memcpy(codeword_vector_to_transmit[i], codeword_vector_to_transmit[i + 1], 10000);
             codeword_size_vector[i]=codeword_size_vector[i+1];
         }
         memcpy(&codeword_vector[n-1][2],message,sizeof(unsigned char)*10000);
@@ -82,6 +83,7 @@ namespace siphon {
         }
         for (int i=0;i<n2-1;i++) {
             memcpy(codeword_new_vector[i], codeword_new_vector[i + 1], sizeof(unsigned char)*10000);
+            memcpy(codeword_vector_to_transmit[i], codeword_vector_to_transmit[i + 1], 10000);
             memcpy(codeword_vector_store_in_burst[i], codeword_vector_store_in_burst[i + 1], sizeof(unsigned char)*10000);
             codeword_size_vector[i] = codeword_size_vector[i+1];
         }
@@ -196,8 +198,8 @@ namespace siphon {
         }
     }
 
-    void Decoder_Symbol_Wise::extract_data(unsigned char *buffer,int k,int n,int received_seq){// temp extraction of data
-        unsigned char temp_buffer[30000];
+    void Decoder_Symbol_Wise::extract_data(unsigned char *buffer,int k,int n,int received_seq,unsigned char *temp_buffer){// temp extraction of data
+//        unsigned char temp_buffer[30000];
         int number_of_code_blocks=ceil(300/k);//TODO replace 300 wih max_payload !!!
         int ind=0;
         for (int j=0;j<number_of_code_blocks;j++) {

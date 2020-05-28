@@ -71,7 +71,6 @@ public:
     int latest_seq;
 
 
-
 //    void symbol_wise_encode(int k, int n, unsigned char *generator, int temp_size,int k2, int n2);
 //
 //    void symbol_wise_decode(int k, int n, unsigned char *generator, int temp_size);

@@ -22,6 +22,7 @@
 #include "Memory_Allocator.h"
 #include "Encoder.h"
 #include "Decoder_Symbol_Wise.h"
+#include "Payload_Simulator.h"
 
 namespace siphon {
 
@@ -68,7 +69,8 @@ namespace siphon {
         unsigned char **codeword_vector_store_in_burst;
         unsigned char codeword_new_symbol_wise[30000];
 
-
+        Payload_Simulator *payload_simulator;
+        unsigned char *raw_data;
 
         void receive_message_and_symbol_wise_encode(FEC_Message *message, int n, int k, int n2, int k2, int temp_size,int *codeword_size_final);
 
@@ -81,6 +83,7 @@ namespace siphon {
 
 
         int n2_old;
+        size_t final_counter_loss_of_char;
     private:
 
         int T{}, B{}, N{}, max_payload;
@@ -128,6 +131,7 @@ namespace siphon {
   */
         size_t counter_, loss_counter_, UDP_loss_counter_, final_loss_counter_, final_UDP_loss_counter_;
         size_t loss_counter_two_seg_, final_loss_counter_two_seg_;
+        size_t counter_loss_of_char;
         /**
          * @brief Time of last report of data receiving rate.
          */

@@ -24,7 +24,7 @@
 #define B_INITIAL -1
 #define N_INITIAL -1
 
-#define T_INITIAL_2 4
+#define T_INITIAL_2 3
 #define B_INITIAL_2 2
 #define N_INITIAL_2 -1
 
@@ -81,6 +81,7 @@
 
 #define DEBUG_FEC 1 //debugging messages hidden if DEBUG_FEC is 0
 #define DEBUG_COMM 0
+#define DEBUG_CHAR 1
 
 #if DEBUG_FEC
 #define DEBUG_MSG(str) do {std::cout << str << std::endl; } while( false )

@@ -3,6 +3,7 @@
 //
 
 #include <basicOperations.h>
+#include <Payload_Simulator.h>
 #include "Application_Layer_Receiver.h"
 #include "FEC_Macro.h"
 
@@ -33,7 +34,6 @@ erasure_type_value, bool adaptive_mode_MDS_value, int flag) {
 
     receiver_index=0;
     latest_seq=0;
-
 
 }
 

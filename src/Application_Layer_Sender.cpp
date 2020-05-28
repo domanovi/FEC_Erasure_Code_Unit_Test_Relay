@@ -33,7 +33,7 @@ Application_Layer_Sender::Application_Layer_Sender(const char *Tx, const char *R
     variable_rate_FEC_encoder = new siphon::Variable_Rate_FEC_Encoder(max_payload, INPUTDATAFILE);
     raw_data = (unsigned char *) malloc(sizeof(unsigned char) * max_payload);
     codeword = (unsigned char *) malloc(
-            sizeof(unsigned char) * (max_payload + 12) * 4 * T); //4-byte sequence number + 4-byte
+            sizeof(unsigned char) * (max_payload + 12) * 4 * T_TOT); //4-byte sequence number + 4-byte
     // coding parameters
 
     message_transmitted = (FEC_Message *) malloc(sizeof(FEC_Message));
@@ -95,22 +95,27 @@ void Application_Layer_Sender::generate_message_and_encode(unsigned char *udp_pa
         cout << "Response at source" << endl;
         printMatrix(response_buffer, 1, 12);
     }
-    if (RELAYING_TYPE==2){
+    if (RELAYING_TYPE==2 && seq_number>0 && adaptive_coding==1){
         if (N+N2<=T_TOT) {
             T = T_TOT - N2;
             variable_rate_FEC_encoder->N2 = N2;
 //        T2=T_TOT-N;
         }else
             cout<<"N1="<<N << "+N2=" << N2 <<">T_TOT="<<T_TOT<<endl;
+        variable_rate_FEC_encoder->T2_ack = T2_ack;
+        variable_rate_FEC_encoder->B2_ack = B2_ack;
+        variable_rate_FEC_encoder->N2_ack = N2_ack;
     }
 
     if (RELAYING_TYPE>0)// Currently supporting only arbitrary erasures
         message_transmitted->set_parameters(seq_number, T, N, N, max_payload, raw_data);
     else
         message_transmitted->set_parameters(seq_number, T, B, N, max_payload, raw_data);
-    variable_rate_FEC_encoder->T2_ack=T2_ack;
-    variable_rate_FEC_encoder->B2_ack=B2_ack;
-    variable_rate_FEC_encoder->N2_ack=N2_ack;
+//    if (RELAYING_TYPE==2 && adaptive_coding==1) {
+//        variable_rate_FEC_encoder->T2_ack = T2_ack;
+//        variable_rate_FEC_encoder->B2_ack = B2_ack;
+//        variable_rate_FEC_encoder->N2_ack = N2_ack;
+//    }
 
 //    if ((N!=N_ack || N2!=N2_ack) && (N_ack+N2_ack<=T_TOT)){
 //        T=T_TOT-N2_ack;

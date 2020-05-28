@@ -134,8 +134,8 @@ int main(int argc, const char *argv[]) {
     erasure_generator2.generate_IID(stream_duration + T+T2, 0.1, "erasure2.bin",2);
 
 
-    siphon::Erasure_Simulator erasure_simulator("erasure2.bin");
-    siphon::Erasure_Simulator erasure_simulator2("erasure.bin");
+    siphon::Erasure_Simulator erasure_simulator("erasure.bin");
+    siphon::Erasure_Simulator erasure_simulator2("erasure2.bin");
 
     auto start_time = high_resolution_clock::now();;
 
@@ -152,34 +152,15 @@ int main(int argc, const char *argv[]) {
     }
     erasure_simulator.erasure_seq[1]='\001';
     erasure_simulator.erasure_seq[2]='\001';
-    erasure_simulator.erasure_seq[12]='\001';
-    erasure_simulator.erasure_seq[13]='\001';
-    erasure_simulator.erasure_seq[14]='\001';
-//    erasure_simulator.erasure_seq[8]='\001';
+//    erasure_simulator.erasure_seq[3]='\001';
+//    erasure_simulator.erasure_seq[4]='\001';
+//    erasure_simulator2.erasure_seq[6]='\001';
+//    erasure_simulator.erasure_seq[7]='\001';
+//    erasure_simulator2.erasure_seq[8]='\001';
 //    erasure_simulator.erasure_seq[9]='\001';
 //    erasure_simulator.erasure_seq[10]='\001';
-//    erasure_simulator.erasure_seq[11]='\001';
-//
-//    erasure_simulator.erasure_seq[15]='\001';
-//    erasure_simulator.erasure_seq[16]='\001';
+//    erasure_simulator2.erasure_seq[10]='\001';
 
-
-//    erasure_simulator.erasure_seq[11]='\001';
-//    erasure_simulator.erasure_seq[13]='\001';
-//    erasure_simulator.erasure_seq[14]='\001';
-//    erasure_simulator.erasure_seq[7]='\001';
-//    erasure_simulator.erasure_seq[4]='\001';
-//    erasure_simulator.erasure_seq[5]='\001';
-//    erasure_simulator.erasure_seq[6]='\001';
-//    erasure_simulator.erasure_seq[7]='\001';
-//    erasure_simulator.erasure_seq[8]='\001';
-
-//    erasure_simulator2.erasure_seq[1]='\001';
-//    erasure_simulator2.erasure_seq[2]='\001';
-//    erasure_simulator2.erasure_seq[3]='\001';
-//    erasure_simulator.erasure_seq[4]='\001';
-//    erasure_simulator2.erasure_seq[1]='\001';
-//    erasure_simulator2.erasure_seq[6]='\001';
     cout << "Iteration = " << stream_duration << endl;
 
     int seq_number;
@@ -220,8 +201,9 @@ int main(int argc, const char *argv[]) {
         k2_new=T2-N_INITIAL_2+1;
     }
 
-
+    int packet_counter=0;
     for (int i = 0;; i++) {
+        packet_counter++;
 //        application_layer_sender.generate_message_and_encode(udp_parameters, buffer, &buffer_size); //udp_codeword is
 
         // sent;
@@ -412,7 +394,7 @@ int main(int argc, const char *argv[]) {
         if (i == 0)
             start_time = high_resolution_clock::now();
 
-        if (seq_number >= stream_duration + T +T2+1000- 1) //Elad added T2
+        if (seq_number >= stream_duration + T +T2- 1) //Elad added T2
             break;
     }
 
@@ -422,6 +404,11 @@ int main(int argc, const char *argv[]) {
 
     cout << "Time duration = " << duration.count() << " minutes" << endl;
     cout << "Last sequence number received = " << seq_number << endl;
+
+    if (RELAYING_TYPE==2 && DEBUG_CHAR==1) {
+        float final_char_loss_in_per=(float) application_layer_destination_receiver->fec_decoder->final_counter_loss_of_char/(300*(packet_counter-T_TOT)) * 100;
+        DEBUG_MSG("\033[1;34m" << "Total Char loss in % "<<  final_char_loss_in_per << "% " << "\033[0m");
+    }
 
 //    cout << "Loss probability = " << calculateLossMessage(INPUTDATAFILE, OUTPUTDATAFILE);
 
