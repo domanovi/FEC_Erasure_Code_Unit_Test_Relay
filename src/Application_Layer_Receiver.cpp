@@ -310,7 +310,7 @@ int Application_Layer_Receiver::receive_message_and_decode(unsigned char *udp_pa
 
     }else if (RELAYING_TYPE==1){
         second_seg_seq= int(codeword[7]) + 256 * int(codeword[6]) + 256 * 256 * int(codeword[5]) + 256 * 256 * 256 * int
-                    (codeword[4]);
+                (codeword[4]);
         fec_message->set_parameters(second_seg_seq, int(codeword[8]), int(codeword[9]), int(codeword[10]),
                                     temp_size - 12, codeword + 12);
         fec_message->seq_number2=second_seg_seq;

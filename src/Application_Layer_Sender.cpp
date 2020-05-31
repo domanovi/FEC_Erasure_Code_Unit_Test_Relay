@@ -91,6 +91,8 @@ void Application_Layer_Sender::generate_message_and_encode(unsigned char *udp_pa
             N2_ack = (int) udp_parameters[11];
         }
     }
+    cout << "Response at source" << endl;
+    printMatrix(response_buffer, 1, 12);
     if (DEBUG_COMM==1) {
         cout << "Response at source" << endl;
         printMatrix(response_buffer, 1, 12);

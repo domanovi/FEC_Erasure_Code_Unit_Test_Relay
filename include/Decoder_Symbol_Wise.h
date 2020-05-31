@@ -26,6 +26,8 @@ namespace siphon {
         unsigned char **codeword_vector_store_in_burst;
         unsigned char codeword_new_symbol_wise[30000];
         bool *temp_erasure_vector;
+        int n2_vector[T_TOT+1];
+        int k2_vector[T_TOT+1];
 
         Decoder *decoder_current;
         Encoder *encoder_current;
@@ -45,7 +47,7 @@ namespace siphon {
                              int n2, bool *flag);
 
 
-        void rotate_pointers_and_insert_zero_word(int n, int n2, int temp_size,int codeword_r_d_size_current);
+        void rotate_pointers_and_insert_zero_word(int n, int n2, int temp_size,int codeword_r_d_size_current,bool flag_fot_rotate_burst);
 
         void push_current_codeword(unsigned char *message,int n,int n2, int temp_size,int codeword_r_d_size_current);
 

@@ -84,10 +84,11 @@ namespace siphon {
 
         } else {
 
+//            if (((message->T != T) || (message->B != B) || (message->N != N)) &&
+//                (transition_flag == 0) && (T_ack == T) && (B_ack == B) &&
+//                (N_ack == N) && (T2_ack == T2) && (B2_ack == B2) && (N2_ack == N2)) { //currently not in transition and the current coding parameters have been acknowledged
             if (((message->T != T) || (message->B != B) || (message->N != N)) &&
-                (transition_flag == 0) && (T_ack == T) && (B_ack == B) &&
-                (N_ack == N)) { //currently not in transition and the current coding parameters have been acknowledged
-
+                                (transition_flag == 0) && (T_ack == T) && (B_ack == B)){
                 cout<<"Start double coding at the source"<<endl;
 
                 T_old = T;
@@ -153,6 +154,10 @@ namespace siphon {
 
             } else
                 transition_flag = 0;
+//        } else if (counter_transition>2*T_TOT) //Can assist in debugging !!!
+//            transition_flag = 0;
+//        else
+//            counter_transition++;
         }else {
             if (counter_transition <= T) {
 

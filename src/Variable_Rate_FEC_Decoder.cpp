@@ -4,10 +4,10 @@
  * and open the template in the editor.
  */
 
-/* 
+/*
  * File:   Variable_Rate_FEC_Decoder.cpp
  * Author: silas
- * 
+ *
  * Created on July 12, 2018, 11:12 AM
  */
 
@@ -67,6 +67,7 @@ namespace siphon {
 
         counter_loss_of_char=0;
         final_counter_loss_of_char=0;
+        final_counter_loss_of_char_elad=0;
 
         loss_counter_two_seg_=0;
         final_loss_counter_two_seg_=0;
@@ -170,6 +171,8 @@ namespace siphon {
             latest_seq = seq_start;
             k2_old=k2;
             n2_old=n2;
+            k2_last_used=k2;
+            n2_last_used=n2;
         }
         int received_seq = message->seq_number;
 
@@ -200,10 +203,12 @@ namespace siphon {
 //                &loss_counter_,&final_loss_counter_,temp_size,
 //                decoder_current->decoder->getG(),encoder->getG());
 
-        int codeword_r_d_size_old= ceil(float(max_payload + 2) / k2_old) * n2_old;
-        int codeword_r_d_size_current= ceil(float(max_payload + 2) / k2) * n2;
+        int codeword_r_d_size_old= (ceil(float(max_payload + 2) / k2_old)+1) * n2_old;
+        int codeword_r_d_size_current= (ceil(float(max_payload + 2) / k2)+1) * n2;
 
+        flag_for_burst=0;
         if (received_seq>latest_seq+n2_old-1) {
+            flag_for_burst=n2_old;
             //TODO handle a burst...
             // in case of a burst longer than n fill codeword_vector with zeros and store codeword_new_vector in codeword_vector_store_in_burst
             for (int seq = latest_seq; seq < latest_seq + n2_old ; seq++) {
@@ -234,41 +239,30 @@ namespace siphon {
                     decoder_Symbol_Wise_new->encoder_current=new Encoder(n2-1,n2-k2,n2-k2, max_payload);
                     double_coding_flag = 1;
                 }
-//                for (int i = 0; i < n - 1; i++) {
-//                    memcpy(codeword_vector[i], codeword_vector[i + 1], temp_size);
-//                    temp_erasure_vector[i] = temp_erasure_vector[i + 1];
-//                }
-//                for (int i=0;i<n2-1;i++) {
-//                    memcpy(codeword_new_vector[i], codeword_new_vector[i + 1], temp_size);
-//                    memcpy(codeword_vector_store_in_burst[i], codeword_vector_store_in_burst[i + 1], temp_size);
-//                }
-//                // zero the input
-//                memset(codeword_vector[n - 1], '\000', (300 + 12) * 4 * T_TOT);//ELAD - 300=max_payload
-//                temp_erasure_vector[n - 1] = 1;
-//                DEBUG_MSG("\033[1;34m" << "Burst: packet dropped in (s,r) #" << seq << ": " << "\033[0m");
-//                symbol_wise_encode(k, n, decoder_current->decoder->getG(),encoder->getG(), temp_size,k2,n2); // decode past codewords
                 if (double_coding_flag == 0) {
-                    decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n,n2,size_received,codeword_r_d_size_current);
+                    decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n,n2,size_received,codeword_r_d_size_current,true);
 //                    DEBUG_MSG("\033[1;34m" << "Packet dropped in (s,r) #" << seq << ": " << "\033[0m");
                     decoder_Symbol_Wise->symbol_wise_encode_1(k,n,k2,n2,&flag);
                     if (flag==true){
                         loss_counter_++;
                         final_loss_counter_++;
                     }
-                    *codeword_size_final = codeword_r_d_size_current;  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
-                    int codeword_size_final_temp = codeword_r_d_size_current;
+                    *codeword_size_final = codeword_r_d_size_current+2;  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
+                    int codeword_size_final_temp = codeword_r_d_size_current+2;
                     codeword_final[1] = (unsigned char) (codeword_r_d_size_current);
                     codeword_final[0] = (unsigned char) ((codeword_r_d_size_current) / 256);
                     memcpy(codeword_final + 2, decoder_Symbol_Wise->codeword_new_vector[n2-1], size_t(codeword_r_d_size_current));
                     memcpy(decoder_Symbol_Wise->codeword_vector_to_transmit[n2-1],codeword_final,size_t(codeword_size_final_temp));
+                    decoder_Symbol_Wise->k2_vector[n2-1]=k2;
+                    decoder_Symbol_Wise->n2_vector[n2-1]=n2;
                     display_udp_statistics(seq);
                     memcpy(decoder_Symbol_Wise->codeword_vector_store_in_burst[n2 - 1],
                            decoder_Symbol_Wise->codeword_vector_to_transmit[n2 - 1], size_t(codeword_size_final_temp));
                     decoder_Symbol_Wise->codeword_size_vector[n2-1]=codeword_size_final_temp;
                 } else{
                     //TODO check codeword size in case of transition !!!
-                    decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n_old,n2_old,size_received_transition,codeword_r_d_size_old);
-                    decoder_Symbol_Wise_new->rotate_pointers_and_insert_zero_word(n,n2,size_received,codeword_r_d_size_current);
+                    decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n_old,n2_old,size_received_transition,codeword_r_d_size_old,true);
+                    decoder_Symbol_Wise_new->rotate_pointers_and_insert_zero_word(n,n2,size_received,codeword_r_d_size_current,true);
                     decoder_Symbol_Wise->symbol_wise_encode_1(k_old,n_old,k2_old,n2_old,&flag);
                     if (flag==true){
                         loss_counter_++;
@@ -290,6 +284,8 @@ namespace siphon {
                     memcpy(codeword_final + 2, decoder_Symbol_Wise_new->codeword_new_vector[n2-1], size_t(codeword_r_d_size_current));
                     memcpy(codeword_final + codeword_r_d_size_current + 2, decoder_Symbol_Wise->codeword_new_vector[n2_old - 1], size_t(codeword_r_d_size_old));
                     memcpy(decoder_Symbol_Wise->codeword_vector_to_transmit[n2_old-1],codeword_final,size_t(codeword_size_final_temp));
+                    decoder_Symbol_Wise->k2_vector[n2_old-1]=k2_old;
+                    decoder_Symbol_Wise->n2_vector[n2_old-1]=n2_old;
                     memcpy(decoder_Symbol_Wise->codeword_vector_store_in_burst[n2_old - 1], decoder_Symbol_Wise->codeword_vector_to_transmit[n2 - 1], size_t(codeword_size_final_temp));
                     decoder_Symbol_Wise->codeword_size_vector[n2_old-1]=codeword_size_final_temp;
                     display_udp_statistics(seq);
@@ -297,8 +293,8 @@ namespace siphon {
 
 //                display_udp_statistics(seq);
             }
-            for (int i=0;i<n2_old-1;i++)// zero the output (after storing)
-                memset(decoder_Symbol_Wise->codeword_new_vector[i], '\000', (300 + 12) * 4 * T_TOT);//ELAD - 300=max_payloa
+//            for (int i=0;i<n2_old-1;i++)// zero the output (after storing)
+//                memset(decoder_Symbol_Wise->codeword_new_vector[i], '\000', 10000);//ELAD - 300=max_payloa
             // go over the rest of the missing UDP packets
             for (int seq = latest_seq + n2_old; seq < received_seq ; seq++) {
                 UDP_loss_counter_++;
@@ -315,9 +311,18 @@ namespace siphon {
                 }
                 trans_vec[seq-latest_seq]=double_coding_flag;
                 DEBUG_MSG("\033[1;34m" << "Burst: packet dropped in (s,r) #" << seq << ": " << "\033[0m");
+                if (double_coding_flag==0){
+                    decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n,n2,size_received,codeword_r_d_size_current,false);
+                    decoder_Symbol_Wise->symbol_wise_encode_1(k,n,k2,n2,&flag);
+                }else{
+                    decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n_old,n2_old,size_received_transition,codeword_r_d_size_old,false);
+                    decoder_Symbol_Wise_new->rotate_pointers_and_insert_zero_word(n,n2,size_received,codeword_r_d_size_current,false);
+                    decoder_Symbol_Wise->symbol_wise_encode_1(k_old,n_old,k2_old,n2_old,&flag);
+                    decoder_Symbol_Wise_new->symbol_wise_encode_1(k,n,k2,n2,&flag);
+                }
                 display_udp_statistics(seq);
             }
-        }else {
+        }else { // NOT IN BURST !!!
             for (int seq = latest_seq; seq < received_seq; seq++) {// need to handle bursts longer than n
                 UDP_loss_counter_++;
                 final_UDP_loss_counter_++;
@@ -327,8 +332,8 @@ namespace siphon {
                     decoder_Symbol_Backup->copy_elements(decoder_Symbol_Wise,true);
                     decoder_Symbol_Backup->n=n2_old;
                     decoder_Symbol_Wise->copy_elements(decoder_Symbol_Wise_new,true);
-                    n2_old=n2;
-                    k2_old=k2;
+                    n2_old=n2_last_used;
+                    k2_old=k2_last_used;
                     cout<<"Stopped double coding at the relay"<<endl;
                 }
                 trans_vec[seq-latest_seq]=double_coding_flag;
@@ -337,6 +342,8 @@ namespace siphon {
                     seq_end_double_coding = seq_start_double_coding + T_TOT + 1 - 1;//TODO need to make sure it use the right T...
                     if (decoder_Symbol_Wise_new != NULL)
                         delete decoder_Symbol_Wise_new;
+                    k_old=T-N+1;
+                    n_old=T+1;
                     T=message->T;
                     B=message->B;
                     N=message->N;
@@ -348,25 +355,27 @@ namespace siphon {
                 }
 
                 if (double_coding_flag == 0) {
-                    decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n,n2,size_received,codeword_r_d_size_current);
+                    decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n,n2,size_received,codeword_r_d_size_current,true);
                     DEBUG_MSG("\033[1;34m" << "Packet dropped in (s,r) #" << seq << ": " << "\033[0m");
                     decoder_Symbol_Wise->symbol_wise_encode_1(k,n,k2,n2,&flag);
                     if (flag==true){
                         loss_counter_++;
                         final_loss_counter_++;
                     }
-                    *codeword_size_final = codeword_r_d_size_current;  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
-                    int codeword_size_final_temp = codeword_r_d_size_current;
+                    *codeword_size_final = codeword_r_d_size_current+2;  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
+                    int codeword_size_final_temp = codeword_r_d_size_current+2;
                     codeword_final[1] = (unsigned char) (codeword_r_d_size_current);
                     codeword_final[0] = (unsigned char) ((codeword_r_d_size_current) / 256);
                     memcpy(codeword_final + 2, decoder_Symbol_Wise->codeword_new_vector[n2-1], size_t(codeword_r_d_size_current));
                     memcpy(decoder_Symbol_Wise->codeword_vector_to_transmit[n2-1],codeword_final,size_t(codeword_size_final_temp));
+                    decoder_Symbol_Wise->k2_vector[n2-1]=k2;
+                    decoder_Symbol_Wise->n2_vector[n2-1]=n2;
                     decoder_Symbol_Wise->codeword_size_vector[n2-1]=codeword_size_final_temp;
                     display_udp_statistics(seq);
                 } else{
                     //TODO check codeword size in case of transition !!!
-                    decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n_old,n2_old,size_received_transition,codeword_r_d_size_old);
-                    decoder_Symbol_Wise_new->rotate_pointers_and_insert_zero_word(n,n2,size_received,codeword_r_d_size_current);
+                    decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n_old,n2_old,size_received_transition,codeword_r_d_size_old,true);
+                    decoder_Symbol_Wise_new->rotate_pointers_and_insert_zero_word(n,n2,size_received,codeword_r_d_size_current,true);
                     decoder_Symbol_Wise->symbol_wise_encode_1(k_old,n_old,k2_old,n2_old,&flag);
                     if (flag==true){
                         loss_counter_++;
@@ -388,6 +397,8 @@ namespace siphon {
                     memcpy(codeword_final + 2, decoder_Symbol_Wise_new->codeword_new_vector[n2-1], size_t(codeword_r_d_size_current));
                     memcpy(codeword_final + codeword_r_d_size_current + 2, decoder_Symbol_Wise->codeword_new_vector[n2_old - 1], size_t(codeword_r_d_size_old));
                     memcpy(decoder_Symbol_Wise->codeword_vector_to_transmit[n2_old-1],codeword_final,size_t(codeword_size_final_temp));
+                    decoder_Symbol_Wise->k2_vector[n2_old-1]=k2_old;
+                    decoder_Symbol_Wise->n2_vector[n2_old-1]=n2_old;
                     decoder_Symbol_Wise->codeword_size_vector[n2_old-1]=codeword_size_final_temp;
 //                    // prepare decoder_Symbol_Wise_new->codeword_new_vector[n2-1] for sending if needed!!!
 //                    memcpy(codeword_final + 2, decoder_Symbol_Wise_new->codeword_new_vector[n2-1], size_t(codeword_r_d_size_current));
@@ -399,6 +410,11 @@ namespace siphon {
                 }
             }
         }
+
+//        if ((T != message->T) || (B != message->B) || (N != message->N)) { //record when the double_coding begins
+//            seq_start_double_coding = received_seq - message->counter_for_start_and_end;
+//            cout<<"Start double coding at the relay"<<endl;
+//        }
 
         if ((received_seq > seq_end_double_coding) && (double_coding_flag == 1)) {
             double_coding_flag = 0;
@@ -436,7 +452,7 @@ namespace siphon {
             }
             *codeword_size_final = codeword_r_d_size_current+2;  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
 
-            int codeword_size_final_temp = codeword_r_d_size_current;
+            int codeword_size_final_temp = codeword_r_d_size_current+2;
             codeword_final[1] = (unsigned char) (codeword_r_d_size_current);
             codeword_final[0] = (unsigned char) ((codeword_r_d_size_current) / 256);
             memcpy(codeword_final + 2, decoder_Symbol_Wise->codeword_new_vector[n2-1], size_t(codeword_r_d_size_current));
@@ -487,6 +503,8 @@ namespace siphon {
         counter_++; //Elad - need to check
 
         latest_seq = received_seq + 1;
+        k2_last_used=k2;
+        n2_last_used=n2;
         //return received_seq;//ELAD to change
     }
 
@@ -514,9 +532,10 @@ namespace siphon {
             //cout << "\033[1;31mOut-of-sequence packet: #" << received_seq << "\033[0m" << endl;
             return;
         }
-
+        int transition_flag=0;
         if ((T != message->T) || (B != message->B) || (N != message->N)){ //record when the double_coding begins
             seq_start_double_coding = received_seq - message->counter_for_start_and_end;
+            transition_flag=1;
             cout<<"Start double coding at the destination"<<endl;
         }
 
@@ -564,7 +583,7 @@ namespace siphon {
 
             if (double_coding_flag==0){
                 // the k,n inserted from above are the new ones in case packet dropped before beginning of transition...
-                decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n_last_used,0,size_received,0);
+                decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n_last_used,0,size_received,0,false);
                 flag=false;
                 decoder_Symbol_Wise->symbol_wise_decode_1(buffer,&flag,k_last_used,n_last_used);
                 if (flag) {
@@ -573,29 +592,10 @@ namespace siphon {
                 }
                 decoder_Symbol_Wise->extract_data(buffer,k,n,seq,temp_buffer);
                 if (DEBUG_CHAR==1) {
-                    while ((payload_simulator->current_file_position) / 300 < (seq + 1) - T_TOT)
-                        payload_simulator->generate_payload(raw_data);
-                    int count_char_errors = 0;
-                    int sum_of_chars=0;
-                    if (seq >= T_TOT) {
-                        for (int kk = 0; kk < 300; kk++) {
-                            if (temp_buffer[kk + 2] != raw_data[kk]) {
-                                if (kk<250)
-                                    sum_of_chars=sum_of_chars+(int)temp_buffer[kk + 2];
-                                count_char_errors++;
-                                counter_loss_of_char++;
-                                final_counter_loss_of_char++;
-                            }
-                        }
-//                DEBUG_MSG("\033[1;34m" << "% of bad chars " << (float)count_char_errors/300*100 << "% " << "\033[0m");
-//                DEBUG_MSG("\033[1;34m" << "Original Message #" << received_seq-T_TOT << ": " << "\033[0m");
-                        printMatrix(raw_data, 1, 300);
-                        if (sum_of_chars>0 && count_char_errors>200)
-                            cout<<"Elad";
-                    }
+                    calc_missed_chars(seq,temp_buffer);
                 }
             }else{
-                decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n_old,0,size_received_transition,0);
+                decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n_old,0,size_received_transition,0,false);
                 flag=false;
                 decoder_Symbol_Wise->symbol_wise_decode_1(buffer,&flag,k_old,n_old);
                 if (flag) {
@@ -604,29 +604,10 @@ namespace siphon {
                 }
                 decoder_Symbol_Wise->extract_data(buffer,k_old,n_old,seq,temp_buffer);
                 if (DEBUG_CHAR==1) {
-                    while ((payload_simulator->current_file_position) / 300 < (seq + 1) - T_TOT)
-                        payload_simulator->generate_payload(raw_data);
-                    int count_char_errors = 0;
-                    int sum_of_chars=0;
-                    if (seq >= T_TOT) {
-                        for (int kk = 0; kk < 300; kk++) {
-                            if (temp_buffer[kk + 2] != raw_data[kk]) {
-                                if (kk<250)
-                                    sum_of_chars=sum_of_chars+(int)raw_data[kk];
-                                count_char_errors++;
-                                counter_loss_of_char++;
-                                final_counter_loss_of_char++;
-                            }
-                        }
-//                DEBUG_MSG("\033[1;34m" << "% of bad chars " << (float)count_char_errors/300*100 << "% " << "\033[0m");
-//                DEBUG_MSG("\033[1;34m" << "Original Message #" << received_seq-T_TOT << ": " << "\033[0m");
-                        printMatrix(raw_data, 1, 300);
-                        if (sum_of_chars>0 && count_char_errors>200)
-                            cout<<"Elad";
-                    }
+                    calc_missed_chars(seq,temp_buffer);
                 }
                 counter_++;
-                decoder_Symbol_Wise_new->rotate_pointers_and_insert_zero_word(n,0,size_received,0);
+                decoder_Symbol_Wise_new->rotate_pointers_and_insert_zero_word(n,0,size_received,0,false);
                 decoder_Symbol_Wise_new->symbol_wise_decode_1(buffer,&flag,k,n);
             }
 //            for (int i = 0; i < n - 1; i++) {
@@ -655,7 +636,7 @@ namespace siphon {
 //            k2_old=k2;
         }
 
-        if (received_seq == seq_start_double_coding) {
+        if (received_seq == seq_start_double_coding || (received_seq>=seq_start_double_coding && transition_flag==1)) {
             seq_end_double_coding = seq_start_double_coding + T_TOT + 1 - 1;//TODO need to make sure it use the right T...
             if (decoder_Symbol_Wise_new != NULL)
                 delete decoder_Symbol_Wise_new;
@@ -703,26 +684,7 @@ namespace siphon {
             }
             decoder_Symbol_Wise->extract_data(buffer,k,n,received_seq,temp_buffer);
             if (DEBUG_CHAR==1) {
-                while ((payload_simulator->current_file_position) / 300 < (received_seq + 1) - T_TOT)
-                    payload_simulator->generate_payload(raw_data);
-                int count_char_errors = 0;
-                int sum_of_chars=0;
-                if (received_seq >= T_TOT) {
-                    for (int kk = 0; kk < 300; kk++) {
-                        if (temp_buffer[kk + 2] != raw_data[kk]) {
-                            if (kk<250)
-                                sum_of_chars=sum_of_chars+(int)temp_buffer[kk + 2];
-                            count_char_errors++;
-                            counter_loss_of_char++;
-                            final_counter_loss_of_char++;
-                        }
-                    }
-//                DEBUG_MSG("\033[1;34m" << "% of bad chars " << (float)count_char_errors/300*100 << "% " << "\033[0m");
-//                DEBUG_MSG("\033[1;34m" << "Original Message #" << received_seq-T_TOT << ": " << "\033[0m");
-                    printMatrix(raw_data, 1, 300);
-                    if (sum_of_chars>0 && count_char_errors>200)
-                        cout<<"Elad";
-                }
+                calc_missed_chars(received_seq,temp_buffer);
             }
 
 //            // temp extraction of data
@@ -748,6 +710,9 @@ namespace siphon {
                 final_loss_counter_++;
             }
             decoder_Symbol_Wise->extract_data(buffer,k_old,n_old,received_seq,temp_buffer);
+            if (DEBUG_CHAR==1) {
+                calc_missed_chars(received_seq,temp_buffer);
+            }
 //            // temp extraction of data
 //            unsigned char temp_buffer[30000];
 //            int ind=0;
@@ -1220,6 +1185,39 @@ namespace siphon {
                  << (double) disruption_session_counter_FEC / total_session_counter << endl;
 
             display_final_loss_rate_flag = false;
+        }
+    }
+    void Variable_Rate_FEC_Decoder::calc_missed_chars(int received_seq, unsigned char *temp_buffer) {
+        while ((payload_simulator->current_file_position) / 300 < (received_seq + 1) - T_TOT)
+            payload_simulator->generate_payload(raw_data);
+        int count_char_errors = 0;
+        int sum_of_false_chars = 0;
+        int sum_of_all_chars = 0;
+        int sum_of_all_chars_geq_200_leq_250= 0;
+        if (received_seq >= T_TOT) {
+            for (int kk = 0; kk < 300; kk++) {
+                if (kk<250)
+                    sum_of_all_chars=sum_of_all_chars+(int) temp_buffer[kk + 2];
+                if (kk>200 && kk<250)
+                    sum_of_all_chars_geq_200_leq_250=sum_of_all_chars_geq_200_leq_250+(int) temp_buffer[kk + 2];
+                if (temp_buffer[kk + 2] != raw_data[kk]) {
+                    if (kk < 250)
+                        sum_of_false_chars = sum_of_false_chars + (int) temp_buffer[kk + 2];
+                    count_char_errors++;
+                    counter_loss_of_char++;
+                    final_counter_loss_of_char++;
+                }
+            }
+//                DEBUG_MSG("\033[1;34m" << "% of bad chars " << (float)count_char_errors/300*100 << "% " << "\033[0m");
+//                DEBUG_MSG("\033[1;34m" << "Original Message #" << received_seq-T_TOT << ": " << "\033[0m");
+            printMatrix(raw_data, 1, 300);
+            if (sum_of_false_chars > 0 && count_char_errors > 200) {
+                cout << "Elad";
+                final_counter_loss_of_char_elad++;
+            }
+            if (sum_of_all_chars>0 && sum_of_all_chars_geq_200_leq_250==0 && count_char_errors > 100) {
+                cout << "Dror";
+            }
         }
     }
 }

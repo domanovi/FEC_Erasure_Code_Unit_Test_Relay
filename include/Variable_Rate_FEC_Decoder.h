@@ -63,6 +63,7 @@ namespace siphon {
         FEC_Decoder *decoder_old;
         int *erasure_counter;
         int *erasure_counter_total;
+        int flag_for_burst;
 
         unsigned char **codeword_new_vector;
 //        unsigned char **codeword_new_vector_new_decoder;
@@ -76,6 +77,8 @@ namespace siphon {
 
         void receive_message_and_symbol_wise_decode(FEC_Message *message, int n, int k, int temp_size);
 
+        void calc_missed_chars(int received_seq, unsigned char *temp_buffer);
+
         Decoder_Symbol_Wise *decoder_Symbol_Wise;
         Decoder_Symbol_Wise *decoder_Symbol_Wise_new;
         Decoder_Symbol_Wise *decoder_Symbol_Backup;
@@ -83,7 +86,7 @@ namespace siphon {
 
 
         int n2_old;
-        size_t final_counter_loss_of_char;
+        size_t final_counter_loss_of_char,final_counter_loss_of_char_elad;
     private:
 
         int T{}, B{}, N{}, max_payload;
@@ -91,7 +94,7 @@ namespace siphon {
         int n_old,k_old;
         int k2_old;
         int n_last_used,k_last_used;
-
+        int n2_last_used,k2_last_used;
 
         int latest_seq;
         int latest_seq_2;

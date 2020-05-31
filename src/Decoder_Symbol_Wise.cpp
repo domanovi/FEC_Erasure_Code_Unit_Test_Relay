@@ -27,12 +27,16 @@ namespace siphon {
             memset(codeword_vector[i], '\000', 10000);
             codeword_new_vector[i] = (unsigned char *) malloc(
                     sizeof(unsigned char) * 10000); //4-byte sequence number + 4-byte
+            memset(codeword_new_vector[i], '\000', 10000);
             codeword_vector_store_in_burst[i] = (unsigned char *) malloc(
                     sizeof(unsigned char) * 10000); //4-byte sequence number + 4-byte
+            memset(codeword_vector_store_in_burst[i], '\000', 10000);
             codeword_vector_to_transmit[i]=(unsigned char *) malloc(
                     sizeof(unsigned char) * 10000); //4-byte sequence number + 4-byte
-            //memset(codeword_new_vector[i],'\000',(max_payload + 12) * 4 * T_INITIAL);
+            memset(codeword_vector_to_transmit[i], '\000', 10000);
             temp_erasure_vector[i] = 0;
+            n2_vector[i]=0;
+            k2_vector[i]=0;
         }
 
     }
@@ -53,7 +57,7 @@ namespace siphon {
                 codeword_new_vector[i][j]=source->codeword_new_vector[i][j];
                 codeword_vector_store_in_burst[i][j]=source->codeword_vector_store_in_burst[i][j];
                 codeword_vector_to_transmit[i][j]=source->codeword_vector_store_in_burst[i][j];
-             }
+            }
             temp_erasure_vector[i]=source->temp_erasure_vector[i];
             codeword_size_vector[i]=source->codeword_size_vector[i];
         }
@@ -71,12 +75,13 @@ namespace siphon {
             memcpy(codeword_new_vector[i], codeword_new_vector[i + 1], 10000);
             memcpy(codeword_vector_to_transmit[i], codeword_vector_to_transmit[i + 1], 10000);
             codeword_size_vector[i]=codeword_size_vector[i+1];
+            k2_vector[i]=k2_vector[i+1];
         }
         memcpy(&codeword_vector[n-1][2],message,sizeof(unsigned char)*10000);
         temp_erasure_vector[n - 1] = 0;
     }
 
-    void Decoder_Symbol_Wise::rotate_pointers_and_insert_zero_word(int n,int n2, int temp_size,int codeword_r_d_size_current){
+    void Decoder_Symbol_Wise::rotate_pointers_and_insert_zero_word(int n,int n2, int temp_size,int codeword_r_d_size_current,bool flag_fot_rotate_burst){
         for (int i = 0; i < n - 1; i++) {
             memcpy(codeword_vector[i], codeword_vector[i + 1], sizeof(unsigned char)*10000);
             temp_erasure_vector[i] = temp_erasure_vector[i + 1];//ELAD to check...
@@ -84,8 +89,10 @@ namespace siphon {
         for (int i=0;i<n2-1;i++) {
             memcpy(codeword_new_vector[i], codeword_new_vector[i + 1], sizeof(unsigned char)*10000);
             memcpy(codeword_vector_to_transmit[i], codeword_vector_to_transmit[i + 1], 10000);
-            memcpy(codeword_vector_store_in_burst[i], codeword_vector_store_in_burst[i + 1], sizeof(unsigned char)*10000);
+            if (flag_fot_rotate_burst==true)
+                memcpy(codeword_vector_store_in_burst[i], codeword_vector_store_in_burst[i + 1], sizeof(unsigned char)*10000);
             codeword_size_vector[i] = codeword_size_vector[i+1];
+            k2_vector[i]=k2_vector[i+1];
         }
         memset(codeword_vector[n - 1], '\000', sizeof(unsigned char)*10000);//ELAD - 300=max_payload
         temp_erasure_vector[n - 1] = 1;
@@ -98,7 +105,7 @@ namespace siphon {
             if (temp_erasure_vector[i]==1)
                 erasure_counter++;
         }
-        int number_of_code_blocks=ceil(300/k);//TODO replace 300 wih max_payload !!! Since k=k2 no need to worry !
+        int number_of_code_blocks=ceil(304/k);//TODO replace 300 wih max_payload !!! Since k=k2 no need to worry !
 //        int number_of_code_blocks_r_d=ceil(300/k2);//TODO replace 300 wih max_payload !!!
 
         // Extract the relevant parts from the coded message
@@ -146,7 +153,7 @@ namespace siphon {
         //memcpy(codeword_new_vector[n2-1],codeword_new_symbol_wise,temp_size);//ELAD - to change
 
 
-        for (int j=0;j<100;j++) {
+        for (int j=0;j<number_of_code_blocks;j++) {
             for (int delta=0;delta<n2-k2;delta++) {//this is to fill all parity symbols in codeword_new_vector[n2 - 1]
                 for (int i = 0+delta; i < k_min+delta; i++) {
                     temp_codeword[i-delta] = codeword_new_vector[i][2 + j * n2 +i-delta]; // temp_codeword holds the diagonal (c_0,b_0,a_0...)!!!
@@ -177,7 +184,7 @@ namespace siphon {
 
 //        unsigned char buffer[30000];
         unsigned char temp_codeword[n];
-        int number_of_code_blocks=ceil(300/k);//TODO replace 300 wih max_payload !!!
+        int number_of_code_blocks=ceil(304/k);//TODO replace 300 wih max_payload !!!
         bool *stam_erasure_vector=(bool *) malloc(sizeof(bool)*T_INITIAL);
         *flag=false;
         for (int j=0;j<number_of_code_blocks;j++) {
@@ -200,7 +207,7 @@ namespace siphon {
 
     void Decoder_Symbol_Wise::extract_data(unsigned char *buffer,int k,int n,int received_seq,unsigned char *temp_buffer){// temp extraction of data
 //        unsigned char temp_buffer[30000];
-        int number_of_code_blocks=ceil(300/k);//TODO replace 300 wih max_payload !!!
+        int number_of_code_blocks=ceil(304/k);//TODO replace 300 wih max_payload !!!
         int ind=0;
         for (int j=0;j<number_of_code_blocks;j++) {
             for (int i = 0; i < k; i++) {

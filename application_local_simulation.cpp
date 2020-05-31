@@ -97,6 +97,11 @@ int main(int argc, const char *argv[]) {
     Application_Layer_Sender application_layer_sender(Tx, Rx, packet_size, 0, T,B, N, 0);
     Application_Layer_Sender application_layer_relay_sender(Tx2, Rx2, packet_size, 0, T2, B2, N2 , 1 );
 
+    application_layer_sender.variable_rate_FEC_encoder->T2=T2;
+    if (N2==-1){
+        application_layer_sender.variable_rate_FEC_encoder->N2=0;
+        application_layer_sender.variable_rate_FEC_encoder->B2=0;
+    }
     Application_Layer_Receiver *application_layer_relay_receiver = new Application_Layer_Receiver(Tx, Rx, max_payload,
                                                                                                   erasure_type,
                                                                                                   adaptive_mode_MDS, 0);
@@ -143,18 +148,22 @@ int main(int argc, const char *argv[]) {
 //    erasure_simulator.erasure_seq[4]='\001';
 //    erasure_simulator.erasure_seq[5]='\001';
 
-    for (int i=0;i<1000;i++) {
-        erasure_simulator.erasure_seq[i] = '\000';
-    }
-
-    for (int i=0;i<1000;i++) {
-        erasure_simulator2.erasure_seq[i] = '\000';
-    }
-    erasure_simulator.erasure_seq[1]='\001';
-    erasure_simulator.erasure_seq[2]='\001';
+//    for (int i=0;i<1000;i++) {
+//        erasure_simulator.erasure_seq[i] = '\000';
+//    }
+//
+//    for (int i=0;i<1000;i++) {
+//        erasure_simulator2.erasure_seq[i] = '\000';
+//    }
+//    erasure_simulator.erasure_seq[1]='\001';
+//    erasure_simulator.erasure_seq[2]='\001';
 //    erasure_simulator.erasure_seq[3]='\001';
-//    erasure_simulator.erasure_seq[4]='\001';
-//    erasure_simulator2.erasure_seq[6]='\001';
+//    erasure_simulator.erasure_seq[5]='\001';
+//    erasure_simulator.erasure_seq[6]='\001';
+//    erasure_simulator.erasure_seq[7]='\001';
+//    erasure_simulator2.erasure_seq[1]='\001';
+//    erasure_simulator2.erasure_seq[3]='\001';
+//    erasure_simulator2.erasure_seq[5]='\001';
 //    erasure_simulator.erasure_seq[7]='\001';
 //    erasure_simulator2.erasure_seq[8]='\001';
 //    erasure_simulator.erasure_seq[9]='\001';
@@ -301,7 +310,8 @@ int main(int argc, const char *argv[]) {
                                                                                                   &k2_new,&n2_new);
             bool flag_for_using_backup=false;
             if (seq_number>-1) {
-                if (seq_number-last_seq_received_from_srouce>n2_new) {
+//                if (seq_number-last_seq_received_from_srouce>n2_new) {
+                if (application_layer_relay_receiver->fec_decoder->flag_for_burst>0){
                     //Need to send all codeword_vector_store_in_burst
                     int double_coding_sum=0;
                     if (seq_number-last_seq_received_from_srouce>1){// packets erased in (s,r)
@@ -316,7 +326,7 @@ int main(int argc, const char *argv[]) {
                         }
                     }
                     int count=-1;
-                    for (int seq = 0; seq < n2_new; seq++) {
+                    for (int seq = 0; seq < application_layer_relay_receiver->fec_decoder->flag_for_burst; seq++) {
                         count++;
                           if (flag_for_using_backup==true && count<double_coding_sum) {
                             int n2_old_old=application_layer_relay_receiver->fec_decoder->decoder_Symbol_Backup->n;
@@ -408,6 +418,8 @@ int main(int argc, const char *argv[]) {
     if (RELAYING_TYPE==2 && DEBUG_CHAR==1) {
         float final_char_loss_in_per=(float) application_layer_destination_receiver->fec_decoder->final_counter_loss_of_char/(300*(packet_counter-T_TOT)) * 100;
         DEBUG_MSG("\033[1;34m" << "Total Char loss in % "<<  final_char_loss_in_per << "% " << "\033[0m");
+        DEBUG_MSG("\033[1;34m" << "Total occurnces bad words% "<<  application_layer_destination_receiver->fec_decoder->final_counter_loss_of_char_elad << "\033[0m");
+
     }
 
 //    cout << "Loss probability = " << calculateLossMessage(INPUTDATAFILE, OUTPUTDATAFILE);
