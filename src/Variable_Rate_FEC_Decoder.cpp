@@ -195,7 +195,7 @@ namespace siphon {
         unsigned char *codeword_received_transition = codeword_received + size_received;
 //        int size_received_transition = message->size - 2 - size_received;
         int size_received_transition = message->size - size_received;
-        char codeword_final[30000];
+        unsigned char codeword_final[30000];
         bool flag=false;
 
 //        decoder_Symbol_Wise->receive_message_and_symbol_wise_encode(message->buffer,received_seq,latest_seq,n,k,k2,
@@ -205,6 +205,7 @@ namespace siphon {
 
         int codeword_r_d_size_old= (ceil(float(max_payload + 2) / k2_old)+1) * n2_old;
         int codeword_r_d_size_current= (ceil(float(max_payload + 2) / k2)+1) * n2;
+        int codeword_r_d_size_last= (ceil(float(max_payload + 2) / k2_last_used)+1) * n2_last_used;
 
         flag_for_burst=0;
         if (received_seq>latest_seq+n2_old-1) {
@@ -355,18 +356,26 @@ namespace siphon {
                 }
 
                 if (double_coding_flag == 0) {
-                    decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n,n2,size_received,codeword_r_d_size_current,true);
                     DEBUG_MSG("\033[1;34m" << "Packet dropped in (s,r) #" << seq << ": " << "\033[0m");
-                    decoder_Symbol_Wise->symbol_wise_encode_1(k,n,k2,n2,&flag);
+//                    decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n,n2,size_received,codeword_r_d_size_current,true);
+//                    decoder_Symbol_Wise->symbol_wise_encode_1(k,n,k2,n2,&flag);
+                    decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n_last_used,n2_last_used,size_received,codeword_r_d_size_current,true);
+                    decoder_Symbol_Wise->symbol_wise_encode_1(k_last_used,n_last_used,k2_last_used,n2_last_used,&flag);
                     if (flag==true){
                         loss_counter_++;
                         final_loss_counter_++;
                     }
-                    *codeword_size_final = codeword_r_d_size_current+2;  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
-                    int codeword_size_final_temp = codeword_r_d_size_current+2;
-                    codeword_final[1] = (unsigned char) (codeword_r_d_size_current);
-                    codeword_final[0] = (unsigned char) ((codeword_r_d_size_current) / 256);
-                    memcpy(codeword_final + 2, decoder_Symbol_Wise->codeword_new_vector[n2-1], size_t(codeword_r_d_size_current));
+//                    *codeword_size_final = codeword_r_d_size_current+2;  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
+//                    int codeword_size_final_temp = codeword_r_d_size_current+2;
+//                    codeword_final[1] = (unsigned char) (codeword_r_d_size_current);
+//                    codeword_final[0] = (unsigned char) ((codeword_r_d_size_current) / 256);
+//                    memcpy(codeword_final + 2, decoder_Symbol_Wise->codeword_new_vector[n2-1], size_t(codeword_r_d_size_current));
+                     *codeword_size_final = codeword_r_d_size_last+2;  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
+                    int codeword_size_final_temp = codeword_r_d_size_last+2;
+                    codeword_final[1] = (unsigned char) (codeword_r_d_size_last);
+                    codeword_final[0] = (unsigned char) ((codeword_r_d_size_last) / 256);
+                    memcpy(codeword_final + 2, decoder_Symbol_Wise->codeword_new_vector[n2-1], size_t(codeword_r_d_size_last));
+
                     memcpy(decoder_Symbol_Wise->codeword_vector_to_transmit[n2-1],codeword_final,size_t(codeword_size_final_temp));
                     decoder_Symbol_Wise->k2_vector[n2-1]=k2;
                     decoder_Symbol_Wise->n2_vector[n2-1]=n2;
@@ -503,6 +512,8 @@ namespace siphon {
         counter_++; //Elad - need to check
 
         latest_seq = received_seq + 1;
+        k_last_used=k;
+        n_last_used=n;
         k2_last_used=k2;
         n2_last_used=n2;
         //return received_seq;//ELAD to change
@@ -534,7 +545,10 @@ namespace siphon {
         }
         int transition_flag=0;
         if ((T != message->T) || (B != message->B) || (N != message->N)){ //record when the double_coding begins
-            seq_start_double_coding = received_seq - message->counter_for_start_and_end;
+            if (message->counter_for_start_and_end>128)
+                seq_start_double_coding = received_seq - (message->counter_for_start_and_end-255);
+            else
+                seq_start_double_coding = received_seq - message->counter_for_start_and_end;
             transition_flag=1;
             cout<<"Start double coding at the destination"<<endl;
         }
@@ -558,7 +572,7 @@ namespace siphon {
             DEBUG_MSG("\033[1;34m" << "Packet dropped in (r,d) #" << seq << ": " << "\033[0m");
             if ((seq > seq_end_double_coding) && (double_coding_flag == 1)) {
                 double_coding_flag = 0;
-//                decoder_Symbol_Wise = decoder_Symbol_Wise_new;
+                //                decoder_Symbol_Wise = decoder_Symbol_Wise_new;
                 decoder_Symbol_Wise->copy_elements(decoder_Symbol_Wise_new,false);
                 cout<<"Stopped double coding at the destination"<<endl;
                 n_last_used=n;
@@ -575,7 +589,7 @@ namespace siphon {
                 T=message->T;
                 B=message->B;
                 N=message->N;
-
+                transition_flag=0; // no need to perform another tranisition
                 decoder_Symbol_Wise_new=new Decoder_Symbol_Wise(max_payload);
                 decoder_Symbol_Wise_new->decoder_current=new Decoder(T,B,N, max_payload);
                 double_coding_flag = 1;
@@ -590,7 +604,7 @@ namespace siphon {
                     loss_counter_++;
                     final_loss_counter_++;
                 }
-                decoder_Symbol_Wise->extract_data(buffer,k,n,seq,temp_buffer);
+                decoder_Symbol_Wise->extract_data(buffer,k_last_used,n_last_used,seq,temp_buffer);
                 if (DEBUG_CHAR==1) {
                     calc_missed_chars(seq,temp_buffer);
                 }
@@ -675,14 +689,17 @@ namespace siphon {
 //            double_coding_flag = 1;
 //        }
         if (double_coding_flag==0) {
-            decoder_Symbol_Wise->push_current_codeword(codeword_received,n,0,size_received,0);
+//            decoder_Symbol_Wise->push_current_codeword(codeword_received,n,0,size_received,0);
+//            flag=false;
+//            decoder_Symbol_Wise->symbol_wise_decode_1(buffer,&flag,k,n);
+            decoder_Symbol_Wise->push_current_codeword(codeword_received,n_last_used,0,size_received,0);
             flag=false;
-            decoder_Symbol_Wise->symbol_wise_decode_1(buffer,&flag,k,n);
+            decoder_Symbol_Wise->symbol_wise_decode_1(buffer,&flag,k_last_used,n_last_used);
             if (flag) {
                 loss_counter_++;
                 final_loss_counter_++;
             }
-            decoder_Symbol_Wise->extract_data(buffer,k,n,received_seq,temp_buffer);
+            decoder_Symbol_Wise->extract_data(buffer,k_last_used,n_last_used,received_seq,temp_buffer);
             if (DEBUG_CHAR==1) {
                 calc_missed_chars(received_seq,temp_buffer);
             }
@@ -1194,6 +1211,7 @@ namespace siphon {
         int sum_of_false_chars = 0;
         int sum_of_all_chars = 0;
         int sum_of_all_chars_geq_200_leq_250= 0;
+        int sum_of_false_chars_not_zero=0;
         if (received_seq >= T_TOT) {
             for (int kk = 0; kk < 300; kk++) {
                 if (kk<250)
@@ -1201,8 +1219,11 @@ namespace siphon {
                 if (kk>200 && kk<250)
                     sum_of_all_chars_geq_200_leq_250=sum_of_all_chars_geq_200_leq_250+(int) temp_buffer[kk + 2];
                 if (temp_buffer[kk + 2] != raw_data[kk]) {
-                    if (kk < 250)
+                    if (kk < 250) {
                         sum_of_false_chars = sum_of_false_chars + (int) temp_buffer[kk + 2];
+                        if (temp_buffer[kk+2]!=0)
+                            sum_of_false_chars_not_zero=sum_of_false_chars_not_zero+1;
+                    }
                     count_char_errors++;
                     counter_loss_of_char++;
                     final_counter_loss_of_char++;
@@ -1211,11 +1232,15 @@ namespace siphon {
 //                DEBUG_MSG("\033[1;34m" << "% of bad chars " << (float)count_char_errors/300*100 << "% " << "\033[0m");
 //                DEBUG_MSG("\033[1;34m" << "Original Message #" << received_seq-T_TOT << ": " << "\033[0m");
             printMatrix(raw_data, 1, 300);
-            if (sum_of_false_chars > 0 && count_char_errors > 200) {
+            if (sum_of_false_chars_not_zero>10) {
+                cout << "Elad!!!";
+                final_counter_loss_of_char_elad++;
+            }
+            else if (sum_of_false_chars > 0 && count_char_errors > 200) {
                 cout << "Elad";
                 final_counter_loss_of_char_elad++;
             }
-            if (sum_of_all_chars>0 && sum_of_all_chars_geq_200_leq_250==0 && count_char_errors > 100) {
+            else if (sum_of_all_chars>0 && sum_of_all_chars_geq_200_leq_250==0 && count_char_errors > 100) {
                 cout << "Dror";
             }
         }

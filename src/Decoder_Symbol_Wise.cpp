@@ -56,7 +56,7 @@ namespace siphon {
                 codeword_vector[i][j]=source->codeword_vector[i][j];
                 codeword_new_vector[i][j]=source->codeword_new_vector[i][j];
                 codeword_vector_store_in_burst[i][j]=source->codeword_vector_store_in_burst[i][j];
-                codeword_vector_to_transmit[i][j]=source->codeword_vector_store_in_burst[i][j];
+                codeword_vector_to_transmit[i][j]=source->codeword_vector_to_transmit[i][j];
             }
             temp_erasure_vector[i]=source->temp_erasure_vector[i];
             codeword_size_vector[i]=source->codeword_size_vector[i];
@@ -215,7 +215,8 @@ namespace siphon {
             }
         }
 // Need to add decoding...
-        DEBUG_MSG("\033[1;34m" << "Message recovered at destination from symbol-wise DF #" << received_seq << ": " << "\033[0m");
+        DEBUG_MSG("\033[1;34m" << "Message recovered at destination (T=" << n-1 << ", N=" << n-k <<") R=" << k <<"/" << n
+        << " from symbol-wise DF #" << received_seq << ": " << "\033[0m");
         printMatrix(&temp_buffer[2], 1, 300);}
 
 

@@ -98,12 +98,18 @@ void Application_Layer_Sender::generate_message_and_encode(unsigned char *udp_pa
         printMatrix(response_buffer, 1, 12);
     }
     if (RELAYING_TYPE==2 && seq_number>0 && adaptive_coding==1){
-        if (N+N2<=T_TOT) {
+        if (N>=T_TOT) {
+            cout << "N1=T_TOT" << endl;
+            N=N_ack;
+        }
+        else if (N+N2<=T_TOT) {
             T = T_TOT - N2;
             variable_rate_FEC_encoder->N2 = N2;
+            variable_rate_FEC_encoder->B2 = N2;
 //        T2=T_TOT-N;
         }else
             cout<<"N1="<<N << "+N2=" << N2 <<">T_TOT="<<T_TOT<<endl;
+
         variable_rate_FEC_encoder->T2_ack = T2_ack;
         variable_rate_FEC_encoder->B2_ack = B2_ack;
         variable_rate_FEC_encoder->N2_ack = N2_ack;

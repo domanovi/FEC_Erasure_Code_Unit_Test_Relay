@@ -88,7 +88,7 @@ namespace siphon {
 //                (transition_flag == 0) && (T_ack == T) && (B_ack == B) &&
 //                (N_ack == N) && (T2_ack == T2) && (B2_ack == B2) && (N2_ack == N2)) { //currently not in transition and the current coding parameters have been acknowledged
             if (((message->T != T) || (message->B != B) || (message->N != N)) &&
-                                (transition_flag == 0) && (T_ack == T) && (B_ack == B)){
+                (transition_flag == 0) && (T_ack == T) && (B_ack == B)){
                 cout<<"Start double coding at the source"<<endl;
 
                 T_old = T;
@@ -152,12 +152,12 @@ namespace siphon {
                     codeword_old = encoder_old->onTransmit(message->buffer, message->size, message->seq_number,
                                                            &codeword_size_old);
 
-            } else
-                transition_flag = 0;
-//        } else if (counter_transition>2*T_TOT) //Can assist in debugging !!!
-//            transition_flag = 0;
-//        else
-//            counter_transition++;
+//            } else
+//                transition_flag = 0;
+        } else if (counter_transition>2*T_TOT) //Can assist in debugging !!!
+            transition_flag = 0;
+        else
+            counter_transition++;
         }else {
             if (counter_transition <= T) {
 
@@ -230,7 +230,7 @@ namespace siphon {
             }
         }
 
-            if (RELAYING_TYPE==1 && T2_ack!=0 && flag==0){
+        if (RELAYING_TYPE==1 && T2_ack!=0 && flag==0){
             if (double_coding_flag == false) {
                 sum_coding_rate_min_2_seg += std::min((float) (T - N + 1) / (T - N + 1 + B),(float) (T2_ack - N2_ack + 1) / (T2_ack - N2_ack + 1 + B2_ack));
                 final_sum_coding_rate_min_2_seg += std::min((float) (T - N + 1) / (T - N + 1 + B),(float) (T2_ack - N2_ack + 1) / (T2_ack - N2_ack + 1 + B2_ack));
@@ -243,10 +243,10 @@ namespace siphon {
         if(B==0)
             no_coding_percent += 1;
         else
-            if (B==N)
-                MDS_percent += 1;
-            else
-                adaptive_percent += 1;
+        if (B==N)
+            MDS_percent += 1;
+        else
+            adaptive_percent += 1;
 
         if (number_of_encoded_total == NUMBER_OF_ITERATIONS) {
             if (RELAYING_TYPE==1){
@@ -324,7 +324,7 @@ namespace siphon {
                 }else
                 {
                     cout << "Coding rate in (r,d) over " << report_window_size << " packets ending at seq " << message->seq_number
-                        << " = " << sum_coding_rate / counter_encoded << endl;
+                         << " = " << sum_coding_rate / counter_encoded << endl;
                 }
             }else if (RELAYING_TYPE==0){
                 cout << "Coding rate over " << report_window_size << " packets ending at seq " << message->seq_number
@@ -336,7 +336,7 @@ namespace siphon {
                      << " = " << sum_coding_rate_seg2_symb_wise / counter_encoded << endl;
                 cout << "Coding rate (min over the two hops) " << report_window_size << " packets ending at seq " << message->seq_number
                      << " = " << sum_coding_rate_min_2_seg / counter_encoded << endl;
-        }
+            }
             sum_coding_rate = 0;
             sum_coding_rate_min_2_seg=0;
             sum_coding_rate_seg2_symb_wise=0;
@@ -352,7 +352,12 @@ namespace siphon {
             save_to_file(message->buffer, message->size, &file_write_encoder);
 
         if (flag==0) {
-            DEBUG_MSG("\033[1;32m" << "Source message #" << message->seq_number << ": " << "\033[0m");
+            if (RELAYING_TYPE>0){
+                DEBUG_MSG("\033[1;32m" << "Source message # " << message->seq_number << " (T=" << message->T << ", N=" << message->N << ") R="
+                                       << (message->T-message->N+1) << "/" << (message->T+1) << " : " << "\033[0m");
+            }
+            else
+                DEBUG_MSG("\033[1;32m" << "Source message #" << message->seq_number << ": " << "\033[0m");
 
             if (message->size > 0)
                 printMatrix(message->buffer, 1, message->size);

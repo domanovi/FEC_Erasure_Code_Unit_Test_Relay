@@ -136,7 +136,7 @@ int main(int argc, const char *argv[]) {
             erasure_generator.generate_periodic(stream_duration + T, T, 0, 0, "erasure.bin");
     }
     erasure_generator.generate_three_sections_IID(3000,0.33,4000,0,stream_duration-3000-4000 + T+T2,0.33,"erasure.bin");
-    erasure_generator2.generate_IID(stream_duration + T+T2, 0.1, "erasure2.bin",2);
+    erasure_generator2.generate_IID(stream_duration + T+T2, 0.01, "erasure2.bin",2);
 
 
     siphon::Erasure_Simulator erasure_simulator("erasure.bin");
@@ -158,6 +158,10 @@ int main(int argc, const char *argv[]) {
 //    erasure_simulator.erasure_seq[1]='\001';
 //    erasure_simulator.erasure_seq[2]='\001';
 //    erasure_simulator.erasure_seq[3]='\001';
+////
+//    erasure_simulator2.erasure_seq[8]='\001';
+//    erasure_simulator2.erasure_seq[11]='\001';
+//    erasure_simulator2.erasure_seq[12]='\001';
 //    erasure_simulator.erasure_seq[5]='\001';
 //    erasure_simulator.erasure_seq[6]='\001';
 //    erasure_simulator.erasure_seq[7]='\001';
@@ -382,11 +386,17 @@ int main(int argc, const char *argv[]) {
                                     size_of_codeword, udp_parameters2, buffer2, &buffer_size2, 0,
                                     response_from_dest_buffer, k2_new, n2_new,
                                     application_layer_relay_receiver->fec_message->counter_for_start_and_end);
-                        }else
+                        }else {
+                            int counter_for_start_and_end=application_layer_relay_receiver->fec_message->counter_for_start_and_end-(seq_number-seq-1);
+                            if (counter_for_start_and_end<0)
+                                counter_for_start_and_end=255+counter_for_start_and_end;
+                            int size_of_codeword=application_layer_relay_receiver->fec_decoder->decoder_Symbol_Wise->codeword_size_vector[index];
                             application_layer_relay_sender.send_sym_wise_message(
                                     application_layer_relay_receiver->fec_decoder->decoder_Symbol_Wise->codeword_vector_to_transmit[index],
-                                    codeword_size_final, udp_parameters2, buffer2, &buffer_size2,0,
-                                    response_from_dest_buffer,k2_new,n2_new,application_layer_relay_receiver->fec_message->counter_for_start_and_end);
+                                    size_of_codeword, udp_parameters2, buffer2, &buffer_size2, 0,
+                                    response_from_dest_buffer, k2_new, n2_new,
+                                    counter_for_start_and_end);
+                        }
                         application_layer_destination_receiver->receive_message_and_symbol_wise_decode(
                                 udp_parameters2, buffer2,
                                 &buffer_size2,
