@@ -135,8 +135,9 @@ int main(int argc, const char *argv[]) {
         default:
             erasure_generator.generate_periodic(stream_duration + T, T, 0, 0, "erasure.bin");
     }
-    erasure_generator.generate_three_sections_IID(3000,0.33,4000,0,stream_duration-3000-4000 + T+T2,0.33,"erasure.bin");
-    erasure_generator2.generate_IID(stream_duration + T+T2, 0.01, "erasure2.bin",2);
+    erasure_generator.generate_three_sections_IID(1000,0.33,8000,0,stream_duration-1000-8000 + T+T2,0.33,"erasure.bin");
+//    erasure_generator.generate_three_sections_IID(4000,0,2000,0.33,stream_duration-4000-2000 + T+T2,0,"erasure.bin");
+    erasure_generator2.generate_IID(stream_duration + T+T2, 0, "erasure2.bin",2);
 
 
     siphon::Erasure_Simulator erasure_simulator("erasure.bin");
@@ -315,7 +316,8 @@ int main(int argc, const char *argv[]) {
             bool flag_for_using_backup=false;
             if (seq_number>-1) {
 //                if (seq_number-last_seq_received_from_srouce>n2_new) {
-                if (application_layer_relay_receiver->fec_decoder->flag_for_burst>0){
+                int length_of_burst=application_layer_relay_receiver->fec_decoder->flag_for_burst;
+                if (length_of_burst>0){
                     //Need to send all codeword_vector_store_in_burst
                     int double_coding_sum=0;
                     if (seq_number-last_seq_received_from_srouce>1){// packets erased in (s,r)
@@ -330,7 +332,8 @@ int main(int argc, const char *argv[]) {
                         }
                     }
                     int count=-1;
-                    for (int seq = 0; seq < application_layer_relay_receiver->fec_decoder->flag_for_burst; seq++) {
+
+                    for (int seq = 0; seq < length_of_burst; seq++) {
                         count++;
                         if (flag_for_using_backup==true && count<double_coding_sum) {
                             int n2_old_old=application_layer_relay_receiver->fec_decoder->decoder_Symbol_Backup->n;
@@ -365,9 +368,11 @@ int main(int argc, const char *argv[]) {
                                 &erasure_simulator2);
                     }
                     // send the message that was received after the burst
+                    int number_of_missing_packets_after_burst=seq_number-last_seq_received_from_srouce-length_of_burst-1; // correcting seq_number in the sent packet
                     application_layer_relay_sender.send_sym_wise_message(
                             application_layer_relay_receiver->fec_decoder->decoder_Symbol_Wise->codeword_vector_to_transmit[n2_new-1],
-                            codeword_size_final, udp_parameters2, buffer2, &buffer_size2,seq_number-last_seq_received_from_srouce-n2_new-1,
+                            codeword_size_final, udp_parameters2, buffer2, &buffer_size2,
+                            number_of_missing_packets_after_burst,
                             response_from_dest_buffer,k2_new,n2_new,application_layer_relay_receiver->fec_message->counter_for_start_and_end);
                     application_layer_destination_receiver->receive_message_and_symbol_wise_decode(
                             udp_parameters2, buffer2,
