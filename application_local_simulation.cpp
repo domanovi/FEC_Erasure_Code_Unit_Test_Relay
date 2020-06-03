@@ -332,19 +332,33 @@ int main(int argc, const char *argv[]) {
                     int count=-1;
                     for (int seq = 0; seq < application_layer_relay_receiver->fec_decoder->flag_for_burst; seq++) {
                         count++;
-                          if (flag_for_using_backup==true && count<double_coding_sum) {
+                        if (flag_for_using_backup==true && count<double_coding_sum) {
                             int n2_old_old=application_layer_relay_receiver->fec_decoder->decoder_Symbol_Backup->n;
-                            int size_of_codeword=application_layer_relay_receiver->fec_decoder->decoder_Symbol_Backup->codeword_size_vector[n2_old_old-count-1];
+                            int size_of_codeword=application_layer_relay_receiver->fec_decoder->decoder_Symbol_Backup->codeword_size_vector[n2_old_old-double_coding_sum+count];
                             application_layer_relay_sender.send_sym_wise_message(
-                                    application_layer_relay_receiver->fec_decoder->decoder_Symbol_Backup->codeword_vector_store_in_burst[n2_old_old-count-1],
+                                    application_layer_relay_receiver->fec_decoder->decoder_Symbol_Backup->codeword_vector_store_in_burst[n2_old_old-double_coding_sum+count],
                                     size_of_codeword, udp_parameters2, buffer2, &buffer_size2, 0,
                                     response_from_dest_buffer, k2_new, n2_new,
                                     application_layer_relay_receiver->fec_message->counter_for_start_and_end);
-                        }else
+                        }else {
+                            int burst_index;
+                            if (flag_for_using_backup==true)
+                                burst_index=seq-double_coding_sum;
+                            else
+                                burst_index=seq;
+
+                            int size_of_codeword=application_layer_relay_receiver->fec_decoder->decoder_Symbol_Wise->burst_codeword_size_vector[burst_index];
+                            int delta_for_counter_for_start_and_end=seq_number-last_seq_received_from_srouce-seq-1;
+                            int counter_for_start_and_end=application_layer_relay_receiver->fec_message->counter_for_start_and_end-delta_for_counter_for_start_and_end;
+                            if (counter_for_start_and_end<0)
+                                counter_for_start_and_end=255+counter_for_start_and_end;
                             application_layer_relay_sender.send_sym_wise_message(
-                                    application_layer_relay_receiver->fec_decoder->decoder_Symbol_Wise->codeword_vector_store_in_burst[seq],
-                                    codeword_size_final, udp_parameters2, buffer2, &buffer_size2,0,response_from_dest_buffer,
-                                    k2_new,n2_new,application_layer_relay_receiver->fec_message->counter_for_start_and_end);
+                                    application_layer_relay_receiver->fec_decoder->decoder_Symbol_Wise->codeword_vector_store_in_burst[burst_index],
+                                    size_of_codeword, udp_parameters2, buffer2, &buffer_size2, 0,
+                                    response_from_dest_buffer,
+                                    k2_new, n2_new,
+                                    counter_for_start_and_end);
+                        }
                         application_layer_destination_receiver->receive_message_and_symbol_wise_decode(
                                 udp_parameters2, buffer2,
                                 &buffer_size2,
@@ -374,15 +388,18 @@ int main(int argc, const char *argv[]) {
                         }
                     }
                     int count=-1;
+//                    int count=seq_number-last_seq_received_from_srouce-1;
                     for (int seq = last_seq_received_from_srouce; seq < seq_number; seq++) {
                         //                    int n=T_INITIAL+1;
+//                        count--;
                         count++;
                         int index = application_layer_relay_receiver->fec_decoder->n2_old - (seq_number - seq);
                         if (flag_for_using_backup==true && count<double_coding_sum) {
                             int n2_old_old=application_layer_relay_receiver->fec_decoder->decoder_Symbol_Backup->n;
-                            int size_of_codeword=application_layer_relay_receiver->fec_decoder->decoder_Symbol_Backup->codeword_size_vector[n2_old_old-count-1];
+//                            int index2=double_coding_sum-count;
+                            int size_of_codeword=application_layer_relay_receiver->fec_decoder->decoder_Symbol_Backup->codeword_size_vector[n2_old_old-double_coding_sum+count];
                             application_layer_relay_sender.send_sym_wise_message(
-                                    application_layer_relay_receiver->fec_decoder->decoder_Symbol_Backup->codeword_vector_to_transmit[n2_old_old-count-1],
+                                    application_layer_relay_receiver->fec_decoder->decoder_Symbol_Backup->codeword_vector_to_transmit[n2_old_old-double_coding_sum+count],
                                     size_of_codeword, udp_parameters2, buffer2, &buffer_size2, 0,
                                     response_from_dest_buffer, k2_new, n2_new,
                                     application_layer_relay_receiver->fec_message->counter_for_start_and_end);

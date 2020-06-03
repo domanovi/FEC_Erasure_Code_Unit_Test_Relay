@@ -60,6 +60,7 @@ namespace siphon {
         int max_payload;
         int k,n;
         int codeword_size_vector[T_TOT];
+        int burst_codeword_size_vector[T_TOT];
 
     private:
 

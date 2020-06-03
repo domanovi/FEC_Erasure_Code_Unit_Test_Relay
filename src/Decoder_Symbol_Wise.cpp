@@ -59,6 +59,7 @@ namespace siphon {
                 codeword_vector_to_transmit[i][j]=source->codeword_vector_to_transmit[i][j];
             }
             temp_erasure_vector[i]=source->temp_erasure_vector[i];
+            burst_codeword_size_vector[i]=source->burst_codeword_size_vector[i];
             codeword_size_vector[i]=source->codeword_size_vector[i];
         }
         decoder_current=new Decoder(source->decoder_current->T,source->decoder_current->B,source->decoder_current->N, source->decoder_current->max_payload);
@@ -89,8 +90,11 @@ namespace siphon {
         for (int i=0;i<n2-1;i++) {
             memcpy(codeword_new_vector[i], codeword_new_vector[i + 1], sizeof(unsigned char)*10000);
             memcpy(codeword_vector_to_transmit[i], codeword_vector_to_transmit[i + 1], 10000);
-            if (flag_fot_rotate_burst==true)
-                memcpy(codeword_vector_store_in_burst[i], codeword_vector_store_in_burst[i + 1], sizeof(unsigned char)*10000);
+            if (flag_fot_rotate_burst==true) {
+                memcpy(codeword_vector_store_in_burst[i], codeword_vector_store_in_burst[i + 1],
+                       sizeof(unsigned char) * 10000);
+                burst_codeword_size_vector[i]=burst_codeword_size_vector[i+1];
+            }
             codeword_size_vector[i] = codeword_size_vector[i+1];
             k2_vector[i]=k2_vector[i+1];
         }
