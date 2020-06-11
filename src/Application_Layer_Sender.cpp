@@ -91,18 +91,25 @@ void Application_Layer_Sender::generate_message_and_encode(unsigned char *udp_pa
             N2_ack = (int) udp_parameters[11];
         }
     }
-    cout << "Response at source" << endl;
-    printMatrix(response_buffer, 1, 12);
+//    cout << "Response at source" << endl;
+    //printMatrix(response_buffer, 1, 12);
     if (DEBUG_COMM==1) {
         cout << "Response at source" << endl;
         printMatrix(response_buffer, 1, 12);
     }
+    if (RELAYING_TYPE==1 && seq_number>0 && adaptive_coding==1) {
+        variable_rate_FEC_encoder->T2_ack = T2_ack;
+        variable_rate_FEC_encoder->N2_ack = N2_ack;
+        variable_rate_FEC_encoder->B2_ack = B2_ack;
+    }
+
     if (RELAYING_TYPE==2 && seq_number>0 && adaptive_coding==1){
-        if (N>=T_TOT) {
-            cout << "N1=T_TOT" << endl;
-            N=N_ack;
-        }
-        else if (N+N2<=T_TOT) {
+//        if (N>=T_TOT) {
+//            cout << "N1=T_TOT" << endl;
+//            N=N_ack;
+//        }
+//        else if (N+N2<=T_TOT) {
+        if (N+N2<=T_TOT) {
             T = T_TOT - N2;
             variable_rate_FEC_encoder->N2 = N2;
             variable_rate_FEC_encoder->B2 = N2;
@@ -286,7 +293,8 @@ void Application_Layer_Sender::message_wise_encode_at_relay(unsigned char *recei
     }
 
     message_transmitted->set_parameters(orig_seq_num, T, B, N, max_payload, received_data);
-    DEBUG_MSG("\033[1;36m" << "Relay->destination message #" << message_transmitted->seq_number << ": " << "\033[0m");
+    DEBUG_MSG("\033[1;36m" << "Relay->destination message #" << message_transmitted->seq_number << ": (T=" << T_ack << ", N=" <<
+        N_ack << ") R=" << T_ack-N_ack+1 << "/" << T_ack+1 << "\033[0m");
 
     if (message_transmitted->size > 0)
         printMatrix(message_transmitted->buffer, 1, message_transmitted->size);

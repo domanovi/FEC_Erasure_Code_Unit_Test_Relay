@@ -19,14 +19,20 @@
 //#define T_INITIAL 10
 //#define B_INITIAL -1
 //#define N_INITIAL -1
-#define T_TOT 5 // T_TOT needs to be >= T_INITAL+T_INTIAL_2
-#define T_INITIAL 3
-#define B_INITIAL -1
-#define N_INITIAL -1
 
-#define T_INITIAL_2 3
+#define RELAYING_TYPE 2
+// if RELAYING_TYPE=0 P2P
+// if RELAYING_TYPE=1 message-wise decode and forward
+// if RELAYING_TYPE=2 symbol-wise decode and forward
+
+#define T_TOT 10 // T_TOT needs to be >= T_INITAL+T_INTIAL_2
+#define T_INITIAL 4
+#define B_INITIAL -1
+#define N_INITIAL 2
+
+#define T_INITIAL_2 4
 #define B_INITIAL_2 2
-#define N_INITIAL_2 -1
+#define N_INITIAL_2 2
 
 #define ESTIMATION_WINDOW_SIZE 1000    //the size of window used for estimating coding parameters.
 
@@ -40,14 +46,9 @@
 // if ERASURE_TYPE=2, erasures are generated according Gilbert-Elliot channel (ALPHA, BETA, EPSILON);
 // if ERASURE_TYPE=3, erasures are generated according to the above Gilbert-Elliot channel with the middle third phase having beta doubled
 // if ERASURE_TYPE=4, erasures are generated according to (T,B,N)-periodic erasures
-// if Erasure_Type=5, erasures are obtained from the recorded erasures in erasure.bin inside the bin directory
+// if ERASURE_TYPE=5, erasures are obtained from the recorded erasures in erasure.bin inside the bin directory
 // if ERASURE_TYPE=6, iid erasures with Bernoulli(EPSILON) are introduced on three regions;
 
-
-#define RELAYING_TYPE 2
-// if RELAYING_TYPE=0 P2P
-// if RELAYING_TYPE=1 message-wise decode and forward
-// if RELAYING_TYPE=2 symbol-wise decode and forward
 
 #define ERASURE_RECORDER 0         //If ERASURE_RECORDER equals 1, erasure will be saved to "erasure.bin" inside the
 // bin directory, active only when ERASURE_TYPE not equal to 5
@@ -80,7 +81,7 @@
 /*************** The following is used for displaying debugging messages *******************/
 
 #define DEBUG_FEC 1 //debugging messages hidden if DEBUG_FEC is 0
-#define DEBUG_COMM 0
+#define DEBUG_COMM 1
 #define DEBUG_CHAR 1
 
 #if DEBUG_FEC

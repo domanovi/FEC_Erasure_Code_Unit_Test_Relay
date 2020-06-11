@@ -143,7 +143,11 @@ int Decoder::decodeStream(unsigned char *codeword, unsigned char *data_with_head
             decoder_basic[1]->decodeStream(codeword + n, data_with_header + k, erasure, t);
 
         payload = (int(data_with_header[0])) * 256 + int(data_with_header[1]); //payload for packet t-T
-
+        ////////////////////////////////////////////////////
+        // TODO - currently the destination may try to recover messages that were erased at the relay. This makes sure there will be no drift in massage size !!!
+        if (payload>max_payload)
+            payload=max_payload;
+        /////////////////////////////////////////////////
         int payload_with_header = payload + 2;
         int lastIndexWithData = ceil(float(payload_with_header) / k) - 1;
 

@@ -89,7 +89,10 @@ namespace siphon {
 //                (N_ack == N) && (T2_ack == T2) && (B2_ack == B2) && (N2_ack == N2)) { //currently not in transition and the current coding parameters have been acknowledged
             if (((message->T != T) || (message->B != B) || (message->N != N)) &&
                 (transition_flag == 0) && (T_ack == T) && (B_ack == B)){
-                cout<<"Start double coding at the source"<<endl;
+                if (RELAYING_TYPE==1 && flag==1)
+                    cout<<"Start double coding at the relay"<<endl;
+                else
+                    cout<<"Start double coding at the source"<<endl;
 
                 T_old = T;
                 B_old = B;
@@ -99,13 +102,15 @@ namespace siphon {
                 B = message->B;
                 N = message->N;
 
-                T2_old=T2;
-                B2_old=B2;
-                N2_old=N2;
+                if (RELAYING_TYPE==2) {
+                    T2_old = T2;
+                    B2_old = B2;
+                    N2_old = N2;
 
-                T2 = T_TOT-N;
+                    T2 = T_TOT - N;
 //                B2 = B2;
 //                N2 = N2; // N2 is modified at Applicaiton_Layer_Sender
+                }
 
                 transition_flag = 1; //set transition flag
                 double_coding_flag = 1;  //set double coding flag
@@ -163,7 +168,10 @@ namespace siphon {
 
                 if (counter_transition == T) {
                     double_coding_flag = 0;   //no need to use the old encoder to protect the data transmitted at T time slots ago
-                    cout<<"Stop double coding at the source"<<endl;
+                    if (RELAYING_TYPE==1 && flag==1)
+                        cout<<"Stop double coding at the relay"<<endl;
+                    else
+                        cout<<"Stop double coding at the source"<<endl;
                 }
 
                 counter_transition++;

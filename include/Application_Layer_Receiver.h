@@ -48,7 +48,7 @@ public:
                                                                        int *codeword_size_final,int *k2_out,int *n2_out);
     int receive_message_and_symbol_wise_decode(unsigned char *udp_parameters, unsigned char *udp_codeword,
                                            int *udp_codeword_size, siphon::Erasure_Simulator
-                                           *erasure_simulator);
+                                           *erasure_simulator,int length_of_burst);
 
     void update_parameter(unsigned char *udp_parameters);    //use parameter estimator to udpate the coding parameters
 

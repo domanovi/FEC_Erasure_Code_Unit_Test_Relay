@@ -87,6 +87,8 @@ namespace siphon {
 
         int n2_old;
         size_t final_counter_loss_of_char,final_counter_loss_of_char_elad;
+        size_t counter_loss_of_full_packet,final_counter_loss_of_full_packet;
+        size_t final_counter_loss_of_packets_swdf;
     private:
 
         int T{}, B{}, N{}, max_payload;

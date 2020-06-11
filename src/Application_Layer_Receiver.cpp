@@ -173,7 +173,7 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_encode(unsigned 
 
 int Application_Layer_Receiver::receive_message_and_symbol_wise_decode(unsigned char *udp_parameters, unsigned char *udp_codeword,
                                                                        int *udp_codeword_size, siphon::Erasure_Simulator
-                                                                       *erasure_simulator) {
+                                                                       *erasure_simulator,int num_of_packets_to_ignore_est) {
     int temp_size;
 
 //    int k=T_INITIAL-N_INITIAL+1; //Elad - to change
@@ -203,6 +203,14 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_decode(unsigned 
     fec_message->set_parameters(temp_seq, int(codeword[4]), int(codeword[5]), int(codeword[6]),
                                 temp_size - 8, codeword + 8);
     fec_message->counter_for_start_and_end = int(codeword[7]);
+
+    //disable estimation at the receiver.
+//    if (num_of_packets_to_ignore_est>0){
+//        for (int kk=0;kk<num_of_packets_to_ignore_est;kk++) {
+//            estimator->previous_win_end=temp_seq-num_of_packets_to_ignore_est+kk;
+//            background_estimator->previous_win_end=temp_seq-num_of_packets_to_ignore_est+kk;
+//        }
+//    }
 
     estimator->estimate(fec_message);
     background_estimator->estimate(fec_message);

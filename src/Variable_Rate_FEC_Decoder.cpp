@@ -53,8 +53,9 @@ namespace siphon {
         double_coding_flag = 0;
 
         recovered_message = new FEC_Message();
-        recovered_message_vector=(FEC_Message **)malloc(sizeof(FEC_Message*) * T_TOT);
-        for (int i=0;i<T_TOT;i++)
+        //Paraters used by message-wise DF
+        recovered_message_vector=(FEC_Message **)malloc(sizeof(FEC_Message*) * T_INITIAL);
+        for (int i=0;i<T_INITIAL;i++)
             recovered_message_vector[i]=new FEC_Message();
         message_old_encoder = new FEC_Message();
 
@@ -68,6 +69,8 @@ namespace siphon {
         counter_loss_of_char=0;
         final_counter_loss_of_char=0;
         final_counter_loss_of_char_elad=0;
+        counter_loss_of_full_packet=0;
+        final_counter_loss_of_full_packet=0;
 
         loss_counter_two_seg_=0;
         final_loss_counter_two_seg_=0;
@@ -780,8 +783,10 @@ namespace siphon {
             return;
         }
 
-        if ((T != message->T) || (B != message->B) || (N != message->N)) //record when the double_coding begins
+        if ((T != message->T) || (B != message->B) || (N != message->N)) { //record when the double_coding begins
             seq_start_double_coding = received_seq - message->counter_for_start_and_end;
+            cout<<"Start double coding at the destination"<<endl;
+        }
 
         // first decode the old message using the old decoder
 
@@ -817,7 +822,7 @@ namespace siphon {
         unsigned char zero = 0x0;
         unsigned char one = 0x1;
 
-        for (int i=0;i<T_TOT;i++) {
+        for (int i=0;i<T_INITIAL;i++) {
             recovered_message_vector[i]->buffer = NULL;
         }
         recovered_message->buffer = NULL;
@@ -841,8 +846,10 @@ namespace siphon {
 
             display_udp_statistics(seq);
 
-            if ((seq > seq_end_double_coding) && (double_coding_flag == 1))
+            if ((seq > seq_end_double_coding) && (double_coding_flag == 1)) {
                 double_coding_flag = 0;
+                cout << "Stopped double coding at the destination" << endl;
+            }
 
             if (seq == seq_start_double_coding) {
                 seq_end_double_coding = seq_start_double_coding + T - 1;
@@ -891,8 +898,10 @@ namespace siphon {
         if (erasure_recorder == 1)
             file_write_erasures.write((char *) &zero, 1);
 
-        if ((received_seq > seq_end_double_coding) && (double_coding_flag == 1))
+        if ((received_seq > seq_end_double_coding) && (double_coding_flag == 1)) {
             double_coding_flag = 0;
+            cout<<"Stopped double coding at the destination"<<endl;
+        }
 
         if (received_seq == seq_start_double_coding) {
             seq_end_double_coding = seq_start_double_coding + T - 1;
@@ -942,15 +951,19 @@ namespace siphon {
         if (message->buffer != NULL) {
             if (receiver_index==0)
                 if (RELAYING_TYPE == 0){
-                    DEBUG_MSG("\033[1;34m" << "Recovered message at destination #" << message->seq_number << ": " << "\033[0m");
+                    DEBUG_MSG("\033[1;34m" << "Recovered message at destination #" << message->seq_number << " (T=" << message->T << ", N="
+                        << message->N <<") R=" << message->T-message->N+1 << "/" << message->T+1 << " : " << "\033[0m");
                 }else {
-                    DEBUG_MSG("\033[1;35m" << "Recovered message at relay #" << message->seq_number << ": " << "\033[0m");
+                    DEBUG_MSG("\033[1;35m" << "Recovered message at relay # "  << message->seq_number << " (T=" << message->T << ", N="
+                        << message->N <<") R=" << message->T-message->N+1 << "/" << message->T+1 << " : " << "\033[0m");
                 }
             else {
-                DEBUG_MSG("\033[1;34m" << "Recovered message at destination #" << message->seq_number << ": "
-                                       << "\033[0m");
+                DEBUG_MSG("\033[1;34m" << "Recovered message at destination #" << message->seq_number << " (T=" << message->T << ", N="
+                    << message->N <<") R=" << message->T-message->N+1 << "/" << message->T+1 << " : " << "\033[0m");
             }
             printMatrix(message->buffer, 1, message->size);
+            if (RELAYING_TYPE>0 && receiver_index==1)
+                calc_missed_chars(message->seq_number+T_TOT, message->buffer-2);
             if ((file_name != "") && (counter_ <= NUMBER_OF_ITERATIONS))
                 save_to_file(message->buffer, message->size, &file_write_decoder);
 //            if (receiver_index>0 && message->buffer[0]=='\000' && message->buffer[1]=='\000' && message->buffer[22]=='\000' && message->buffer[3]=='\000' && message->buffer[14]=='\000' && message->buffer[100]=='\000'){
@@ -965,7 +978,9 @@ namespace siphon {
                     DEBUG_MSG("\033[1;31merased at (s,r):" << " #" << message->seq_number << "\033[0m" << endl);
                 }
             } else{
-                DEBUG_MSG("\033[1;34merased at (r,d):" << " #" << message->seq_number << "\033[0m" << endl);
+                DEBUG_MSG("\033[1;31merased at (r,d):" << " #" << message->seq_number << "\033[0m" << endl);
+                counter_loss_of_full_packet++;
+                final_counter_loss_of_full_packet++;
             }
             if ((file_name != "") && (counter_ <= NUMBER_OF_ITERATIONS))
                 save_to_file(NULL, max_payload, &file_write_decoder);
@@ -1017,7 +1032,6 @@ namespace siphon {
             payload = 0;
 
         if (payload > 0) {
-
             unsigned char *buffer_data = memory_object->allocate_memory(payload);
 
             //for (int j = 0; j < payload; j++)
@@ -1027,6 +1041,9 @@ namespace siphon {
             message->buffer = buffer_data;
             message->size = payload;
             message->seq_number = seq - T;
+            //Elad added
+            message->T=T;
+            message->N=N;
 
         } else {
             message->buffer = NULL;
@@ -1220,13 +1237,20 @@ namespace siphon {
         }
     }
     void Variable_Rate_FEC_Decoder::calc_missed_chars(int received_seq, unsigned char *temp_buffer) {
-        while ((payload_simulator->current_file_position) / 300 < (received_seq + 1) - T_TOT)
+        int counter=0;
+        while ((payload_simulator->current_file_position) / 300 < (received_seq + 1) - T_TOT) {
             payload_simulator->generate_payload(raw_data);
+            counter++;
+        }
+        if (counter>1)
+            cout<<"Inbar"<<endl;
         int count_char_errors = 0;
         int sum_of_false_chars = 0;
         int sum_of_all_chars = 0;
         int sum_of_all_chars_geq_200_leq_250= 0;
         int sum_of_false_chars_not_zero=0;
+        int counter_loss_of_char_old=counter_loss_of_char;
+        int final_counter_loss_of_char_old=final_counter_loss_of_char;
         if (received_seq >= T_TOT) {
             for (int kk = 0; kk < 300; kk++) {
                 if (kk<250)
@@ -1244,18 +1268,34 @@ namespace siphon {
                     final_counter_loss_of_char++;
                 }
             }
+
 //                DEBUG_MSG("\033[1;34m" << "% of bad chars " << (float)count_char_errors/300*100 << "% " << "\033[0m");
 //                DEBUG_MSG("\033[1;34m" << "Original Message #" << received_seq-T_TOT << ": " << "\033[0m");
             printMatrix(raw_data, 1, 300);
-            if (sum_of_false_chars_not_zero>10) {
+            int flag=0;
+            if (count_char_errors>0){
+                for (int kk = 0; kk < 50; kk++) {
+                    if (temp_buffer[kk + 2] != raw_data[kk]){
+                       flag=1;
+                       break;
+                    }
+                }
+                if (flag==1)
+                    final_counter_loss_of_packets_swdf++;
+            }
+            if (RELAYING_TYPE==2 && sum_of_false_chars_not_zero>10) {
                 cout << "Elad!!!";
                 final_counter_loss_of_char_elad++;
+//                counter_loss_of_char=counter_loss_of_char_old;
+//                final_counter_loss_of_char=final_counter_loss_of_char_old;
             }
-            else if (sum_of_false_chars > 0 && count_char_errors > 200) {
+            else if (RELAYING_TYPE==2 && sum_of_false_chars > 0 && count_char_errors > 200) {
                 cout << "Elad";
                 final_counter_loss_of_char_elad++;
+//                counter_loss_of_char=counter_loss_of_char_old;
+//                final_counter_loss_of_char=final_counter_loss_of_char_old;
             }
-            else if (sum_of_all_chars>0 && sum_of_all_chars_geq_200_leq_250==0 && count_char_errors > 100) {
+            else if (RELAYING_TYPE==2 && sum_of_all_chars>0 && sum_of_all_chars_geq_200_leq_250==0 && count_char_errors > 100) {
                 cout << "Dror";
             }
         }

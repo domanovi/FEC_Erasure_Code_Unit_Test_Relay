@@ -135,7 +135,7 @@ int main(int argc, const char *argv[]) {
         default:
             erasure_generator.generate_periodic(stream_duration + T, T, 0, 0, "erasure.bin");
     }
-    erasure_generator.generate_three_sections_IID(1000,0.33,8000,0,stream_duration-1000-8000 + T+T2,0.33,"erasure.bin");
+    erasure_generator.generate_three_sections_IID(3000,0.33,4000,0,stream_duration-3000-4000 + T+T2,0.33,"erasure.bin");
 //    erasure_generator.generate_three_sections_IID(4000,0,2000,0.33,stream_duration-4000-2000 + T+T2,0,"erasure.bin");
     erasure_generator2.generate_IID(stream_duration + T+T2, 0, "erasure2.bin",2);
 
@@ -156,10 +156,12 @@ int main(int argc, const char *argv[]) {
 //    for (int i=0;i<1000;i++) {
 //        erasure_simulator2.erasure_seq[i] = '\000';
 //    }
-//    erasure_simulator.erasure_seq[1]='\001';
+//    erasure_simulator2.erasure_seq[1]='\001';
 //    erasure_simulator.erasure_seq[2]='\001';
 //    erasure_simulator.erasure_seq[3]='\001';
-////
+//    erasure_simulator.erasure_seq[4]='\001';
+//    erasure_simulator.erasure_seq[15]='\001';
+//
 //    erasure_simulator2.erasure_seq[8]='\001';
 //    erasure_simulator2.erasure_seq[11]='\001';
 //    erasure_simulator2.erasure_seq[12]='\001';
@@ -231,6 +233,9 @@ int main(int argc, const char *argv[]) {
                                                                                       &erasure_simulator);
         }
         else if (relaying_type == 1) {
+            // 1. Currently there is no signalling from the relay to the destination about erased packets at the relay.
+            // This means that the destination may try to recover erased packets (resulting with false recovery)
+            // 2. Currently each hop performs adaptation separately and independently. Currently there is no shift in delay between hops.
             application_layer_sender.generate_message_and_encode(udp_parameters, buffer, &buffer_size); //udp_codeword is
 
             //if (i >= T) {
@@ -242,8 +247,8 @@ int main(int argc, const char *argv[]) {
             seq_number = application_layer_relay_receiver->receive_message_and_decode(udp_parameters, buffer,
                                                                                       &buffer_size,&erasure_simulator);
             if (i>=T) {
-                if (application_layer_relay_receiver->fec_decoder->recovered_message_vector[0]->buffer != NULL) {
-                    // check if there are codewords received in the past
+                if (application_layer_relay_receiver->fec_decoder->recovered_message_vector[0]->buffer != NULL) {//recover past messages
+                    // check if there are codewords recovered in the past
                     for (int j = 0; j < T_INITIAL; j++) {
                         if (application_layer_relay_receiver->fec_decoder->recovered_message_vector[j]->buffer !=
                             NULL) {
@@ -273,7 +278,7 @@ int main(int argc, const char *argv[]) {
                                 udp_parameters2, buffer2,
                                 &buffer_size2,
                                 &erasure_simulator2);
-                    } else if (application_layer_relay_receiver->fec_decoder->message_old_encoder->buffer != NULL) {
+                    } else if (application_layer_relay_receiver->fec_decoder->message_old_encoder->buffer != NULL) {// if double coding extract from old encoder
                         application_layer_relay_sender.message_wise_encode_at_relay(
                                 application_layer_relay_receiver->fec_decoder->message_old_encoder->buffer,
                                 seq_number - T, udp_parameters2, buffer2,
@@ -286,16 +291,6 @@ int main(int argc, const char *argv[]) {
                 }
             }
 
-//                application_layer_relay_receiver->get_current_packet(received_data, T, i, seq_number,
-//                                                               application_layer_sender.message_transmitted->seq_number -
-//                                                               T);
-//                std::memcpy(data_to_transmit_in_relay, received_data, sizeof(unsigned char) * 300);
-//                application_layer_relay_sender.message_wise_encode_at_relay(data_to_transmit_in_relay, udp_parameters2, buffer2,
-//                                                                       &buffer_size2);
-//                seq_number2 = application_layer_destination_receiver->receive_message_and_decode(udp_parameters2, buffer2,
-//                                                                                                 &buffer_size2,
-//                                                                                                 &erasure_simulator2);
-            //}
         } else if (relaying_type == 2) {
             application_layer_sender.generate_message_and_encode(udp_parameters, buffer, &buffer_size); //udp_codeword is
 
@@ -314,16 +309,17 @@ int main(int argc, const char *argv[]) {
                                                                                                   n2_new,&codeword_size_final,
                                                                                                   &k2_new,&n2_new);
             bool flag_for_using_backup=false;
+            int length_of_burst=0;
             if (seq_number>-1) {
 //                if (seq_number-last_seq_received_from_srouce>n2_new) {
-                int length_of_burst=application_layer_relay_receiver->fec_decoder->flag_for_burst;
+                length_of_burst=application_layer_relay_receiver->fec_decoder->flag_for_burst;
                 if (length_of_burst>0){
                     //Need to send all codeword_vector_store_in_burst
                     int double_coding_sum=0;
                     if (seq_number-last_seq_received_from_srouce>1){// packets erased in (s,r)
                         // check if double-coding ended
-                        for (int k=0;k<seq_number-last_seq_received_from_srouce;k++){
-                            if (application_layer_relay_receiver->fec_decoder->trans_vec[k]==true)
+                        for (int kk=0;kk<seq_number-last_seq_received_from_srouce;kk++){
+                            if (application_layer_relay_receiver->fec_decoder->trans_vec[kk]==true)
                                 double_coding_sum++;
                         }
                         if (application_layer_relay_receiver->fec_decoder->trans_vec[0]==true && double_coding_sum>0 && double_coding_sum<seq_number-last_seq_received_from_srouce) {
@@ -337,9 +333,10 @@ int main(int argc, const char *argv[]) {
                         count++;
                         if (flag_for_using_backup==true && count<double_coding_sum) {
                             int n2_old_old=application_layer_relay_receiver->fec_decoder->decoder_Symbol_Backup->n;
-                            int size_of_codeword=application_layer_relay_receiver->fec_decoder->decoder_Symbol_Backup->codeword_size_vector[n2_old_old-double_coding_sum+count];
+                            int double_coding_sum_to_use=std::min(double_coding_sum,n2_old_old);
+                            int size_of_codeword=application_layer_relay_receiver->fec_decoder->decoder_Symbol_Backup->codeword_size_vector[n2_old_old-double_coding_sum_to_use+count];
                             application_layer_relay_sender.send_sym_wise_message(
-                                    application_layer_relay_receiver->fec_decoder->decoder_Symbol_Backup->codeword_vector_store_in_burst[n2_old_old-double_coding_sum+count],
+                                    application_layer_relay_receiver->fec_decoder->decoder_Symbol_Backup->codeword_vector_store_in_burst[n2_old_old-double_coding_sum_to_use+count],
                                     size_of_codeword, udp_parameters2, buffer2, &buffer_size2, 0,
                                     response_from_dest_buffer, k2_new, n2_new,
                                     application_layer_relay_receiver->fec_message->counter_for_start_and_end);
@@ -365,7 +362,7 @@ int main(int argc, const char *argv[]) {
                         application_layer_destination_receiver->receive_message_and_symbol_wise_decode(
                                 udp_parameters2, buffer2,
                                 &buffer_size2,
-                                &erasure_simulator2);
+                                &erasure_simulator2,0);
                     }
                     // send the message that was received after the burst
                     int number_of_missing_packets_after_burst=seq_number-last_seq_received_from_srouce-length_of_burst-1; // correcting seq_number in the sent packet
@@ -377,7 +374,7 @@ int main(int argc, const char *argv[]) {
                     application_layer_destination_receiver->receive_message_and_symbol_wise_decode(
                             udp_parameters2, buffer2,
                             &buffer_size2,
-                            &erasure_simulator2);
+                            &erasure_simulator2,seq_number-last_seq_received_from_srouce-length_of_burst-1);
                 }
                 else {
                     int double_coding_sum=0;
@@ -422,7 +419,7 @@ int main(int argc, const char *argv[]) {
                         application_layer_destination_receiver->receive_message_and_symbol_wise_decode(
                                 udp_parameters2, buffer2,
                                 &buffer_size2,
-                                &erasure_simulator2);
+                                &erasure_simulator2,0);
                     }
                 }
 
@@ -447,10 +444,17 @@ int main(int argc, const char *argv[]) {
     cout << "Time duration = " << duration.count() << " minutes" << endl;
     cout << "Last sequence number received = " << seq_number << endl;
 
-    if (RELAYING_TYPE==2 && DEBUG_CHAR==1) {
-        float final_char_loss_in_per=(float) application_layer_destination_receiver->fec_decoder->final_counter_loss_of_char/(300*(packet_counter-T_TOT)) * 100;
-        DEBUG_MSG("\033[1;34m" << "Total Char loss in % "<<  final_char_loss_in_per << "% " << "\033[0m");
-        DEBUG_MSG("\033[1;34m" << "Total occurnces bad words% "<<  application_layer_destination_receiver->fec_decoder->final_counter_loss_of_char_elad << "\033[0m");
+    if (RELAYING_TYPE>0 && DEBUG_CHAR==1) {
+        float final_char_loss_in_per=(float) (application_layer_destination_receiver->fec_decoder->final_counter_loss_of_char+
+                application_layer_destination_receiver->fec_decoder->final_counter_loss_of_full_packet*300)/(300*(packet_counter-T_TOT)) * 100;
+        int num_of_packets_lost;
+        if (RELAYING_TYPE==2)
+            num_of_packets_lost=application_layer_destination_receiver->fec_decoder->final_counter_loss_of_full_packet+application_layer_destination_receiver->fec_decoder->final_counter_loss_of_packets_swdf;
+        else
+            num_of_packets_lost=application_layer_destination_receiver->fec_decoder->final_counter_loss_of_full_packet;
+        DEBUG_MSG("\033[1;34m" << "Total Char loss "<<  final_char_loss_in_per << "% " << "\033[0m");
+        DEBUG_MSG("\033[1;34m" << "Total number of erased packets "<<  num_of_packets_lost << "\033[0m");
+        DEBUG_MSG("\033[1;34m" << "Total occurrences of bug words  "<<  application_layer_destination_receiver->fec_decoder->final_counter_loss_of_char_elad << "\033[0m");
 
     }
 
