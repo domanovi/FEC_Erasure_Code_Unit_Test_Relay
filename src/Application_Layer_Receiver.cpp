@@ -237,7 +237,7 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_decode(unsigned 
     int k=T_value-N_value+1;
     int n=T_value+1;
 
-    fec_decoder->receive_message_and_symbol_wise_decode(fec_message,n,k,temp_size);
+    fec_decoder->receive_message_and_symbol_wise_decode(fec_message,n,k,temp_size,erasure_simulator);
 
 //    if (temp_seq>10){
 //        estimator->B_current=0;

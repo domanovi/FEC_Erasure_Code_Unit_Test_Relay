@@ -137,11 +137,11 @@ int main(int argc, const char *argv[]) {
     }
     erasure_generator.generate_three_sections_IID(3000,0.33,4000,0,stream_duration-3000-4000 + T+T2,0.33,"erasure.bin");
 //    erasure_generator.generate_three_sections_IID(4000,0,2000,0.33,stream_duration-4000-2000 + T+T2,0,"erasure.bin");
-    erasure_generator2.generate_IID(stream_duration + T+T2, 0, "erasure2.bin",2);
+    erasure_generator2.generate_IID(stream_duration + T+T2, 0.01, "erasure2.bin",2);
 
 
-    siphon::Erasure_Simulator erasure_simulator("erasure.bin");
-    siphon::Erasure_Simulator erasure_simulator2("erasure2.bin");
+    siphon::Erasure_Simulator erasure_simulator("erasure2.bin");
+    siphon::Erasure_Simulator erasure_simulator2("erasure.bin");
 
     auto start_time = high_resolution_clock::now();;
 
@@ -259,6 +259,24 @@ int main(int argc, const char *argv[]) {
                                     &buffer_size2, response_from_dest_buffer);
                             // after transmitting zero (in case next packet is lost...)
                             application_layer_relay_receiver->fec_decoder->recovered_message_vector[j]->buffer=NULL;
+                            application_layer_destination_receiver->receive_message_and_decode(
+                                    udp_parameters2, buffer2,
+                                    &buffer_size2,
+                                    &erasure_simulator2);
+                        } else {
+                            break;
+                        }
+                    }
+                    for (int j = 0; j < 3*T_INITIAL; j++) {
+                        if (application_layer_relay_receiver->fec_decoder->burst_erased_message_vector[j]->buffer !=
+                            NULL) {
+                            application_layer_relay_sender.message_wise_encode_at_relay(
+                                    application_layer_relay_receiver->fec_decoder->burst_erased_message_vector[j]->buffer,
+                                    application_layer_relay_receiver->fec_decoder->burst_erased_message_vector[j]->seq_number,
+                                    udp_parameters2, buffer2,
+                                    &buffer_size2, response_from_dest_buffer);
+                            // after transmitting zero (in case next packet is lost...)
+                            application_layer_relay_receiver->fec_decoder->burst_erased_message_vector[j]->buffer=NULL;
                             application_layer_destination_receiver->receive_message_and_decode(
                                     udp_parameters2, buffer2,
                                     &buffer_size2,
@@ -448,10 +466,13 @@ int main(int argc, const char *argv[]) {
         float final_char_loss_in_per=(float) (application_layer_destination_receiver->fec_decoder->final_counter_loss_of_char+
                 application_layer_destination_receiver->fec_decoder->final_counter_loss_of_full_packet*300)/(300*(packet_counter-T_TOT)) * 100;
         int num_of_packets_lost;
-        if (RELAYING_TYPE==2)
-            num_of_packets_lost=application_layer_destination_receiver->fec_decoder->final_counter_loss_of_full_packet+application_layer_destination_receiver->fec_decoder->final_counter_loss_of_packets_swdf;
-        else
-            num_of_packets_lost=application_layer_destination_receiver->fec_decoder->final_counter_loss_of_full_packet;
+//        if (RELAYING_TYPE==2)
+//            num_of_packets_lost=application_layer_destination_receiver->fec_decoder->final_counter_loss_of_full_packet+
+//                    application_layer_destination_receiver->fec_decoder->final_counter_loss_of_packets_swdf;
+//        else
+//            num_of_packets_lost=application_layer_destination_receiver->fec_decoder->final_counter_loss_of_full_packet;
+        num_of_packets_lost=application_layer_destination_receiver->fec_decoder->final_counter_loss_of_full_packet+
+                            application_layer_destination_receiver->fec_decoder->final_counter_loss_of_packets_swdf;
         DEBUG_MSG("\033[1;34m" << "Total Char loss "<<  final_char_loss_in_per << "% " << "\033[0m");
         DEBUG_MSG("\033[1;34m" << "Total number of erased packets "<<  num_of_packets_lost << "\033[0m");
         DEBUG_MSG("\033[1;34m" << "Total occurrences of bug words  "<<  application_layer_destination_receiver->fec_decoder->final_counter_loss_of_char_elad << "\033[0m");

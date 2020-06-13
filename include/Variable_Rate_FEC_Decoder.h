@@ -23,6 +23,7 @@
 #include "Encoder.h"
 #include "Decoder_Symbol_Wise.h"
 #include "Payload_Simulator.h"
+#include "Erasure_Simulator.h"
 
 namespace siphon {
 
@@ -56,6 +57,7 @@ namespace siphon {
 
         FEC_Message *recovered_message;
         FEC_Message ** recovered_message_vector;
+        FEC_Message ** burst_erased_message_vector;
         FEC_Message *message_old_encoder;
 
         FEC_Decoder *decoder_current;
@@ -75,7 +77,7 @@ namespace siphon {
 
         void receive_message_and_symbol_wise_encode(FEC_Message *message, int n, int k, int n2, int k2, int temp_size,int *codeword_size_final);
 
-        void receive_message_and_symbol_wise_decode(FEC_Message *message, int n, int k, int temp_size);
+        void receive_message_and_symbol_wise_decode(FEC_Message *message, int n, int k, int temp_size,siphon::Erasure_Simulator *erasure_simulator);
 
         void calc_missed_chars(int received_seq, unsigned char *temp_buffer);
 

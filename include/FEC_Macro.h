@@ -26,13 +26,13 @@
 // if RELAYING_TYPE=2 symbol-wise decode and forward
 
 #define T_TOT 10 // T_TOT needs to be >= T_INITAL+T_INTIAL_2
-#define T_INITIAL 4
+#define T_INITIAL 3
 #define B_INITIAL -1
-#define N_INITIAL 2
+#define N_INITIAL 1
 
-#define T_INITIAL_2 4
+#define T_INITIAL_2 5
 #define B_INITIAL_2 2
-#define N_INITIAL_2 2
+#define N_INITIAL_2 5
 
 #define ESTIMATION_WINDOW_SIZE 1000    //the size of window used for estimating coding parameters.
 

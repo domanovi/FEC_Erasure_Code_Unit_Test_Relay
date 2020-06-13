@@ -220,7 +220,7 @@ namespace siphon {
         }
 // Need to add decoding...
         DEBUG_MSG("\033[1;34m" << "Message recovered at destination (T=" << n-1 << ", N=" << n-k <<") R=" << k <<"/" << n
-        << " from symbol-wise DF #" << received_seq << ": " << "\033[0m");
+        << " from symbol-wise DF received seq #" << received_seq << " original seq #" << received_seq-T_TOT << ": " << "\033[0m");
         printMatrix(&temp_buffer[2], 1, 300);}
 
 

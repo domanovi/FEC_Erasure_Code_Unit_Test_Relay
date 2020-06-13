@@ -111,11 +111,34 @@ void Application_Layer_Sender::generate_message_and_encode(unsigned char *udp_pa
 //        else if (N+N2<=T_TOT) {
         if (N+N2<=T_TOT) {
             T = T_TOT - N2;
-            variable_rate_FEC_encoder->N2 = N2;
-            variable_rate_FEC_encoder->B2 = N2;
+            T2 = T_TOT - N;
+            if (T>=1) // T1 cannot be lower than 1
+            {
+                variable_rate_FEC_encoder->N2 = N2;
+                variable_rate_FEC_encoder->B2 = N2;
+            }else            {
+                N=N_ack;
+                T=T_ack;
+            }
+//            if (T2>=4) {
+//                variable_rate_FEC_encoder->N2 = N2;
+//                variable_rate_FEC_encoder->B2 = N2;
+//            }else{
+//                N=N_ack;
+//                T=T_ack;
+//            }
+//            variable_rate_FEC_encoder->N2 = N2;
+//            variable_rate_FEC_encoder->B2 = N2;
+
 //        T2=T_TOT-N;
-        }else
-            cout<<"N1="<<N << "+N2=" << N2 <<">T_TOT="<<T_TOT<<endl;
+        }else{
+//            {// give priority to the 2nd hop
+//            N=T_TOT-N2;
+//            T = T_TOT - N2;
+//            variable_rate_FEC_encoder->N2 = N2;
+//            variable_rate_FEC_encoder->B2 = N2;
+              cout<<"N1="<<N << "+N2=" << N2 <<">T_TOT="<<T_TOT<<endl;
+        }
 
         variable_rate_FEC_encoder->T2_ack = T2_ack;
         variable_rate_FEC_encoder->B2_ack = B2_ack;

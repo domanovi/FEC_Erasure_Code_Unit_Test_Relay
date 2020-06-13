@@ -55,8 +55,11 @@ namespace siphon {
         recovered_message = new FEC_Message();
         //Paraters used by message-wise DF
         recovered_message_vector=(FEC_Message **)malloc(sizeof(FEC_Message*) * T_INITIAL);
+        burst_erased_message_vector=(FEC_Message **)malloc(sizeof(FEC_Message*) * 3*T_INITIAL);
         for (int i=0;i<T_INITIAL;i++)
             recovered_message_vector[i]=new FEC_Message();
+        for (int i=0;i<3*T_INITIAL;i++)
+            burst_erased_message_vector[i]=new FEC_Message();
         message_old_encoder = new FEC_Message();
 
         counter_ = 0;
@@ -219,7 +222,7 @@ namespace siphon {
             for (int seq = latest_seq; seq < latest_seq + n2_old_saved_for_burst ; seq++) {
                 UDP_loss_counter_++;
                 final_UDP_loss_counter_++;
-                DEBUG_MSG("\033[1;34m" << "Burst: packet dropped in (s,r) #" << seq << ": " << "\033[0m");
+                DEBUG_MSG("\033[1;35m" << "Burst: packet dropped in (s,r) #" << seq << ": " << "\033[0m");
                 if ((seq > seq_end_double_coding) && (double_coding_flag == 1)) {
                     double_coding_flag = 0;
 //                    decoder_Symbol_Wise = decoder_Symbol_Wise_new;
@@ -323,7 +326,7 @@ namespace siphon {
                     cout<<"Stopped double coding at the relay"<<endl;
                 }
                 trans_vec[seq-latest_seq]=double_coding_flag;
-                DEBUG_MSG("\033[1;34m" << "Burst: packet dropped in (s,r) #" << seq << ": " << "\033[0m");
+                DEBUG_MSG("\033[1;35m" << "Burst: packet dropped in (s,r) #" << seq << ": " << "\033[0m");
                 if (double_coding_flag==0){
                     decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n_last_used,n2_last_used,size_received,codeword_r_d_size_current,false);
                     decoder_Symbol_Wise->symbol_wise_encode_1(k_last_used,n_last_used,k2_last_used,n2_last_used,&flag);
@@ -369,7 +372,7 @@ namespace siphon {
                 trans_vec[seq-latest_seq]=double_coding_flag;
 
                 if (double_coding_flag == 0) {
-                    DEBUG_MSG("\033[1;34m" << "Packet dropped in (s,r) #" << seq << ": " << "\033[0m");
+                    DEBUG_MSG("\033[1;35m" << "Packet dropped in (s,r) #" << seq << ": " << "\033[0m");
 //                    decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n,n2,size_received,codeword_r_d_size_current,true);
 //                    decoder_Symbol_Wise->symbol_wise_encode_1(k,n,k2,n2,&flag);
                     decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n_last_used,n2_last_used,size_received,codeword_r_d_size_current,true);
@@ -408,7 +411,7 @@ namespace siphon {
                         final_loss_counter_++;
                     }
                     decoder_Symbol_Wise_new->symbol_wise_encode_1(k,n,k2,n2,&flag);
-                    DEBUG_MSG("\033[1;34m" << "Packet dropped in (s,r) #" << seq << ": " << "\033[0m");
+                    DEBUG_MSG("\033[1;35m" << "Packet dropped in (s,r) #" << seq << ": " << "\033[0m");
                     int codeword_size_final_temp = codeword_r_d_size_current + codeword_r_d_size_old + 2;  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
                     *codeword_size_final = codeword_size_final_temp;
 
@@ -537,7 +540,8 @@ namespace siphon {
         //return received_seq;//ELAD to change
     }
 
-    void Variable_Rate_FEC_Decoder::receive_message_and_symbol_wise_decode(FEC_Message *message,int n,int k,int temp_size) {
+    void Variable_Rate_FEC_Decoder::receive_message_and_symbol_wise_decode(FEC_Message *message,int n,int k,int temp_size,siphon::Erasure_Simulator
+    *erasure_simulator) {
 //        if (seq_start == -1) //initialize the decoder upon receiving the first packet
 //            initialize_decoder(message);
         if (seq_start == -1) { //initialize the decoder upon receiving the first packet
@@ -587,7 +591,10 @@ namespace siphon {
         for (int seq = latest_seq; seq < received_seq; seq++) {// need to handle bursts longer than n
             UDP_loss_counter_++;
             final_UDP_loss_counter_++;
-            DEBUG_MSG("\033[1;34m" << "Packet dropped in (r,d) #" << seq << ": " << "\033[0m");
+            if (erasure_simulator->is_erasure(seq) == true)
+                DEBUG_MSG("\033[1;34m" << "Packet dropped in (r,d) #" << seq << " (erasure in channel): " << "\033[0m");
+            else
+                DEBUG_MSG("\033[1;34m" << "Packet dropped in (r,d) #" << seq << ": (Potentially not sent from relay)" << "\033[0m");
             if ((seq > seq_end_double_coding) && (double_coding_flag == 1)) {
                 double_coding_flag = 0;
                 //                decoder_Symbol_Wise = decoder_Symbol_Wise_new;
@@ -825,10 +832,14 @@ namespace siphon {
         for (int i=0;i<T_INITIAL;i++) {
             recovered_message_vector[i]->buffer = NULL;
         }
+        for (int i=0;i<3*T_INITIAL;i++) {
+            burst_erased_message_vector[i]->buffer = NULL;
+        }
         recovered_message->buffer = NULL;
         message_old_encoder->buffer = NULL;
 
         int index=-1;
+        int burst_index=-1;
         for (int seq = latest_seq; seq < received_seq; seq++) {
             UDP_loss_counter_++;
             final_UDP_loss_counter_++;
@@ -864,10 +875,19 @@ namespace siphon {
 
                 if (seq - T >= seq_start)
                     onDecodedMessage(recovered_message);
-                if (recovered_message->buffer!=NULL){
+                if (recovered_message->buffer!=NULL) {
                     index++;
-                    recovered_message_vector[index]->buffer=recovered_message->buffer;
-                    recovered_message_vector[index]->seq_number=recovered_message->seq_number;
+                    unsigned char *buffer_data = memory_object->allocate_memory(recovered_message->size);
+                    memcpy(buffer_data, recovered_message->buffer, size_t(recovered_message->size));
+                    recovered_message_vector[index]->buffer = buffer_data;
+                    recovered_message_vector[index]->seq_number = recovered_message->seq_number;
+//                }
+                }else if (seq>=T && index==T-1){
+                    burst_index++;
+                    unsigned char *buffer_data = memory_object->allocate_memory(max_payload);
+                    memset(buffer_data, '\000', max_payload);
+                    burst_erased_message_vector[burst_index]->buffer=buffer_data;
+                    burst_erased_message_vector[burst_index]->seq_number=recovered_message->seq_number;
                 }
 
             } else {
@@ -878,18 +898,34 @@ namespace siphon {
                     if (seq - T >= seq_start) {
                         onDecodedMessage(recovered_message);
                         if (recovered_message->buffer!=NULL){
-                            recovered_message_vector[tempIndex]->buffer=recovered_message->buffer;
+                            unsigned char *buffer_data = memory_object->allocate_memory(recovered_message->size);
+                            memcpy(buffer_data, recovered_message->buffer, size_t(recovered_message->size));
+                            recovered_message_vector[tempIndex]->buffer=buffer_data;
                             recovered_message_vector[tempIndex]->seq_number=recovered_message->seq_number;
                             index=tempIndex;
+                        }else if (seq>=T && tempIndex==T-1){
+                            burst_index++;
+                            unsigned char *buffer_data = memory_object->allocate_memory(max_payload);
+                            memset(buffer_data, '\000', max_payload);
+                            burst_erased_message_vector[burst_index]->buffer=buffer_data;
+                            burst_erased_message_vector[burst_index]->seq_number=recovered_message->seq_number;
                         }
                     }
                 }
                 // Elad - decoding with new decoder
                 decode_for_erased_codeword(recovered_message, seq, decoder_current);
                 if (recovered_message->buffer!=NULL){ // ELAD - very delicate... if both decoders managed to recover???
-                    recovered_message_vector[tempIndex]->buffer=recovered_message->buffer;
+                    unsigned char *buffer_data = memory_object->allocate_memory(recovered_message->size);
+                    memcpy(buffer_data, recovered_message->buffer, size_t(recovered_message->size));
+                    recovered_message_vector[tempIndex]->buffer=buffer_data;
                     recovered_message_vector[tempIndex]->seq_number=recovered_message->seq_number;
                     index=tempIndex;
+                }else if (seq>=T && tempIndex==T-1){
+                    burst_index++;
+                    unsigned char *buffer_data = memory_object->allocate_memory(max_payload);
+                    memset(buffer_data, '\000', max_payload);
+                    burst_erased_message_vector[burst_index]->buffer=buffer_data;
+                    burst_erased_message_vector[burst_index]->seq_number=recovered_message->seq_number;
                 }
             }
 
@@ -1280,8 +1316,10 @@ namespace siphon {
                        break;
                     }
                 }
-                if (flag==1)
+                if (flag==1) {
+                    cout << "Packet # " << received_seq << " dropped" << endl;
                     final_counter_loss_of_packets_swdf++;
+                }
             }
             if (RELAYING_TYPE==2 && sum_of_false_chars_not_zero>10) {
                 cout << "Elad!!!";
