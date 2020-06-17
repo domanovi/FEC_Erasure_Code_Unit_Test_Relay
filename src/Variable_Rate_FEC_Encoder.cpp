@@ -117,8 +117,9 @@ namespace siphon {
 
                 counter_transition = 0;
 
-                if (encoder_old != NULL)
-                    delete encoder_old;
+                if (encoder_old != NULL) {
+                   delete encoder_old;
+                }
                 encoder_old = encoder_current;
                 encoder_current = new FEC_Encoder(max_payload, T, B, N, memory_object);
 
@@ -159,7 +160,7 @@ namespace siphon {
 
 //            } else
 //                transition_flag = 0;
-        } else if (counter_transition>2*T_TOT) //Can assist in debugging !!!
+        } else if (counter_transition>T_TOT+1) //Can assist in debugging !!!
             transition_flag = 0;
         else
             counter_transition++;

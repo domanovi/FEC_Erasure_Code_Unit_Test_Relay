@@ -114,9 +114,20 @@ void Application_Layer_Sender::generate_message_and_encode(unsigned char *udp_pa
             T2 = T_TOT - N;
             if (T>=1) // T1 cannot be lower than 1
             {
-                variable_rate_FEC_encoder->N2 = N2;
-                variable_rate_FEC_encoder->B2 = N2;
-            }else            {
+                if (MIN_T2>0) {
+                    if (T2 >= MIN_T2) {
+                        variable_rate_FEC_encoder->N2 = N2;
+                        variable_rate_FEC_encoder->B2 = N2;
+                    } else {
+                        N = N_ack;
+                        T = T_ack;
+                    }
+                }else{
+                    variable_rate_FEC_encoder->N2 = N2;
+                    variable_rate_FEC_encoder->B2 = N2;
+                }
+
+            }else{
                 N=N_ack;
                 T=T_ack;
             }
@@ -138,6 +149,8 @@ void Application_Layer_Sender::generate_message_and_encode(unsigned char *udp_pa
 //            variable_rate_FEC_encoder->N2 = N2;
 //            variable_rate_FEC_encoder->B2 = N2;
               cout<<"N1="<<N << "+N2=" << N2 <<">T_TOT="<<T_TOT<<endl;
+              N=N_ack;
+              T=T_ack;
         }
 
         variable_rate_FEC_encoder->T2_ack = T2_ack;

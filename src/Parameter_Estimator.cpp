@@ -69,8 +69,10 @@ namespace siphon {
             seq_start = 0;
         }
 
-        if (RELAYING_TYPE==2)
-            T = message->T;
+        if (RELAYING_TYPE==2) {
+//            T = message->T;
+            T=T_TOT;
+        }
 
         current_win_end = message->seq_number;
 

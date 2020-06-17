@@ -86,7 +86,13 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_encode(unsigned 
     estimator->estimate(fec_message);
     background_estimator->estimate(fec_message);
 
-    if ((temp_seq + 1) >flag_for_estimation_cycle*ESTIMATION_WINDOW_SIZE/10){
+    int estimation_factor;
+    if (RELAYING_TYPE==2)
+        estimation_factor=10;
+    else
+        estimation_factor=10;
+
+    if ((temp_seq + 1) >flag_for_estimation_cycle*ESTIMATION_WINDOW_SIZE/estimation_factor){
         cout << "Old (T,B,N) at relay receiver=" << "(" << estimator->T << "," << estimator->B_current << "," << estimator->N_current << ")" << endl;
         free(estimator);
         estimator=background_estimator;
@@ -215,7 +221,15 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_decode(unsigned 
     estimator->estimate(fec_message);
     background_estimator->estimate(fec_message);
 
-    if ((temp_seq + 1) >flag_for_estimation_cycle*ESTIMATION_WINDOW_SIZE/10){
+    int estimation_factor;
+    if (RELAYING_TYPE==2)
+        estimation_factor=10;
+    else
+        estimation_factor=10;
+
+
+
+    if ((temp_seq + 1) >flag_for_estimation_cycle*ESTIMATION_WINDOW_SIZE/estimation_factor){
         cout << "Old (T,B,N) at destination=" << "(" << estimator->T << "," << estimator->B_current << "," << estimator->N_current << ")" << endl;
         free(estimator);
         estimator=background_estimator;
@@ -331,7 +345,13 @@ int Application_Layer_Receiver::receive_message_and_decode(unsigned char *udp_pa
                                     temp_size - 12, codeword + 12);
     }
 
-    if ((temp_seq + 1) >flag_for_estimation_cycle*ESTIMATION_WINDOW_SIZE/10){
+    int estimation_factor;
+    if (RELAYING_TYPE==2)
+        estimation_factor=10;
+    else
+        estimation_factor=10;
+
+    if ((temp_seq + 1) >flag_for_estimation_cycle*ESTIMATION_WINDOW_SIZE/estimation_factor){
         if (RELAYING_TYPE==0 || receiver_index==0)
             cout << "Old (T,B,N) at relay receiver=" << "(" << estimator->T << "," << estimator->B_current << "," << estimator->N_current << ")" << endl;
         else

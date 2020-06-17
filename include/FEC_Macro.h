@@ -25,19 +25,21 @@
 // if RELAYING_TYPE=1 message-wise decode and forward
 // if RELAYING_TYPE=2 symbol-wise decode and forward
 
-#define T_TOT 10 // T_TOT needs to be >= T_INITAL+T_INTIAL_2
+#define T_TOT 8 // T_TOT needs to be >= T_INITAL+T_INTIAL_2
 #define T_INITIAL 3
 #define B_INITIAL -1
-#define N_INITIAL 1
+#define N_INITIAL -1
 
-#define T_INITIAL_2 5
+#define T_INITIAL_2 3
 #define B_INITIAL_2 2
-#define N_INITIAL_2 5
+#define N_INITIAL_2 -1
+
+#define MIN_T2 0
 
 #define ESTIMATION_WINDOW_SIZE 1000    //the size of window used for estimating coding parameters.
 
 //#define NUMBER_OF_ITERATIONS 361000   //total number of iterations. Recommended: 50 times ESTIMATION_WINDOW_SIZE,
-#define NUMBER_OF_ITERATIONS 10000
+#define NUMBER_OF_ITERATIONS 100000
 // 360000 packets = 3600 seconds =  60 minutes, 1 minute = 6000 packets
 
 #define ERASURE_TYPE 1

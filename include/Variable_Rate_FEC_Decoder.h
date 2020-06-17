@@ -65,7 +65,7 @@ namespace siphon {
         FEC_Decoder *decoder_old;
         int *erasure_counter;
         int *erasure_counter_total;
-        int flag_for_burst;
+        int flag_for_burst,flag_for_burst_index;
 
         unsigned char **codeword_new_vector;
 //        unsigned char **codeword_new_vector_new_decoder;
