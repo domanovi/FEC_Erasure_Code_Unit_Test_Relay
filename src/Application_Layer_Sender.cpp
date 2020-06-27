@@ -125,12 +125,21 @@ void Application_Layer_Sender::generate_message_and_encode(unsigned char *udp_pa
                         N = N_ack;
                         T = T_ack;
                     }
-                }else{
-                    variable_rate_FEC_encoder->N2 = N2;
-                    variable_rate_FEC_encoder->B2 = N2;
+                }else{ //T1>=1
+                    if (MIN_N2>0 && N2<MIN_N2){
+                        N2=MIN_N2;
+                        T=T_TOT-N2;
+                        N=std::min(N,T);
+                        T2=T_TOT-N;
+                        variable_rate_FEC_encoder->N2 = N2;
+                        variable_rate_FEC_encoder->B2 = N2;
+                    }else {
+                        variable_rate_FEC_encoder->N2 = N2;
+                        variable_rate_FEC_encoder->B2 = N2;
+                    }
                 }
 
-            }else{
+            }else{//recommended T1=0
                 T=1;
                 N2=T_TOT-T;
                 N=std::min(N,T);
