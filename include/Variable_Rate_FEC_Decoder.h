@@ -71,6 +71,10 @@ namespace siphon {
 //        unsigned char **codeword_new_vector_new_decoder;
         unsigned char **codeword_vector_store_in_burst;
         unsigned char codeword_new_symbol_wise[30000];
+        unsigned char **codeword_vector_to_transmit_stored;
+        int codeword_vector_to_transmit_stored_index;
+        int codeword_vector_to_transmit_stored_word_size[2*T_TOT];
+        int codeword_vector_to_transmit_stored_seq[2*T_TOT];
 
         Payload_Simulator *payload_simulator;
         unsigned char *raw_data;
@@ -84,13 +88,17 @@ namespace siphon {
         Decoder_Symbol_Wise *decoder_Symbol_Wise;
         Decoder_Symbol_Wise *decoder_Symbol_Wise_new;
         Decoder_Symbol_Wise *decoder_Symbol_Backup;
-        bool trans_vec[50];
+        bool trans_vec[MAX_BURST_SIZE_MWDF];
 
 
         int n2_old;
         size_t final_counter_loss_of_char,final_counter_loss_of_char_elad;
         size_t counter_loss_of_full_packet,final_counter_loss_of_full_packet;
         size_t final_counter_loss_of_packets_swdf;
+
+        float debug_rate_second_hop;
+        float debug_rate_second_hop_curr;
+        int debug_rate_second_hop_num_packets;
     private:
 
         int T{}, B{}, N{}, max_payload;

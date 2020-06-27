@@ -86,13 +86,7 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_encode(unsigned 
     estimator->estimate(fec_message);
     background_estimator->estimate(fec_message);
 
-    int estimation_factor;
-    if (RELAYING_TYPE==2)
-        estimation_factor=10;
-    else
-        estimation_factor=10;
-
-    if ((temp_seq + 1) >flag_for_estimation_cycle*ESTIMATION_WINDOW_SIZE/estimation_factor){
+    if ((temp_seq + 1) >flag_for_estimation_cycle*ESTIMATION_WINDOW_SIZE/ESTIMATION_WINDOW_SIZE_REDUCTION_FACTOR){
         cout << "Old (T,B,N) at relay receiver=" << "(" << estimator->T << "," << estimator->B_current << "," << estimator->N_current << ")" << endl;
         free(estimator);
         estimator=background_estimator;
@@ -174,7 +168,7 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_encode(unsigned 
         }
     }
 
-    return temp_seq;//TODO symbol-wise check return temp_seq at receive_message_and_symbol_wise_encode()
+    return temp_seq;
 }
 
 int Application_Layer_Receiver::receive_message_and_symbol_wise_decode(unsigned char *udp_parameters, unsigned char *udp_codeword,
@@ -221,15 +215,8 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_decode(unsigned 
     estimator->estimate(fec_message);
     background_estimator->estimate(fec_message);
 
-    int estimation_factor;
-    if (RELAYING_TYPE==2)
-        estimation_factor=10;
-    else
-        estimation_factor=10;
 
-
-
-    if ((temp_seq + 1) >flag_for_estimation_cycle*ESTIMATION_WINDOW_SIZE/estimation_factor){
+    if ((temp_seq + 1) >flag_for_estimation_cycle*ESTIMATION_WINDOW_SIZE/ESTIMATION_WINDOW_SIZE_REDUCTION_FACTOR){
         cout << "Old (T,B,N) at destination=" << "(" << estimator->T << "," << estimator->B_current << "," << estimator->N_current << ")" << endl;
         free(estimator);
         estimator=background_estimator;
@@ -289,7 +276,7 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_decode(unsigned 
         }
     }
 
-    return 0;//TODO symbols-wise: check if return 0 at receive_message_and_symbol_wise_decode()
+    return 0;
 
 
 }
@@ -345,13 +332,7 @@ int Application_Layer_Receiver::receive_message_and_decode(unsigned char *udp_pa
                                     temp_size - 12, codeword + 12);
     }
 
-    int estimation_factor;
-    if (RELAYING_TYPE==2)
-        estimation_factor=10;
-    else
-        estimation_factor=10;
-
-    if ((temp_seq + 1) >flag_for_estimation_cycle*ESTIMATION_WINDOW_SIZE/estimation_factor){
+     if ((temp_seq + 1) >flag_for_estimation_cycle*ESTIMATION_WINDOW_SIZE/ESTIMATION_WINDOW_SIZE_REDUCTION_FACTOR){
         if (RELAYING_TYPE==0 || receiver_index==0)
             cout << "Old (T,B,N) at relay receiver=" << "(" << estimator->T << "," << estimator->B_current << "," << estimator->N_current << ")" << endl;
         else

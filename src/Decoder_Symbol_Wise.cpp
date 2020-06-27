@@ -19,21 +19,25 @@ namespace siphon {
         codeword_new_vector = (unsigned char **) malloc(sizeof(unsigned char *) * (T_TOT + 1));
         codeword_vector_store_in_burst = (unsigned char **) malloc(sizeof(unsigned char *) * (T_TOT + 1));
         codeword_vector_to_transmit = (unsigned char **) malloc(sizeof(unsigned char *) * (T_TOT + 1));
+        codeword_vector_to_trasnmit_store = (unsigned char **) malloc(sizeof(unsigned char *) * (T_TOT + 1));
 
         temp_erasure_vector = (bool *) malloc(sizeof(bool) * T_TOT);
         for (int i = 0; i < T_TOT + 1; i++) {
             codeword_vector[i] = (unsigned char *) malloc(
-                    sizeof(unsigned char) * 10000); //4-byte sequence number + 4-byte
-            memset(codeword_vector[i], '\000', 10000);
+                    sizeof(unsigned char) * GLOBAL_MAX_SIZE_OF_CODEWORD); //4-byte sequence number + 4-byte
+            memset(codeword_vector[i], '\000', GLOBAL_MAX_SIZE_OF_CODEWORD);
             codeword_new_vector[i] = (unsigned char *) malloc(
-                    sizeof(unsigned char) * 10000); //4-byte sequence number + 4-byte
-            memset(codeword_new_vector[i], '\000', 10000);
+                    sizeof(unsigned char) * GLOBAL_MAX_SIZE_OF_CODEWORD); //4-byte sequence number + 4-byte
+            memset(codeword_new_vector[i], '\000', GLOBAL_MAX_SIZE_OF_CODEWORD);
             codeword_vector_store_in_burst[i] = (unsigned char *) malloc(
-                    sizeof(unsigned char) * 10000); //4-byte sequence number + 4-byte
-            memset(codeword_vector_store_in_burst[i], '\000', 10000);
+                    sizeof(unsigned char) * GLOBAL_MAX_SIZE_OF_CODEWORD); //4-byte sequence number + 4-byte
+            memset(codeword_vector_store_in_burst[i], '\000', GLOBAL_MAX_SIZE_OF_CODEWORD);
+            codeword_vector_to_trasnmit_store[i]=(unsigned char *) malloc(
+                    sizeof(unsigned char) * GLOBAL_MAX_SIZE_OF_CODEWORD); //4-byte sequence number + 4-byte
+            memset(codeword_vector_to_trasnmit_store[i], '\000', GLOBAL_MAX_SIZE_OF_CODEWORD);
             codeword_vector_to_transmit[i]=(unsigned char *) malloc(
-                    sizeof(unsigned char) * 10000); //4-byte sequence number + 4-byte
-            memset(codeword_vector_to_transmit[i], '\000', 10000);
+                    sizeof(unsigned char) * GLOBAL_MAX_SIZE_OF_CODEWORD); //4-byte sequence number + 4-byte
+            memset(codeword_vector_to_transmit[i], '\000', GLOBAL_MAX_SIZE_OF_CODEWORD);
             temp_erasure_vector[i] = 0;
             n2_vector[i]=0;
             k2_vector[i]=0;
@@ -47,12 +51,13 @@ namespace siphon {
             free(codeword_new_vector[i]);
             free(codeword_vector_store_in_burst[i]);
             free(codeword_vector_to_transmit[i]);
+            free(codeword_vector_to_trasnmit_store[i]);
         }
     }
 
     void Decoder_Symbol_Wise::copy_elements(Decoder_Symbol_Wise *source,bool encode){
         for (int i = 0; i < T_TOT + 1; i++) {
-            for (int j = 0;j<10000;j++) {
+            for (int j = 0;j<GLOBAL_MAX_SIZE_OF_CODEWORD;j++) {
                 codeword_vector[i][j]=source->codeword_vector[i][j];
                 codeword_new_vector[i][j]=source->codeword_new_vector[i][j];
                 codeword_vector_store_in_burst[i][j]=source->codeword_vector_store_in_burst[i][j];
@@ -75,41 +80,43 @@ namespace siphon {
 
     void Decoder_Symbol_Wise::push_current_codeword(unsigned char *message,int n,int n2, int temp_size,int codeword_r_d_size_current){
         for (int i = 0; i < n - 1; i++) {
-            memcpy(codeword_vector[i], codeword_vector[i + 1], 10000);
+            memcpy(codeword_vector[i], codeword_vector[i + 1], sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
             temp_erasure_vector[i] = temp_erasure_vector[i + 1];//ELAD to check...
         }
         for (int i=0;i<n2-1;i++) {
-            memcpy(codeword_new_vector[i], codeword_new_vector[i + 1], 10000);
-            memcpy(codeword_vector_to_transmit[i], codeword_vector_to_transmit[i + 1], 10000);
+            memcpy(codeword_new_vector[i], codeword_new_vector[i + 1], sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
+            memcpy(codeword_vector_to_transmit[i], codeword_vector_to_transmit[i + 1], sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
             codeword_size_vector[i]=codeword_size_vector[i+1];
             k2_vector[i]=k2_vector[i+1];
         }
-        memcpy(&codeword_vector[n-1][2],message,sizeof(unsigned char)*10000);
+        memcpy(&codeword_vector[n-1][2],message,sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
         temp_erasure_vector[n - 1] = 0;
     }
 
     void Decoder_Symbol_Wise::rotate_pointers_and_insert_zero_word(int n,int n2, int temp_size,int codeword_r_d_size_current,bool flag_fot_rotate_burst){
         for (int i = 0; i < n - 1; i++) {
-            memcpy(codeword_vector[i], codeword_vector[i + 1], sizeof(unsigned char)*10000);
+            memcpy(codeword_vector[i], codeword_vector[i + 1], sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
             temp_erasure_vector[i] = temp_erasure_vector[i + 1];//ELAD to check...
+//            memcpy(codeword_vector_to_trasnmit_store[i], codeword_vector_to_trasnmit_store[i + 1], sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
+//            store_codeword_size_vector[i]=store_codeword_size_vector[i+1];
             if (flag_fot_rotate_burst==true) {
                 memcpy(codeword_vector_store_in_burst[i], codeword_vector_store_in_burst[i + 1],
-                       sizeof(unsigned char) * 10000);
+                       sizeof(unsigned char) * GLOBAL_MAX_SIZE_OF_CODEWORD);
                 burst_codeword_size_vector[i]=burst_codeword_size_vector[i+1];
             }
         }
         for (int i=0;i<n2-1;i++) {
-            memcpy(codeword_new_vector[i], codeword_new_vector[i + 1], sizeof(unsigned char)*10000);
-            memcpy(codeword_vector_to_transmit[i], codeword_vector_to_transmit[i + 1], 10000);
+            memcpy(codeword_new_vector[i], codeword_new_vector[i + 1], sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
+            memcpy(codeword_vector_to_transmit[i], codeword_vector_to_transmit[i + 1], sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
 //            if (flag_fot_rotate_burst==true) {
 //                memcpy(codeword_vector_store_in_burst[i], codeword_vector_store_in_burst[i + 1],
-//                       sizeof(unsigned char) * 10000);
+//                       sizeof(unsigned char) * GLOBAL_MAX_SIZE_OF_CODEWORD);
 //                burst_codeword_size_vector[i]=burst_codeword_size_vector[i+1];
 //            }
             codeword_size_vector[i] = codeword_size_vector[i+1];
             k2_vector[i]=k2_vector[i+1];
         }
-        memset(codeword_vector[n - 1], '\000', sizeof(unsigned char)*10000);//ELAD - 300=max_payload
+        memset(codeword_vector[n - 1], '\000', sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);//ELAD - 300=max_payload
         temp_erasure_vector[n - 1] = 1;
     }
 

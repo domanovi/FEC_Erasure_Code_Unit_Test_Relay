@@ -41,6 +41,9 @@ namespace siphon {
         int T, B, N, max_payload;                 //transition counter varies from 0 to T; if it is < T, that means the old FEC_Encoder still has a codeword to transmit (concatenated to the new codeword); if it equals T, that means the old FEC_Encoder has nothing to send
         int T2, B2, N2;
 
+        int debug_rate_first_hop_num_packets;
+        float debug_rate_first_hop,debug_rate_first_hop_curr;
+
 
     private:
 

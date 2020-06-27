@@ -47,6 +47,9 @@ Application_Layer_Sender::Application_Layer_Sender(const char *Tx, const char *R
         codeword_new_vector[i]=(unsigned char *) malloc(sizeof(unsigned char) * (max_payload + 12) * 4 * T_TOT); //4-byte sequence number + 4-byte
     }
 
+    debug_rate_second_hop_num_packets=0;
+    debug_rate_second_hop=0;
+
 }
 
 Application_Layer_Sender::~Application_Layer_Sender() {
@@ -128,8 +131,14 @@ void Application_Layer_Sender::generate_message_and_encode(unsigned char *udp_pa
                 }
 
             }else{
-                N=N_ack;
-                T=T_ack;
+                T=1;
+                N2=T_TOT-T;
+                N=std::min(N,T);
+                T2=T_TOT-N;
+                variable_rate_FEC_encoder->N2 = N2;
+                variable_rate_FEC_encoder->B2 = N2;
+//                N=N_ack;
+//                T=T_ack;
             }
 //            if (T2>=4) {
 //                variable_rate_FEC_encoder->N2 = N2;
@@ -243,7 +252,9 @@ void Application_Layer_Sender::send_sym_wise_message(unsigned char *encoded_symw
     int response_size;
     //unsigned char response_buffer[6];
 
-    seq_number=seq_number+missing_packets;
+//    seq_number=seq_number+missing_packets;
+    seq_number=missing_packets;
+
 
     if (udp_parameters == nullptr)
         update_parameter(&response_size, response_buffer);
@@ -270,9 +281,9 @@ void Application_Layer_Sender::send_sym_wise_message(unsigned char *encoded_symw
     memcpy(codeword + 8, encoded_symwise_word, encoded_symwise_word_size);
     //memcpy(codeword , encoded_symwise_word, encoded_symwise_word_size);
 
-//    int counter_for_start_and_end=0;//TODO understand counter_for_start_and_end in send_sym_wise_message()
+//    int counter_for_start_and_end=0;
 
-    codeword[7] = (unsigned char) (counter_for_start_and_end); //TODO understand counter_for_start_and_end in send_sym_wise_message()
+    codeword[7] = (unsigned char) (counter_for_start_and_end);
     codeword[6] = (unsigned char) (n2-k2);//N
     codeword[5] = (unsigned char) (n2-k2);//B
     codeword[4] = (unsigned char) (n2-1);//T
@@ -329,14 +340,19 @@ void Application_Layer_Sender::message_wise_encode_at_relay(unsigned char *recei
     }
 
     message_transmitted->set_parameters(orig_seq_num, T, B, N, max_payload, received_data);
-    DEBUG_MSG("\033[1;36m" << "Relay->destination message #" << message_transmitted->seq_number << ": (T=" << T_ack << ", N=" <<
-        N_ack << ") R=" << T_ack-N_ack+1 << "/" << T_ack+1 << "\033[0m");
 
     if (message_transmitted->size > 0)
         printMatrix(message_transmitted->buffer, 1, message_transmitted->size);
     else
         DEBUG_MSG("null" << endl);
     variable_rate_FEC_encoder->encode(message_transmitted, T_ack, B_ack, N_ack,flag);
+//    DEBUG_MSG("\033[1;36m" << "Relay->destination message #" << message_transmitted->seq_number << ": (T=" << T_ack << ", N=" <<
+//                           N_ack << ") R=" << T_ack-N_ack+1 << "/" << T_ack+1 << "\033[0m");
+    DEBUG_MSG("\033[1;36m" << "Relay->destination message #" << message_transmitted->seq_number << ": (T=" << T_ack << ", N=" <<
+                           N_ack << ") R=" << message_transmitted->T-message_transmitted->N+1 << "/" << message_transmitted->T+1 << "\033[0m");
+    debug_rate_second_hop_num_packets+=1;
+    debug_rate_second_hop_curr=(float)(message_transmitted->T-message_transmitted->N+1)/(message_transmitted->T+1);
+    debug_rate_second_hop+=(float)(message_transmitted->T-message_transmitted->N+1)/(message_transmitted->T+1);
     //   for (int i = 0; i < message_transmitted->size; i++)
     //  codeword[8 + i] = (message_transmitted->buffer)[i];
 

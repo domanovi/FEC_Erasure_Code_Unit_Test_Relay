@@ -52,6 +52,8 @@ namespace siphon {
         final_counter_encoded = 0;
         display_final_coding_rate_flag = true;
 
+        debug_rate_first_hop_num_packets=0;
+        debug_rate_first_hop=0;
 
         report_window_size = ESTIMATION_WINDOW_SIZE;
     }
@@ -160,10 +162,12 @@ namespace siphon {
 
 //            } else
 //                transition_flag = 0;
-        } else if (counter_transition>T_TOT+1) //Can assist in debugging !!!
-            transition_flag = 0;
-        else
-            counter_transition++;
+        } else if (counter_transition>T_TOT+1) { //Can assist in debugging !!!
+                transition_flag = 0;
+                counter_transition++;
+            }
+//        else
+//            counter_transition++;
         }else {
             if (counter_transition <= T) {
 
@@ -364,6 +368,9 @@ namespace siphon {
             if (RELAYING_TYPE>0){
                 DEBUG_MSG("\033[1;32m" << "Source message # " << message->seq_number << " (T=" << message->T << ", N=" << message->N << ") R="
                                        << (message->T-message->N+1) << "/" << (message->T+1) << " : " << "\033[0m");
+                debug_rate_first_hop_num_packets+=1;
+                debug_rate_first_hop_curr=(float)(message->T-message->N+1)/(message->T+1);
+                debug_rate_first_hop+=(float)(message->T-message->N+1)/(message->T+1);
             }
             else
                 DEBUG_MSG("\033[1;32m" << "Source message #" << message->seq_number << ": " << "\033[0m");

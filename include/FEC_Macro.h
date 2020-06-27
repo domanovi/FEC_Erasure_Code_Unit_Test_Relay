@@ -25,7 +25,7 @@
 // if RELAYING_TYPE=1 message-wise decode and forward
 // if RELAYING_TYPE=2 symbol-wise decode and forward
 
-#define T_TOT 8 // T_TOT needs to be >= T_INITAL+T_INTIAL_2
+#define T_TOT 6// T_TOT needs to be >= T_INITAL+T_INTIAL_2, if RELAYING_TYPE=1 not used, if RELAYING_TYPE=2 ignoring T_INITIAL && N_INITIAL_2
 #define T_INITIAL 3
 #define B_INITIAL -1
 #define N_INITIAL -1
@@ -35,11 +35,14 @@
 #define N_INITIAL_2 -1
 
 #define MIN_T2 0
+#define MAX_BURST_SIZE_MWDF 500
+#define GLOBAL_MAX_SIZE_OF_CODEWORD 20000
 
 #define ESTIMATION_WINDOW_SIZE 1000    //the size of window used for estimating coding parameters.
+#define ESTIMATION_WINDOW_SIZE_REDUCTION_FACTOR 10  // divide ESTIMATION_WINDOW_SIZE to accelerate estimation
 
 //#define NUMBER_OF_ITERATIONS 361000   //total number of iterations. Recommended: 50 times ESTIMATION_WINDOW_SIZE,
-#define NUMBER_OF_ITERATIONS 100000
+#define NUMBER_OF_ITERATIONS 360000
 // 360000 packets = 3600 seconds =  60 minutes, 1 minute = 6000 packets
 
 #define ERASURE_TYPE 1
@@ -83,8 +86,9 @@
 /*************** The following is used for displaying debugging messages *******************/
 
 #define DEBUG_FEC 1 //debugging messages hidden if DEBUG_FEC is 0
-#define DEBUG_COMM 1
+#define DEBUG_COMM 0
 #define DEBUG_CHAR 1
+#define DEBUG_SAVE_SEQ_OF_DROPPED_TO_FILE 1
 
 #if DEBUG_FEC
 #define DEBUG_MSG(str) do {std::cout << str << std::endl; } while( false )

@@ -52,6 +52,10 @@ public:
     FEC_Message *message_transmitted;
     siphon::Variable_Rate_FEC_Encoder *variable_rate_FEC_encoder;
 
+    float debug_rate_second_hop;
+    float debug_rate_second_hop_curr;
+    int debug_rate_second_hop_num_packets;
+
     void message_wise_encode_at_relay(unsigned char *received_data, int orig_seq_num, unsigned char *udp_parameters,
                                       unsigned char *udp_codeword, int *udp_codeword_size,unsigned char *response_buffer);
 
