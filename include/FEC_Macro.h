@@ -20,22 +20,22 @@
 //#define B_INITIAL -1
 //#define N_INITIAL -1
 
-#define RELAYING_TYPE 2
+#define RELAYING_TYPE 1
 // if RELAYING_TYPE=0 P2P
 // if RELAYING_TYPE=1 message-wise decode and forward
 // if RELAYING_TYPE=2 symbol-wise decode and forward
 
 #define T_TOT 8 // T_TOT needs to be >= T_INITAL+T_INTIAL_2, if RELAYING_TYPE=1 not used, if RELAYING_TYPE=2 ignoring T_INITIAL && N_INITIAL_2
-#define T_INITIAL 3
+#define T_INITIAL 6
 #define B_INITIAL -1
-#define N_INITIAL -1
+#define N_INITIAL 1
 
-#define T_INITIAL_2 3
+#define T_INITIAL_2 7
 #define B_INITIAL_2 2
-#define N_INITIAL_2 -1
+#define N_INITIAL_2 2
 
 #define MIN_T2 0
-#define MIN_N2 1
+#define MIN_N2 0
 #define MAX_BURST_SIZE_MWDF 500
 #define GLOBAL_MAX_SIZE_OF_CODEWORD 20000
 

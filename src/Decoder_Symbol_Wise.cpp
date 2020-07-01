@@ -127,7 +127,7 @@ namespace siphon {
             if (temp_erasure_vector[i]==1)
                 erasure_counter++;
         }
-        int number_of_code_blocks=ceil(304/k);//TODO replace 300 wih max_payload !!! Since k=k2 no need to worry !
+        int number_of_code_blocks=ceil(max_payload/k)+1;//TODO replace 300 wih max_payload !!! Since k=k2 no need to worry !
 //        int number_of_code_blocks_r_d=ceil(300/k2);//TODO replace 300 wih max_payload !!!
 
         // Extract the relevant parts from the coded message
@@ -206,7 +206,7 @@ namespace siphon {
 
 //        unsigned char buffer[30000];
         unsigned char temp_codeword[n];
-        int number_of_code_blocks=ceil(304/k);//TODO replace 300 wih max_payload !!!
+        int number_of_code_blocks=ceil(max_payload/k)+1;//TODO replace 300 wih max_payload !!!
         bool *stam_erasure_vector=(bool *) malloc(sizeof(bool)*T_INITIAL);
         *flag=false;
         for (int j=0;j<number_of_code_blocks;j++) {
@@ -229,7 +229,7 @@ namespace siphon {
 
     void Decoder_Symbol_Wise::extract_data(unsigned char *buffer,int k,int n,int received_seq,unsigned char *temp_buffer){// temp extraction of data
 //        unsigned char temp_buffer[30000];
-        int number_of_code_blocks=ceil(304/k);//TODO replace 300 wih max_payload !!!
+        int number_of_code_blocks=ceil(max_payload/k)+1;//TODO replace 300 wih max_payload !!!
         int ind=0;
         for (int j=0;j<number_of_code_blocks;j++) {
             for (int i = 0; i < k; i++) {

@@ -141,7 +141,7 @@ int main(int argc, const char *argv[]) {
 
 
     siphon::Erasure_Simulator erasure_simulator("../Experimental_Logs/erasure40.bin");
-    siphon::Erasure_Simulator erasure_simulator2("../Experimental_Logs/erasure50.bin");
+    siphon::Erasure_Simulator erasure_simulator2("../Experimental_Logs/erasure20.bin");
 
     auto start_time = high_resolution_clock::now();;
 
@@ -149,9 +149,9 @@ int main(int argc, const char *argv[]) {
 //    erasure_simulator.erasure_seq[4]='\001';
 //    erasure_simulator.erasure_seq[5]='\001';
 
-//    for (int i=0;i<360000;i++) {
-//        erasure_simulator2.erasure_seq[i] = '\000';
-//    }
+    for (int i=0;i<360000;i++) {
+        erasure_simulator2.erasure_seq[i] = '\000';
+    }
 //
 //    for (int i=0;i<1000;i++) {
 //        erasure_simulator2.erasure_seq[i] = '\000';
@@ -345,9 +345,9 @@ int main(int argc, const char *argv[]) {
                     int size_of_codeword=application_layer_relay_receiver->fec_decoder->codeword_vector_to_transmit_stored_word_size[kk];
                     int seq=application_layer_relay_receiver->fec_decoder->codeword_vector_to_transmit_stored_seq[kk];
                     if (size_of_codeword>10000 || size_of_codeword<100) {
-                                cout << "Problem with codeword size line 346"<<endl;
-                                cin >> input;
-                            }
+                        cout << "Problem with codeword size line 346"<<endl;
+                        cin >> input;
+                    }
                     application_layer_relay_sender.send_sym_wise_message(
                             application_layer_relay_receiver->fec_decoder->codeword_vector_to_transmit_stored[kk],
                             size_of_codeword, udp_parameters2, buffer2, &buffer_size2, seq,
@@ -358,11 +358,11 @@ int main(int argc, const char *argv[]) {
                             &buffer_size2,
                             &erasure_simulator2,0);
                 }
-        }
-                min_rate_debug_packet_count+=1;
-                min_rate_debug_debug+=std::min(application_layer_sender.variable_rate_FEC_encoder->debug_rate_first_hop_curr,
-                                               application_layer_destination_receiver->fec_decoder->debug_rate_second_hop_curr);
             }
+            min_rate_debug_packet_count+=1;
+            min_rate_debug_debug+=std::min(application_layer_sender.variable_rate_FEC_encoder->debug_rate_first_hop_curr,
+                                           application_layer_destination_receiver->fec_decoder->debug_rate_second_hop_curr);
+        }
 
 
 //            bool flag_for_using_backup=false;
@@ -536,35 +536,62 @@ int main(int argc, const char *argv[]) {
     cout << "Time duration = " << duration.count() << " minutes" << endl;
     cout << "Last sequence number received = " << seq_number << endl;
 
-    if (RELAYING_TYPE>0 && DEBUG_CHAR==1) {
-        float final_char_loss_in_per=(float) (application_layer_destination_receiver->fec_decoder->final_counter_loss_of_char+
-                application_layer_destination_receiver->fec_decoder->final_counter_loss_of_full_packet*300)/(300*(packet_counter-T_TOT)) * 100;
+    if (RELAYING_TYPE>0) {
         int num_of_packets_lost;
+        if (DEBUG_CHAR==1) {
+            float final_char_loss_in_per =
+                    (float) (application_layer_destination_receiver->fec_decoder->final_counter_loss_of_char +
+                             application_layer_destination_receiver->fec_decoder->final_counter_loss_of_full_packet *
+                             300) / (300 * (packet_counter - T_TOT)) * 100;
+            
 //        if (RELAYING_TYPE==2)
 //            num_of_packets_lost=application_layer_destination_receiver->fec_decoder->final_counter_loss_of_full_packet+
 //                    application_layer_destination_receiver->fec_decoder->final_counter_loss_of_packets_swdf;
 //        else
 //            num_of_packets_lost=application_layer_destination_receiver->fec_decoder->final_counter_loss_of_full_packet;
+            if (RELAYING_TYPE == 2) {
+                if (N_INITIAL == -1 && N_INITIAL_2 == -1)
+                    DEBUG_MSG("\033[1;34m" << "adaptive SWDF, T_TOT=" << T_TOT << " estination window=" <<
+                                           ESTIMATION_WINDOW_SIZE / ESTIMATION_WINDOW_SIZE_REDUCTION_FACTOR
+                                           << "\033[0m");
+                else
+                    DEBUG_MSG(
+                            "\033[1;34m" << "Fixed-rate SWDF, hop1 (T1=" << T_TOT - N_INITIAL_2 << ", N1=" << N_INITIAL
+                                         << "), hop2 (T2=" << T_TOT - N_INITIAL << ", N2=" << N_INITIAL_2 << ")"
+                                         << "\033[0m");
+            } else {
+                if (N_INITIAL == -1 && N_INITIAL_2 == -1)
+                    DEBUG_MSG("\033[1;34m" << "adaptive MWDF, T1=" << T_INITIAL << ", T2=" << T_INITIAL_2 << "\033[0m");
+                else
+                    DEBUG_MSG(
+                            "\033[1;34m" << "Fixed-rate MWDF, hop1 (T1=" << T_INITIAL << ", N1=" << N_INITIAL
+                                         << "), hop2 (T2=" << T_INITIAL_2 << ", N2=" << N_INITIAL_2 << ")"
+                                         << "\033[0m");
+            }
+
+            DEBUG_MSG("\033[1;34m" << "Total Char loss " << final_char_loss_in_per << "% " << "\033[0m");
+        }
         num_of_packets_lost=application_layer_destination_receiver->fec_decoder->final_counter_loss_of_full_packet+
                             application_layer_destination_receiver->fec_decoder->final_counter_loss_of_packets_swdf;
-        DEBUG_MSG("\033[1;34m" << "Total Char loss "<<  final_char_loss_in_per << "% " << "\033[0m");
         DEBUG_MSG("\033[1;34m" << "Total number of erased packets "<<  num_of_packets_lost << "\033[0m");
         DEBUG_MSG("\033[1;34m" << "Total occurrences of bug words  "<<  application_layer_destination_receiver->fec_decoder->final_counter_loss_of_char_elad << "\033[0m");
         if (RELAYING_TYPE>0){
-            float avg_rate_loss_first_hop=(float) (application_layer_sender.variable_rate_FEC_encoder->debug_rate_first_hop)/
-                    (application_layer_sender.variable_rate_FEC_encoder->debug_rate_first_hop_num_packets);
-            float avg_rate_loss_second_hop;
+            float avg_rate_first_hop=(float) (application_layer_sender.variable_rate_FEC_encoder->debug_rate_first_hop)/
+                                          (application_layer_sender.variable_rate_FEC_encoder->debug_rate_first_hop_num_packets);
+            float avg_rate_second_hop;
             if (RELAYING_TYPE==1)
-                avg_rate_loss_second_hop=(float) (application_layer_relay_sender.debug_rate_second_hop)/
-                                          (application_layer_relay_sender.debug_rate_second_hop_num_packets);
+                avg_rate_second_hop=(float) (application_layer_relay_sender.debug_rate_second_hop)/
+                                         (application_layer_relay_sender.debug_rate_second_hop_num_packets);
             else
-                avg_rate_loss_second_hop=(float) (application_layer_destination_receiver->fec_decoder->debug_rate_second_hop)/
-                        (application_layer_destination_receiver->fec_decoder->debug_rate_second_hop_num_packets);
-            DEBUG_MSG("\033[1;34m" << "Average rate in first hop "<<  avg_rate_loss_first_hop << "\033[0m");
-            DEBUG_MSG("\033[1;34m" << "Average rate in second hop "<<  avg_rate_loss_second_hop << "\033[0m");
+                avg_rate_second_hop=(float) (application_layer_destination_receiver->fec_decoder->debug_rate_second_hop)/
+                                         (application_layer_destination_receiver->fec_decoder->debug_rate_second_hop_num_packets);
+            DEBUG_MSG("\033[1;34m" << "Average rate in first hop "<<  avg_rate_first_hop << "\033[0m");
+            DEBUG_MSG("\033[1;34m" << "Average rate in second hop "<<  avg_rate_second_hop << "\033[0m");
             DEBUG_MSG("\033[1;34m" << "Average min rate "<<  min_rate_debug_debug/min_rate_debug_packet_count << "\033[0m");
+
         }
     }
+
 
 //    cout << "Loss probability = " << calculateLossMessage(INPUTDATAFILE, OUTPUTDATAFILE);
 
