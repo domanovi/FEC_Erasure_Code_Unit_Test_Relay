@@ -75,6 +75,11 @@ namespace siphon {
         int codeword_vector_to_transmit_stored_index;
         int codeword_vector_to_transmit_stored_word_size[2*T_TOT];
         int codeword_vector_to_transmit_stored_seq[2*T_TOT];
+        int codeword_vector_to_transmit_stored_counter_for_start_and_end[2*T_TOT];
+
+        unsigned char **message_vector_to_transmit_stored;
+        int message_vector_to_transmit_stored_index;
+        int message_vector_to_transmit_stored_seq[MAX_BURST_SIZE_MWDF];
 
         Payload_Simulator *payload_simulator;
         unsigned char *raw_data;

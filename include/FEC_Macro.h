@@ -20,22 +20,23 @@
 //#define B_INITIAL -1
 //#define N_INITIAL -1
 
-#define RELAYING_TYPE 1
+#define RELAYING_TYPE 2
 // if RELAYING_TYPE=0 P2P
 // if RELAYING_TYPE=1 message-wise decode and forward
 // if RELAYING_TYPE=2 symbol-wise decode and forward
 
-#define T_TOT 8 // T_TOT needs to be >= T_INITAL+T_INTIAL_2, if RELAYING_TYPE=1 not used, if RELAYING_TYPE=2 ignoring T_INITIAL && N_INITIAL_2
-#define T_INITIAL 6
+#define T_TOT 10 // T_TOT needs to be >= T_INITAL+T_INTIAL_2, if RELAYING_TYPE=1 not used, if RELAYING_TYPE=2 ignoring T_INITIAL && N_INITIAL_2
+#define T_INITIAL 5
 #define B_INITIAL -1
-#define N_INITIAL 1
+#define N_INITIAL -1
 
-#define T_INITIAL_2 7
+#define T_INITIAL_2 5
 #define B_INITIAL_2 2
-#define N_INITIAL_2 2
+#define N_INITIAL_2 -1
 
 #define MIN_T2 0
 #define MIN_N2 0
+#define SPLIT_PROP 0
 #define MAX_BURST_SIZE_MWDF 500
 #define GLOBAL_MAX_SIZE_OF_CODEWORD 20000
 
@@ -43,7 +44,7 @@
 #define ESTIMATION_WINDOW_SIZE_REDUCTION_FACTOR 10  // divide ESTIMATION_WINDOW_SIZE to accelerate estimation
 
 //#define NUMBER_OF_ITERATIONS 361000   //total number of iterations. Recommended: 50 times ESTIMATION_WINDOW_SIZE,
-#define NUMBER_OF_ITERATIONS 360000
+#define NUMBER_OF_ITERATIONS 100000
 // 360000 packets = 3600 seconds =  60 minutes, 1 minute = 6000 packets
 
 #define ERASURE_TYPE 1
@@ -86,7 +87,7 @@
 
 /*************** The following is used for displaying debugging messages *******************/
 
-#define DEBUG_FEC 1 //debugging messages hidden if DEBUG_FEC is 0
+#define DEBUG_FEC 0 //debugging messages hidden if DEBUG_FEC is 0
 #define DEBUG_COMM 0
 #define DEBUG_CHAR 1
 #define DEBUG_SAVE_SEQ_OF_DROPPED_TO_FILE 1

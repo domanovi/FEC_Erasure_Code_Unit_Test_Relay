@@ -140,8 +140,10 @@ int main(int argc, const char *argv[]) {
     erasure_generator2.generate_IID(stream_duration + T+T2, 0.1, "erasure2.bin",2);
 
 
-    siphon::Erasure_Simulator erasure_simulator("../Experimental_Logs/erasure40.bin");
-    siphon::Erasure_Simulator erasure_simulator2("../Experimental_Logs/erasure20.bin");
+//    siphon::Erasure_Simulator erasure_simulator("../Experimental_Logs/erasure50.bin");
+//    siphon::Erasure_Simulator erasure_simulator2("../Experimental_Logs/erasure20.bin");
+    siphon::Erasure_Simulator erasure_simulator("erasure.bin");
+    siphon::Erasure_Simulator erasure_simulator2("erasure2.bin");
 
     auto start_time = high_resolution_clock::now();;
 
@@ -149,9 +151,9 @@ int main(int argc, const char *argv[]) {
 //    erasure_simulator.erasure_seq[4]='\001';
 //    erasure_simulator.erasure_seq[5]='\001';
 
-    for (int i=0;i<360000;i++) {
-        erasure_simulator2.erasure_seq[i] = '\000';
-    }
+//    for (int i=0;i<360000;i++) {
+//        erasure_simulator2.erasure_seq[i] = '\000';
+//    }
 //
 //    for (int i=0;i<1000;i++) {
 //        erasure_simulator2.erasure_seq[i] = '\000';
@@ -200,8 +202,8 @@ int main(int argc, const char *argv[]) {
     unsigned char buffer2[30000];
     unsigned char received_data[30000];
     unsigned char data_to_transmit_in_relay[30000];
-    unsigned char *zero_data=(unsigned char *)malloc(sizeof(unsigned char *) * 300); // Elad to change
-    memset(zero_data,'\000',300);
+//    unsigned char *zero_data=(unsigned char *)malloc(sizeof(unsigned char *) * 300); // Elad to change
+//    memset(zero_data,'\000',300);
     unsigned char response_from_dest_buffer[6];
     for (int i=0;i<6;i++)
         response_from_dest_buffer[i]=0;
@@ -226,7 +228,7 @@ int main(int argc, const char *argv[]) {
 //        application_layer_sender.generate_message_and_encode(udp_parameters, buffer, &buffer_size); //udp_codeword is
 
         // sent;
-        if (relaying_type == 0) {
+        if (relaying_type == 0) {// P2P (no relay)
             application_layer_sender.generate_message_and_encode(udp_parameters, buffer, &buffer_size); //udp_codeword is
 
             // P2P
@@ -235,7 +237,7 @@ int main(int argc, const char *argv[]) {
             seq_number = application_layer_relay_receiver->receive_message_and_decode(udp_parameters, buffer, &buffer_size,
                                                                                       &erasure_simulator);
         }
-        else if (relaying_type == 1) {
+        else if (relaying_type == 1) {//Message-wise decode and forward
             // 1. Currently there is no signalling from the relay to the destination about erased packets at the relay.
             // This means that the destination may try to recover erased packets (resulting with false recovery)
             // 2. Currently each hop performs adaptation separately and independently. Currently there is no shift in delay between hops.
@@ -251,6 +253,24 @@ int main(int argc, const char *argv[]) {
 
             seq_number = application_layer_relay_receiver->receive_message_and_decode(udp_parameters, buffer,
                                                                                       &buffer_size,&erasure_simulator);
+//            if (i>=T) {
+//                if (seq_number>-1){
+//                int numOfMessagesStored=application_layer_relay_receiver->fec_decoder->message_vector_to_transmit_stored_index;
+////                if (numOfMessagesStored>0)
+////                    cout<<"ELAD"<<endl;
+//                for (int kk=0;kk<=numOfMessagesStored;kk++) {
+//                    application_layer_relay_sender.message_wise_encode_at_relay(
+//                            application_layer_relay_receiver->fec_decoder->message_vector_to_transmit_stored[kk],
+//                            application_layer_relay_receiver->fec_decoder->message_vector_to_transmit_stored_seq[kk],
+//                            udp_parameters2, buffer2,
+//                            &buffer_size2, response_from_dest_buffer);
+//                    application_layer_destination_receiver->receive_message_and_decode(
+//                            udp_parameters2, buffer2,
+//                            &buffer_size2,
+//                            &erasure_simulator2);
+//                }
+//                }
+//            }
             if (i>=T) {
                 if (application_layer_relay_receiver->fec_decoder->recovered_message_vector[0]->buffer != NULL) {//recover past messages
                     // check if there are codewords recovered in the past
@@ -297,6 +317,10 @@ int main(int argc, const char *argv[]) {
                                 application_layer_relay_receiver->fec_message->buffer, seq_number - T, udp_parameters2,
                                 buffer2,
                                 &buffer_size2, response_from_dest_buffer);
+//                        cout<<seq_number - T<<endl;
+//                        printMatrix(application_layer_relay_receiver->fec_message->buffer,1,300);
+//                        cout<<application_layer_relay_receiver->fec_decoder->message_vector_to_transmit_stored_seq[0]<<endl;
+//                        printMatrix(application_layer_relay_receiver->fec_decoder->message_vector_to_transmit_stored[0],1,300);
                         application_layer_destination_receiver->receive_message_and_decode(
                                 udp_parameters2, buffer2,
                                 &buffer_size2,
@@ -317,7 +341,7 @@ int main(int argc, const char *argv[]) {
             min_rate_debug_debug+=std::min(application_layer_sender.variable_rate_FEC_encoder->debug_rate_first_hop_curr,application_layer_relay_sender.debug_rate_second_hop_curr);
 
 
-        } else if (relaying_type == 2) {
+        } else if (relaying_type == 2) { // Symbol-wise decode and forward
             application_layer_sender.generate_message_and_encode(udp_parameters, buffer,
                                                                  &buffer_size); //udp_codeword is
 
@@ -339,20 +363,19 @@ int main(int argc, const char *argv[]) {
                                                                                                   &k2_new, &n2_new);
             if (seq_number>-1) {
                 int numOfStoredCodeWords=application_layer_relay_receiver->fec_decoder->codeword_vector_to_transmit_stored_index;
-//                if (numOfStoredCodeWords>0)
-//                    cout<<"ELAD"<<endl;
                 for (int kk=0;kk<=numOfStoredCodeWords;kk++){
                     int size_of_codeword=application_layer_relay_receiver->fec_decoder->codeword_vector_to_transmit_stored_word_size[kk];
                     int seq=application_layer_relay_receiver->fec_decoder->codeword_vector_to_transmit_stored_seq[kk];
-                    if (size_of_codeword>10000 || size_of_codeword<100) {
-                        cout << "Problem with codeword size line 346"<<endl;
-                        cin >> input;
-                    }
+                    int counter_for_start_and_end=application_layer_relay_receiver->fec_decoder->codeword_vector_to_transmit_stored_counter_for_start_and_end[kk]-numOfStoredCodeWords+kk;
+                    if (counter_for_start_and_end<0)
+                                counter_for_start_and_end=255+counter_for_start_and_end;
+//                    printMatrix(application_layer_relay_receiver->fec_decoder->codeword_vector_to_transmit_stored[kk],1,size_of_codeword);
+//                    cout<<counter_for_start_and_end<<endl;
                     application_layer_relay_sender.send_sym_wise_message(
                             application_layer_relay_receiver->fec_decoder->codeword_vector_to_transmit_stored[kk],
                             size_of_codeword, udp_parameters2, buffer2, &buffer_size2, seq,
                             response_from_dest_buffer, k2_new, n2_new,
-                            application_layer_relay_receiver->fec_message->counter_for_start_and_end);
+                            counter_for_start_and_end);
                     application_layer_destination_receiver->receive_message_and_symbol_wise_decode(
                             udp_parameters2, buffer2,
                             &buffer_size2,
@@ -401,6 +424,8 @@ int main(int argc, const char *argv[]) {
 //                                size_of_codeword=0;
 //                                cin >> input;
 //                            }
+//                            printMatrix(application_layer_relay_receiver->fec_decoder->decoder_Symbol_Backup->codeword_vector_store_in_burst[burst_index],1,size_of_codeword);
+//                            cout << application_layer_relay_receiver->fec_message->counter_for_start_and_end << endl;
 //                            application_layer_relay_sender.send_sym_wise_message(
 //                                    application_layer_relay_receiver->fec_decoder->decoder_Symbol_Backup->codeword_vector_store_in_burst[burst_index],
 //                                    size_of_codeword, udp_parameters2, buffer2, &buffer_size2, 0,
@@ -430,6 +455,8 @@ int main(int argc, const char *argv[]) {
 //                            int counter_for_start_and_end=application_layer_relay_receiver->fec_message->counter_for_start_and_end-delta_for_counter_for_start_and_end;
 //                            if (counter_for_start_and_end<0)
 //                                counter_for_start_and_end=255+counter_for_start_and_end;
+//                            printMatrix(application_layer_relay_receiver->fec_decoder->decoder_Symbol_Wise->codeword_vector_store_in_burst[burst_index],1,size_of_codeword);
+//                            cout << counter_for_start_and_end << endl;
 //                            application_layer_relay_sender.send_sym_wise_message(
 //                                    application_layer_relay_receiver->fec_decoder->decoder_Symbol_Wise->codeword_vector_store_in_burst[burst_index],
 //                                    size_of_codeword, udp_parameters2, buffer2, &buffer_size2, 0,
@@ -449,6 +476,8 @@ int main(int argc, const char *argv[]) {
 //                        index_to_use=application_layer_relay_receiver->fec_decoder->n2_old;
 //                    else
 //                        index_to_use=n2_new;
+//                    printMatrix(application_layer_relay_receiver->fec_decoder->decoder_Symbol_Wise->codeword_vector_to_transmit[index_to_use-1],1,codeword_size_final);
+//                    cout<<application_layer_relay_receiver->fec_message->counter_for_start_and_end<<endl;
 //                    application_layer_relay_sender.send_sym_wise_message(
 //                            application_layer_relay_receiver->fec_decoder->decoder_Symbol_Wise->codeword_vector_to_transmit[index_to_use-1],
 //                            codeword_size_final, udp_parameters2, buffer2, &buffer_size2,
@@ -487,6 +516,8 @@ int main(int argc, const char *argv[]) {
 //                                cout << "Problem with codeword size line 454"<<endl;
 //                                cin >> input;
 //                            }
+//                            printMatrix(application_layer_relay_receiver->fec_decoder->decoder_Symbol_Backup->codeword_vector_to_transmit[n2_old_old-double_coding_sum+count],1,size_of_codeword);
+//                            cout<<application_layer_relay_receiver->fec_message->counter_for_start_and_end<<endl;
 //                            application_layer_relay_sender.send_sym_wise_message(
 //                                    application_layer_relay_receiver->fec_decoder->decoder_Symbol_Backup->codeword_vector_to_transmit[n2_old_old-double_coding_sum+count],
 //                                    size_of_codeword, udp_parameters2, buffer2, &buffer_size2, 0,
@@ -501,6 +532,8 @@ int main(int argc, const char *argv[]) {
 //                                cout << "Problem with codeword size line 468"<<endl;
 //                                cin >> input;
 //                            }
+//                            printMatrix(application_layer_relay_receiver->fec_decoder->decoder_Symbol_Wise->codeword_vector_to_transmit[index],1,size_of_codeword);
+//                            cout<<counter_for_start_and_end<<endl;
 //                            application_layer_relay_sender.send_sym_wise_message(
 //                                    application_layer_relay_receiver->fec_decoder->decoder_Symbol_Wise->codeword_vector_to_transmit[index],
 //                                    size_of_codeword, udp_parameters2, buffer2, &buffer_size2, 0,
@@ -537,43 +570,76 @@ int main(int argc, const char *argv[]) {
     cout << "Last sequence number received = " << seq_number << endl;
 
     if (RELAYING_TYPE>0) {
-        int num_of_packets_lost;
+        time_t now = time(0);
+        tm *ltm = localtime(&now);
+        std::string timeStamp = std::to_string(1900 + ltm->tm_year) + "_" + std::to_string(1 + ltm->tm_mon) + "_" +
+                                std::to_string(ltm->tm_mday) + "_" + std::to_string(ltm->tm_hour) + "_" +
+                                std::to_string(1 + ltm->tm_min);
+        ofstream myfile;
+        myfile.open ("results_summary.csv",std::ios_base::app);
+        myfile << timeStamp << ",";
+        // show type of run
+        if (RELAYING_TYPE == 2) {
+            if (N_INITIAL == -1 && N_INITIAL_2 == -1) {
+                DEBUG_MSG("\033[1;34m" << "adaptive SWDF, T_TOT=" << T_TOT << " estimation window=" <<
+                                       ESTIMATION_WINDOW_SIZE / ESTIMATION_WINDOW_SIZE_REDUCTION_FACTOR
+                                       << "\033[0m");
+                myfile << "adaptive SWDF, T_TOT=" << T_TOT << " estimation window=" <<
+                       ESTIMATION_WINDOW_SIZE / ESTIMATION_WINDOW_SIZE_REDUCTION_FACTOR
+                       << ",";
+            }
+            else {
+                DEBUG_MSG(
+                        "\033[1;34m" << "Fixed-rate SWDF, hop1 (T1=" << T_TOT - N_INITIAL_2 << ", N1=" << N_INITIAL
+                                     << "), hop2 (T2=" << T_TOT - N_INITIAL << ", N2=" << N_INITIAL_2 << ")"
+                                     << "\033[0m");
+                myfile << "Fixed-rate SWDF, hop1 (T1=" << T_TOT - N_INITIAL_2 << "_N1=" << N_INITIAL
+                       << ") hop2 (T2=" << T_TOT - N_INITIAL << "_N2=" << N_INITIAL_2 << ")" << ",";
+
+            }
+        } else {
+            if (N_INITIAL == -1 && N_INITIAL_2 == -1) {
+                DEBUG_MSG("\033[1;34m" << "adaptive MWDF, T1=" << T_INITIAL << ", T2=" << T_INITIAL_2 << "\033[0m");
+                myfile << "adaptive MWDF, T1=" << T_INITIAL << " T2=" << T_INITIAL_2 << ",";
+            }
+            else {
+                DEBUG_MSG(
+                        "\033[1;34m" << "Fixed-rate MWDF, hop1 (T1=" << T_INITIAL << ", N1=" << N_INITIAL
+                                     << "), hop2 (T2=" << T_INITIAL_2 << ", N2=" << N_INITIAL_2 << ")"
+                                     << "\033[0m");
+                myfile << "Fixed-rate MWDF, hop1 (T1=" << T_INITIAL << "_N1=" << N_INITIAL
+                       << ") hop2 (T2=" << T_INITIAL_2 << "_N2=" << N_INITIAL_2 << ")"
+                       <<  ",";
+            }
+        }
+        // show total char loss
+        int num_of_packets_lost=application_layer_destination_receiver->fec_decoder->final_counter_loss_of_full_packet+
+                                application_layer_destination_receiver->fec_decoder->final_counter_loss_of_packets_swdf;
         if (DEBUG_CHAR==1) {
-            float final_char_loss_in_per =
-                    (float) (application_layer_destination_receiver->fec_decoder->final_counter_loss_of_char +
-                             application_layer_destination_receiver->fec_decoder->final_counter_loss_of_full_packet *
-                             300) / (300 * (packet_counter - T_TOT)) * 100;
+            float final_char_loss_in_per;
+            if (RELAYING_TYPE==2)
+                final_char_loss_in_per =
+                        (float) (application_layer_destination_receiver->fec_decoder->final_counter_loss_of_char +
+                                 application_layer_destination_receiver->fec_decoder->final_counter_loss_of_full_packet *
+                                 300) / (300 * (packet_counter - T_TOT)) * 100;
+            else
+                final_char_loss_in_per =
+                        (float) (num_of_packets_lost*
+                                 300) / (300 * (packet_counter - T_INITIAL-T_INITIAL_2)) * 100;
             
 //        if (RELAYING_TYPE==2)
 //            num_of_packets_lost=application_layer_destination_receiver->fec_decoder->final_counter_loss_of_full_packet+
 //                    application_layer_destination_receiver->fec_decoder->final_counter_loss_of_packets_swdf;
 //        else
 //            num_of_packets_lost=application_layer_destination_receiver->fec_decoder->final_counter_loss_of_full_packet;
-            if (RELAYING_TYPE == 2) {
-                if (N_INITIAL == -1 && N_INITIAL_2 == -1)
-                    DEBUG_MSG("\033[1;34m" << "adaptive SWDF, T_TOT=" << T_TOT << " estination window=" <<
-                                           ESTIMATION_WINDOW_SIZE / ESTIMATION_WINDOW_SIZE_REDUCTION_FACTOR
-                                           << "\033[0m");
-                else
-                    DEBUG_MSG(
-                            "\033[1;34m" << "Fixed-rate SWDF, hop1 (T1=" << T_TOT - N_INITIAL_2 << ", N1=" << N_INITIAL
-                                         << "), hop2 (T2=" << T_TOT - N_INITIAL << ", N2=" << N_INITIAL_2 << ")"
-                                         << "\033[0m");
-            } else {
-                if (N_INITIAL == -1 && N_INITIAL_2 == -1)
-                    DEBUG_MSG("\033[1;34m" << "adaptive MWDF, T1=" << T_INITIAL << ", T2=" << T_INITIAL_2 << "\033[0m");
-                else
-                    DEBUG_MSG(
-                            "\033[1;34m" << "Fixed-rate MWDF, hop1 (T1=" << T_INITIAL << ", N1=" << N_INITIAL
-                                         << "), hop2 (T2=" << T_INITIAL_2 << ", N2=" << N_INITIAL_2 << ")"
-                                         << "\033[0m");
-            }
 
             DEBUG_MSG("\033[1;34m" << "Total Char loss " << final_char_loss_in_per << "% " << "\033[0m");
+            myfile << "Total Char loss " << final_char_loss_in_per << "% " <<  ",";
         }
-        num_of_packets_lost=application_layer_destination_receiver->fec_decoder->final_counter_loss_of_full_packet+
-                            application_layer_destination_receiver->fec_decoder->final_counter_loss_of_packets_swdf;
+//        num_of_packets_lost=application_layer_destination_receiver->fec_decoder->final_counter_loss_of_full_packet+
+//                            application_layer_destination_receiver->fec_decoder->final_counter_loss_of_packets_swdf;
         DEBUG_MSG("\033[1;34m" << "Total number of erased packets "<<  num_of_packets_lost << "\033[0m");
+        myfile << "Total number of erased packets "<<  num_of_packets_lost <<  ",";
         DEBUG_MSG("\033[1;34m" << "Total occurrences of bug words  "<<  application_layer_destination_receiver->fec_decoder->final_counter_loss_of_char_elad << "\033[0m");
         if (RELAYING_TYPE>0){
             float avg_rate_first_hop=(float) (application_layer_sender.variable_rate_FEC_encoder->debug_rate_first_hop)/
@@ -586,10 +652,17 @@ int main(int argc, const char *argv[]) {
                 avg_rate_second_hop=(float) (application_layer_destination_receiver->fec_decoder->debug_rate_second_hop)/
                                          (application_layer_destination_receiver->fec_decoder->debug_rate_second_hop_num_packets);
             DEBUG_MSG("\033[1;34m" << "Average rate in first hop "<<  avg_rate_first_hop << "\033[0m");
+            myfile << "Average rate in first hop "<<  avg_rate_first_hop <<  ",";
             DEBUG_MSG("\033[1;34m" << "Average rate in second hop "<<  avg_rate_second_hop << "\033[0m");
+            myfile << "Average rate in second hop "<<  avg_rate_second_hop << ",";
             DEBUG_MSG("\033[1;34m" << "Average min rate "<<  min_rate_debug_debug/min_rate_debug_packet_count << "\033[0m");
+            myfile << "Average min rate "<<  min_rate_debug_debug/min_rate_debug_packet_count <<  ",";
 
         }
+        myfile << "\n";
+        myfile.close();
+
+
     }
 
 

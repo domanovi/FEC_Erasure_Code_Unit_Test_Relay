@@ -27,8 +27,9 @@ namespace siphon {
         ofstream file_write;
         file_write.open(filename, ios::out | ios::binary);
 
-        ofstream myfile;
+        ofstream myfile,myfile2;
         myfile.open (filename.substr (0,filename.length()-4)+".txt");
+        myfile2.open (filename.substr (0,filename.length()-4)+"_ind.txt");
         mt19937 gen;
         if (seed==0)
             gen.seed(SEED_ARTIFICIAL_ERASURE); //Standard mersenne_twister_engine seeded with rd()
@@ -44,6 +45,7 @@ namespace siphon {
             if (dist(gen) < erasure_prob) {
                 file_write.write((char *) &one, 1);
                 myfile << "1\n";
+                myfile2 << i << "\n";
             }
             else {
                 file_write.write((char *) &zero, 1);
@@ -52,7 +54,11 @@ namespace siphon {
         }
 
         myfile.close();
+        myfile2.close();
         file_write.close();
+
+
+
 
         return;
 

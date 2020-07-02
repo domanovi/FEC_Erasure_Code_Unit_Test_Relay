@@ -109,6 +109,10 @@ namespace siphon {
         for (int i=0;i<2*T_TOT;i++) {
             codeword_vector_to_transmit_stored[i]=(unsigned char *) malloc(sizeof(unsigned char) * (max_payload + 12) * 4 * T_TOT);
         }
+        message_vector_to_transmit_stored=(unsigned char **) malloc(sizeof(unsigned char *) * (MAX_BURST_SIZE_MWDF));
+        for (int i=0;i<MAX_BURST_SIZE_MWDF;i++) {
+            message_vector_to_transmit_stored[i]=(unsigned char *) malloc(sizeof(unsigned char) * (max_payload + 12) * 4 * T_TOT);
+        }
 //        temp_erasure_vector=(bool *) malloc(sizeof(bool)*T_TOT);
 //        for (int i=0;i<T_TOT+1;i++){
 //            codeword_vector[i]=(unsigned char *) malloc(
@@ -159,10 +163,13 @@ namespace siphon {
 
         for (int i=0;i<2*T_TOT;i++) {
             free(codeword_vector_to_transmit_stored[i]);
+
 //            free(codeword_vector[i]);
 //            free(codeword_new_vector[i]);
 //            free(codeword_vector_store_in_burst[i]);
         }
+        for (int i=0;i<MAX_BURST_SIZE_MWDF;i++)
+            free(message_vector_to_transmit_stored[i]);
         free(encoder);
         free(raw_data);
         delete payload_simulator;
@@ -294,6 +301,7 @@ namespace siphon {
                            decoder_Symbol_Wise->codeword_vector_to_transmit[n2_last_used - 1], size_t(codeword_size_final_temp));
                     codeword_vector_to_transmit_stored_word_size[codeword_vector_to_transmit_stored_index]=codeword_size_final_temp;
                     codeword_vector_to_transmit_stored_seq[codeword_vector_to_transmit_stored_index]=seq;
+                    codeword_vector_to_transmit_stored_counter_for_start_and_end[codeword_vector_to_transmit_stored_index]=message->counter_for_start_and_end;
                 } else{
                     decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n_old,n2_old,size_received_transition,codeword_r_d_size_old,true);
                     decoder_Symbol_Wise_new->rotate_pointers_and_insert_zero_word(n,n2,size_received,codeword_r_d_size_current,true);
@@ -331,7 +339,7 @@ namespace siphon {
                            decoder_Symbol_Wise->codeword_vector_to_transmit[n2_old - 1], size_t(codeword_size_final_temp));
                     codeword_vector_to_transmit_stored_word_size[codeword_vector_to_transmit_stored_index]=codeword_size_final_temp;
                     codeword_vector_to_transmit_stored_seq[codeword_vector_to_transmit_stored_index]=seq;
-
+                    codeword_vector_to_transmit_stored_counter_for_start_and_end[codeword_vector_to_transmit_stored_index]=message->counter_for_start_and_end;
                     display_udp_statistics(seq);
                 }
 
@@ -445,6 +453,8 @@ namespace siphon {
                            decoder_Symbol_Wise->codeword_vector_to_transmit[n2_last_used - 1], size_t(codeword_size_final_temp));
                     codeword_vector_to_transmit_stored_word_size[codeword_vector_to_transmit_stored_index]=codeword_size_final_temp;
                     codeword_vector_to_transmit_stored_seq[codeword_vector_to_transmit_stored_index]=seq;
+                    codeword_vector_to_transmit_stored_counter_for_start_and_end[codeword_vector_to_transmit_stored_index]=message->counter_for_start_and_end;
+
 //                    // Storing in store_vector
 //                    memcpy(decoder_Symbol_Wise->codeword_vector_to_trasnmit_store[n_old - 1],
 //                           decoder_Symbol_Wise->codeword_vector_to_transmit[n2_old - 1], size_t(codeword_size_final_temp));
@@ -489,7 +499,7 @@ namespace siphon {
                            decoder_Symbol_Wise->codeword_vector_to_transmit[n2_old - 1], size_t(codeword_size_final_temp));
                     codeword_vector_to_transmit_stored_word_size[codeword_vector_to_transmit_stored_index]=codeword_size_final_temp;
                     codeword_vector_to_transmit_stored_seq[codeword_vector_to_transmit_stored_index]=seq;
-
+                    codeword_vector_to_transmit_stored_counter_for_start_and_end[codeword_vector_to_transmit_stored_index]=message->counter_for_start_and_end;
                     display_udp_statistics(seq);
                 }
             }
@@ -551,6 +561,8 @@ namespace siphon {
                    decoder_Symbol_Wise->codeword_vector_to_transmit[n2 - 1], size_t(codeword_size_final_temp));
             codeword_vector_to_transmit_stored_word_size[codeword_vector_to_transmit_stored_index]=codeword_size_final_temp;
             codeword_vector_to_transmit_stored_seq[codeword_vector_to_transmit_stored_index]=received_seq;
+            codeword_vector_to_transmit_stored_counter_for_start_and_end[codeword_vector_to_transmit_stored_index]=message->counter_for_start_and_end;
+
         }else{
             decoder_Symbol_Wise->push_current_codeword(codeword_received_transition, n_old, n2_old, size_received_transition,codeword_r_d_size_old);
             decoder_Symbol_Wise->symbol_wise_encode_1(k_old, n_old, k2_old,n2_old,&flag);
@@ -593,6 +605,8 @@ namespace siphon {
                    decoder_Symbol_Wise->codeword_vector_to_transmit[n2_old - 1], size_t(codeword_size_final_temp));
             codeword_vector_to_transmit_stored_word_size[codeword_vector_to_transmit_stored_index]=codeword_size_final_temp;
             codeword_vector_to_transmit_stored_seq[codeword_vector_to_transmit_stored_index]=received_seq;
+            codeword_vector_to_transmit_stored_counter_for_start_and_end[codeword_vector_to_transmit_stored_index]=message->counter_for_start_and_end;
+
         }
 
         display_udp_statistics(received_seq);
@@ -885,6 +899,7 @@ namespace siphon {
 
         int index=-1;
         int burst_index=-1;
+        message_vector_to_transmit_stored_index=-1;
         for (int seq = latest_seq; seq < received_seq; seq++) {
             UDP_loss_counter_++;
             final_UDP_loss_counter_++;
@@ -926,6 +941,10 @@ namespace siphon {
                     memcpy(buffer_data, recovered_message->buffer, size_t(recovered_message->size));
                     recovered_message_vector[index]->buffer = buffer_data;
                     recovered_message_vector[index]->seq_number = recovered_message->seq_number;
+                    message_vector_to_transmit_stored_index++;
+                    memcpy(message_vector_to_transmit_stored[message_vector_to_transmit_stored_index],
+                           buffer_data, size_t(recovered_message->size));
+                    message_vector_to_transmit_stored_seq[message_vector_to_transmit_stored_index]=recovered_message->seq_number;
 //                }
                 }else if (seq>=T && index==T-1){
                     burst_index++;
@@ -933,6 +952,10 @@ namespace siphon {
                     memset(buffer_data, '\000', max_payload);
                     burst_erased_message_vector[burst_index]->buffer=buffer_data;
                     burst_erased_message_vector[burst_index]->seq_number=recovered_message->seq_number;
+                    message_vector_to_transmit_stored_index++;
+                    memcpy(message_vector_to_transmit_stored[message_vector_to_transmit_stored_index],
+                           buffer_data, size_t(recovered_message->size));
+                    message_vector_to_transmit_stored_seq[message_vector_to_transmit_stored_index]=recovered_message->seq_number;
                 }
 
             } else {
@@ -948,12 +971,20 @@ namespace siphon {
                             recovered_message_vector[tempIndex]->buffer=buffer_data;
                             recovered_message_vector[tempIndex]->seq_number=recovered_message->seq_number;
                             index=tempIndex;
+                            message_vector_to_transmit_stored_index++;
+                            memcpy(message_vector_to_transmit_stored[message_vector_to_transmit_stored_index],
+                                   buffer_data, size_t(recovered_message->size));
+                            message_vector_to_transmit_stored_seq[message_vector_to_transmit_stored_index]=recovered_message->seq_number;
                         }else if (seq>=T && tempIndex==T-1){
                             burst_index++;
                             unsigned char *buffer_data = memory_object->allocate_memory(max_payload);
                             memset(buffer_data, '\000', max_payload);
                             burst_erased_message_vector[burst_index]->buffer=buffer_data;
                             burst_erased_message_vector[burst_index]->seq_number=recovered_message->seq_number;
+                            message_vector_to_transmit_stored_index++;
+                            memcpy(message_vector_to_transmit_stored[message_vector_to_transmit_stored_index],
+                                   buffer_data, size_t(recovered_message->size));
+                            message_vector_to_transmit_stored_seq[message_vector_to_transmit_stored_index]=recovered_message->seq_number;
                         }
                     }
                 }
@@ -965,12 +996,20 @@ namespace siphon {
                     recovered_message_vector[tempIndex]->buffer=buffer_data;
                     recovered_message_vector[tempIndex]->seq_number=recovered_message->seq_number;
                     index=tempIndex;
+                    message_vector_to_transmit_stored_index++;
+                    memcpy(message_vector_to_transmit_stored[message_vector_to_transmit_stored_index],
+                           buffer_data, size_t(recovered_message->size));
+                    message_vector_to_transmit_stored_seq[message_vector_to_transmit_stored_index]=recovered_message->seq_number;
                 }else if (seq>=T && tempIndex==T-1){
                     burst_index++;
                     unsigned char *buffer_data = memory_object->allocate_memory(max_payload);
                     memset(buffer_data, '\000', max_payload);
                     burst_erased_message_vector[burst_index]->buffer=buffer_data;
                     burst_erased_message_vector[burst_index]->seq_number=recovered_message->seq_number;
+                    message_vector_to_transmit_stored_index++;
+                    memcpy(message_vector_to_transmit_stored[message_vector_to_transmit_stored_index],
+                           buffer_data, size_t(recovered_message->size));
+                    message_vector_to_transmit_stored_seq[message_vector_to_transmit_stored_index]=recovered_message->seq_number;
                 }
             }
 
@@ -1022,6 +1061,12 @@ namespace siphon {
         latest_seq = received_seq + 1;    //the next expected sequence number = latest_seq
         if (receiver_index==1)
             latest_seq_2 = received_seq_2 + 1;
+        if (message->buffer != NULL) {
+            message_vector_to_transmit_stored_index++;
+            memcpy(message_vector_to_transmit_stored[message_vector_to_transmit_stored_index],
+                   message->buffer, size_t(message->size));
+            message_vector_to_transmit_stored_seq[message_vector_to_transmit_stored_index] = message->seq_number;
+        }
         return;
     }
 
@@ -1361,7 +1406,7 @@ namespace siphon {
             printMatrix(raw_data, 1, 300);
             int flag=0;
             if (count_char_errors>0){
-                for (int kk = 0; kk < 50; kk++) {
+                for (int kk = 0; kk < 250; kk++) {
                     if (temp_buffer[kk + 2] != raw_data[kk]){
                        flag=1;
                        break;
