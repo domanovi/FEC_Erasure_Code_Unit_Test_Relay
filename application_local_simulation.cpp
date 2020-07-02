@@ -140,10 +140,10 @@ int main(int argc, const char *argv[]) {
     erasure_generator2.generate_IID(stream_duration + T+T2, 0.1, "erasure2.bin",2);
 
 
-//    siphon::Erasure_Simulator erasure_simulator("../Experimental_Logs/erasure50.bin");
-//    siphon::Erasure_Simulator erasure_simulator2("../Experimental_Logs/erasure20.bin");
-    siphon::Erasure_Simulator erasure_simulator("erasure.bin");
-    siphon::Erasure_Simulator erasure_simulator2("erasure2.bin");
+    siphon::Erasure_Simulator erasure_simulator("../Experimental_Logs/erasure40.bin");
+    siphon::Erasure_Simulator erasure_simulator2("../Experimental_Logs/erasure50.bin");
+//    siphon::Erasure_Simulator erasure_simulator("erasure.bin");
+//    siphon::Erasure_Simulator erasure_simulator2("erasure2.bin");
 
     auto start_time = high_resolution_clock::now();;
 
@@ -253,90 +253,98 @@ int main(int argc, const char *argv[]) {
 
             seq_number = application_layer_relay_receiver->receive_message_and_decode(udp_parameters, buffer,
                                                                                       &buffer_size,&erasure_simulator);
-//            if (i>=T) {
-//                if (seq_number>-1){
-//                int numOfMessagesStored=application_layer_relay_receiver->fec_decoder->message_vector_to_transmit_stored_index;
-////                if (numOfMessagesStored>0)
-////                    cout<<"ELAD"<<endl;
-//                for (int kk=0;kk<=numOfMessagesStored;kk++) {
-//                    application_layer_relay_sender.message_wise_encode_at_relay(
-//                            application_layer_relay_receiver->fec_decoder->message_vector_to_transmit_stored[kk],
-//                            application_layer_relay_receiver->fec_decoder->message_vector_to_transmit_stored_seq[kk],
-//                            udp_parameters2, buffer2,
-//                            &buffer_size2, response_from_dest_buffer);
-//                    application_layer_destination_receiver->receive_message_and_decode(
-//                            udp_parameters2, buffer2,
-//                            &buffer_size2,
-//                            &erasure_simulator2);
-//                }
-//                }
-//            }
             if (i>=T) {
-                if (application_layer_relay_receiver->fec_decoder->recovered_message_vector[0]->buffer != NULL) {//recover past messages
-                    // check if there are codewords recovered in the past
-                    for (int j = 0; j < T_INITIAL; j++) {
-                        if (application_layer_relay_receiver->fec_decoder->recovered_message_vector[j]->buffer !=
-                            NULL) {
-                            application_layer_relay_sender.message_wise_encode_at_relay(
-                                    application_layer_relay_receiver->fec_decoder->recovered_message_vector[j]->buffer,
-                                    application_layer_relay_receiver->fec_decoder->recovered_message_vector[j]->seq_number,
-                                    udp_parameters2, buffer2,
-                                    &buffer_size2, response_from_dest_buffer);
-                            // after transmitting zero (in case next packet is lost...)
-                            application_layer_relay_receiver->fec_decoder->recovered_message_vector[j]->buffer=NULL;
-                            application_layer_destination_receiver->receive_message_and_decode(
-                                    udp_parameters2, buffer2,
-                                    &buffer_size2,
-                                    &erasure_simulator2);
-                        } else {
-                            break;
-                        }
-                    }
-                    for (int j = 0; j < MAX_BURST_SIZE_MWDF; j++) {
-                        if (application_layer_relay_receiver->fec_decoder->burst_erased_message_vector[j]->buffer !=
-                            NULL) {
-                            application_layer_relay_sender.message_wise_encode_at_relay(
-                                    application_layer_relay_receiver->fec_decoder->burst_erased_message_vector[j]->buffer,
-                                    application_layer_relay_receiver->fec_decoder->burst_erased_message_vector[j]->seq_number,
-                                    udp_parameters2, buffer2,
-                                    &buffer_size2, response_from_dest_buffer);
-                            // after transmitting zero (in case next packet is lost...)
-                            application_layer_relay_receiver->fec_decoder->burst_erased_message_vector[j]->buffer=NULL;
-                            application_layer_destination_receiver->receive_message_and_decode(
-                                    udp_parameters2, buffer2,
-                                    &buffer_size2,
-                                    &erasure_simulator2);
-                        } else {
-                            break;
-                        }
-                    }
+                if (seq_number>-1){
+                int numOfMessagesStored=application_layer_relay_receiver->fec_decoder->message_vector_to_transmit_stored_index;
+                for (int kk=0;kk<=numOfMessagesStored;kk++) {
+//                    printMatrix(application_layer_relay_receiver->fec_decoder->message_vector_to_transmit_stored[kk],1,300);
+//                    cout << application_layer_relay_receiver->fec_decoder->message_vector_to_transmit_stored_seq[kk] << endl;
+                    application_layer_relay_sender.message_wise_encode_at_relay(
+                            application_layer_relay_receiver->fec_decoder->message_vector_to_transmit_stored[kk],
+                            application_layer_relay_receiver->fec_decoder->message_vector_to_transmit_stored_seq[kk],
+                            udp_parameters2, buffer2,
+                            &buffer_size2, response_from_dest_buffer);
+                    application_layer_destination_receiver->receive_message_and_decode(
+                            udp_parameters2, buffer2,
+                            &buffer_size2,
+                            &erasure_simulator2);
                 }
-                if (seq_number > -1) {
-                    if (application_layer_relay_receiver->fec_message->buffer != NULL) {
-                        application_layer_relay_sender.message_wise_encode_at_relay(
-                                application_layer_relay_receiver->fec_message->buffer, seq_number - T, udp_parameters2,
-                                buffer2,
-                                &buffer_size2, response_from_dest_buffer);
-//                        cout<<seq_number - T<<endl;
-//                        printMatrix(application_layer_relay_receiver->fec_message->buffer,1,300);
-//                        cout<<application_layer_relay_receiver->fec_decoder->message_vector_to_transmit_stored_seq[0]<<endl;
-//                        printMatrix(application_layer_relay_receiver->fec_decoder->message_vector_to_transmit_stored[0],1,300);
-                        application_layer_destination_receiver->receive_message_and_decode(
-                                udp_parameters2, buffer2,
-                                &buffer_size2,
-                                &erasure_simulator2);
-                    } else if (application_layer_relay_receiver->fec_decoder->message_old_encoder->buffer != NULL) {// if double coding extract from old encoder
-                        application_layer_relay_sender.message_wise_encode_at_relay(
-                                application_layer_relay_receiver->fec_decoder->message_old_encoder->buffer,
-                                seq_number - T, udp_parameters2, buffer2,
-                                &buffer_size2, response_from_dest_buffer);
-                        application_layer_destination_receiver->receive_message_and_decode(
-                                udp_parameters2, buffer2,
-                                &buffer_size2,
-                                &erasure_simulator2);
-                    }
                 }
             }
+//            if (i>=T) {
+//                if (application_layer_relay_receiver->fec_decoder->recovered_message_vector[0]->buffer != NULL) {//recover past messages
+//                    // check if there are codewords recovered in the past
+//                    for (int j = 0; j < T_INITIAL; j++) {
+//                        if (application_layer_relay_receiver->fec_decoder->recovered_message_vector[j]->buffer !=
+//                            NULL) {
+//                            printMatrix(application_layer_relay_receiver->fec_decoder->recovered_message_vector[j]->buffer,1,300);
+//                            cout<<application_layer_relay_receiver->fec_decoder->recovered_message_vector[j]->seq_number<<endl;
+//                            application_layer_relay_sender.message_wise_encode_at_relay(
+//                                    application_layer_relay_receiver->fec_decoder->recovered_message_vector[j]->buffer,
+//                                    application_layer_relay_receiver->fec_decoder->recovered_message_vector[j]->seq_number,
+//                                    udp_parameters2, buffer2,
+//                                    &buffer_size2, response_from_dest_buffer);
+//                            // after transmitting zero (in case next packet is lost...)
+//                            application_layer_relay_receiver->fec_decoder->recovered_message_vector[j]->buffer=NULL;
+//                            application_layer_destination_receiver->receive_message_and_decode(
+//                                    udp_parameters2, buffer2,
+//                                    &buffer_size2,
+//                                    &erasure_simulator2);
+//                        } else {
+//                            break;
+//                        }
+//                    }
+//                    for (int j = 0; j < MAX_BURST_SIZE_MWDF; j++) {
+//                        if (application_layer_relay_receiver->fec_decoder->burst_erased_message_vector[j]->buffer !=
+//                            NULL) {
+//                            printMatrix(application_layer_relay_receiver->fec_decoder->burst_erased_message_vector[j]->buffer,1,300);
+//                            cout<<application_layer_relay_receiver->fec_decoder->burst_erased_message_vector[j]->seq_number<<endl;
+//                            application_layer_relay_sender.message_wise_encode_at_relay(
+//                                    application_layer_relay_receiver->fec_decoder->burst_erased_message_vector[j]->buffer,
+//                                    application_layer_relay_receiver->fec_decoder->burst_erased_message_vector[j]->seq_number,
+//                                    udp_parameters2, buffer2,
+//                                    &buffer_size2, response_from_dest_buffer);
+//                            // after transmitting zero (in case next packet is lost...)
+//                            application_layer_relay_receiver->fec_decoder->burst_erased_message_vector[j]->buffer=NULL;
+//                            application_layer_destination_receiver->receive_message_and_decode(
+//                                    udp_parameters2, buffer2,
+//                                    &buffer_size2,
+//                                    &erasure_simulator2);
+//                        } else {
+//                            break;
+//                        }
+//                    }
+//                }
+//                if (seq_number > -1) {
+//                    if (application_layer_relay_receiver->fec_message->buffer != NULL) {
+//                        printMatrix(application_layer_relay_receiver->fec_message->buffer,1,300);
+//                        cout<<seq_number - T<<endl;
+//                        application_layer_relay_sender.message_wise_encode_at_relay(
+//                                application_layer_relay_receiver->fec_message->buffer, seq_number - T, udp_parameters2,
+//                                buffer2,
+//                                &buffer_size2, response_from_dest_buffer);
+////                        cout<<seq_number - T<<endl;
+////                        printMatrix(application_layer_relay_receiver->fec_message->buffer,1,300);
+////                        cout<<application_layer_relay_receiver->fec_decoder->message_vector_to_transmit_stored_seq[0]<<endl;
+////                        printMatrix(application_layer_relay_receiver->fec_decoder->message_vector_to_transmit_stored[0],1,300);
+//                        application_layer_destination_receiver->receive_message_and_decode(
+//                                udp_parameters2, buffer2,
+//                                &buffer_size2,
+//                                &erasure_simulator2);
+//                    } else if (application_layer_relay_receiver->fec_decoder->message_old_encoder->buffer != NULL) {// if double coding extract from old encoder
+//                        printMatrix(application_layer_relay_receiver->fec_decoder->message_old_encoder->buffer,1,300);
+//                        cout<<seq_number - T<<endl;
+//                        application_layer_relay_sender.message_wise_encode_at_relay(
+//                                application_layer_relay_receiver->fec_decoder->message_old_encoder->buffer,
+//                                seq_number - T, udp_parameters2, buffer2,
+//                                &buffer_size2, response_from_dest_buffer);
+//                        application_layer_destination_receiver->receive_message_and_decode(
+//                                udp_parameters2, buffer2,
+//                                &buffer_size2,
+//                                &erasure_simulator2);
+//                    }
+//                }
+//            }
             min_rate_debug_packet_count+=1;
             min_rate_debug_debug+=std::min(application_layer_sender.variable_rate_FEC_encoder->debug_rate_first_hop_curr,application_layer_relay_sender.debug_rate_second_hop_curr);
 

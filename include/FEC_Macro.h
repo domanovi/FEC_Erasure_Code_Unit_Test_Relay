@@ -44,7 +44,7 @@
 #define ESTIMATION_WINDOW_SIZE_REDUCTION_FACTOR 10  // divide ESTIMATION_WINDOW_SIZE to accelerate estimation
 
 //#define NUMBER_OF_ITERATIONS 361000   //total number of iterations. Recommended: 50 times ESTIMATION_WINDOW_SIZE,
-#define NUMBER_OF_ITERATIONS 100000
+#define NUMBER_OF_ITERATIONS 360000
 // 360000 packets = 3600 seconds =  60 minutes, 1 minute = 6000 packets
 
 #define ERASURE_TYPE 1
