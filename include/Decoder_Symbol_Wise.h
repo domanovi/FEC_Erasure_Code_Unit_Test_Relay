@@ -25,6 +25,11 @@ namespace siphon {
         unsigned char **codeword_vector_to_transmit;
         unsigned char **codeword_vector_store_in_burst;
         unsigned char ** codeword_vector_to_trasnmit_store;
+
+        unsigned char **codeword_vector_state_dependent;
+        bool *temp_erasure_vector_state_dependent;
+        int ** header;
+
         unsigned char codeword_new_symbol_wise[30000];
         bool *temp_erasure_vector;
         int n2_vector[T_TOT+1];
@@ -54,6 +59,10 @@ namespace siphon {
 
         void symbol_wise_decode_1(unsigned char *buffer, bool *flag, int k, int n);
 
+        void symbol_wise_encode_state_dependent(int k, int n, int k2, int n2, bool *flag);
+
+        void symbol_wise_decode_state_dependent(unsigned char *buffer, bool *flag, int k, int n);
+
         void extract_data(unsigned char *buffer, int k, int n,int received_seq,unsigned char* temp_buffer);
 
         void copy_elements(Decoder_Symbol_Wise *source,bool encode);
@@ -66,7 +75,6 @@ namespace siphon {
         int burst_codeword_size_vector[T_TOT+1];
 
     private:
-
 
     };
 }

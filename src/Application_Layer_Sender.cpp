@@ -213,7 +213,7 @@ variable_rate_FEC_encoder->encode(message_transmitted, T_ack, B_ack, N_ack,flag)
 //   for (int i = 0; i < message_transmitted->size; i++)
 //  codeword[8 + i] = (message_transmitted->buffer)[i];
 
-if (RELAYING_TYPE==2){
+if (RELAYING_TYPE==2 || RELAYING_TYPE==3){
 memcpy(codeword + 12, message_transmitted->buffer, message_transmitted->size);
 
 codeword[11] = (unsigned char) (message_transmitted->counter_for_start_and_end);

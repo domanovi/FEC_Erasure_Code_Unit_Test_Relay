@@ -20,19 +20,21 @@
 //#define B_INITIAL -1
 //#define N_INITIAL -1
 
-#define RELAYING_TYPE 2
+//#define RELAYING_TYPE 3
+extern int RELAYING_TYPE;
 // if RELAYING_TYPE=0 P2P
 // if RELAYING_TYPE=1 message-wise decode and forward
 // if RELAYING_TYPE=2 symbol-wise decode and forward
+// if RELAYING_TYPE=3 SD-symbol-wise decode and forward
 
-#define T_TOT 10 // T_TOT needs to be >= T_INITAL+T_INTIAL_2, if RELAYING_TYPE=1 not used, if RELAYING_TYPE=2 ignoring T_INITIAL && N_INITIAL_2
-#define T_INITIAL 5
+#define T_TOT 5 // T_TOT needs to be >= T_INITAL+T_INTIAL_2, if RELAYING_TYPE=1 not used, if RELAYING_TYPE=2 ignoring T_INITIAL && N_INITIAL_2
+#define T_INITIAL 4
 #define B_INITIAL -1
-#define N_INITIAL -1
+#define N_INITIAL 1
 
-#define T_INITIAL_2 5
+#define T_INITIAL_2 3
 #define B_INITIAL_2 2
-#define N_INITIAL_2 -1
+#define N_INITIAL_2 2
 
 #define MIN_T2 0
 #define MIN_N2 0
@@ -87,7 +89,7 @@
 
 /*************** The following is used for displaying debugging messages *******************/
 
-#define DEBUG_FEC 0 //debugging messages hidden if DEBUG_FEC is 0
+#define DEBUG_FEC 1 //debugging messages hidden if DEBUG_FEC is 0
 #define DEBUG_COMM 0
 #define DEBUG_CHAR 1
 #define DEBUG_SAVE_SEQ_OF_DROPPED_TO_FILE 1

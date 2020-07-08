@@ -73,9 +73,9 @@ namespace siphon {
         unsigned char codeword_new_symbol_wise[30000];
         unsigned char **codeword_vector_to_transmit_stored;
         int codeword_vector_to_transmit_stored_index;
-        int codeword_vector_to_transmit_stored_word_size[2*T_TOT];
-        int codeword_vector_to_transmit_stored_seq[2*T_TOT];
-        int codeword_vector_to_transmit_stored_counter_for_start_and_end[2*T_TOT];
+        int codeword_vector_to_transmit_stored_word_size[MAX_BURST_SIZE_MWDF];
+        int codeword_vector_to_transmit_stored_seq[MAX_BURST_SIZE_MWDF];
+        int codeword_vector_to_transmit_stored_counter_for_start_and_end[MAX_BURST_SIZE_MWDF];
 
         unsigned char **message_vector_to_transmit_stored;
         int message_vector_to_transmit_stored_index;
@@ -89,6 +89,13 @@ namespace siphon {
         void receive_message_and_symbol_wise_decode(FEC_Message *message, int n, int k, int temp_size,siphon::Erasure_Simulator *erasure_simulator);
 
         void calc_missed_chars(int received_seq, unsigned char *temp_buffer);
+
+        void receive_message_and_state_dependent_symbol_wise_encode(FEC_Message *message, int n,
+                                                                                               int k, int n2_new, int k2_new,
+                                                                                               int temp_size, int *codeword_size_final);
+
+        void receive_message_and_state_dependent_symbol_wise_decode(FEC_Message *message,int n,int k,int temp_size,siphon::Erasure_Simulator
+        *erasure_simulator);
 
         Decoder_Symbol_Wise *decoder_Symbol_Wise;
         Decoder_Symbol_Wise *decoder_Symbol_Wise_new;
@@ -104,6 +111,7 @@ namespace siphon {
         float debug_rate_second_hop;
         float debug_rate_second_hop_curr;
         int debug_rate_second_hop_num_packets;
+
     private:
 
         int T{}, B{}, N{}, max_payload;
