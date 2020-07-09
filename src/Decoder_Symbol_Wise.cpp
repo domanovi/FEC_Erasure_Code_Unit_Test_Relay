@@ -180,7 +180,8 @@ namespace siphon {
         for (int j = 0; j < number_of_code_blocks; j++) {
             int index = -1;
             int tempHeader[T_TOT];
-            for (int symInd = k - N_INITIAL; symInd >= -N_INITIAL_2; symInd--) {
+//            for (int symInd = k - N_INITIAL; symInd >= -N_INITIAL_2; symInd--) {
+            for (int symInd = k - 1; symInd >= -N_INITIAL_2; symInd--) {
                 index++;
                 int symbolIndex = -1;
                 for (int i = symInd; i < n; i++) {
@@ -195,12 +196,12 @@ namespace siphon {
                     int symbolIndex2 = -1;
                     for (int i=0;i<n;i++)
                         tempHeader[i]=0;
-                    for (int i = symbolIndex - 1; i >= 1; i--) {
+                    for (int i = symbolIndex - N_INITIAL; i >= 1; i--) {
                         symbolIndex2++;
                         tempHeader[symbolIndex2] = header[n2 - i - 1][symbolIndex2];
                     }
                     for (int kk = index; kk < n - symInd; kk++) {
-                        if (temp_erasure_vector_state_dependent[kk+T_TOT-1-index] == 0) {
+                        if (temp_erasure_vector_state_dependent[kk+symInd + T_TOT - n +1] == 0) {
                             // check that this symbol was not sent before
                             bool notFoundFlag = true;
                             for (int jj=0;jj<kk;jj++){
@@ -233,36 +234,54 @@ namespace siphon {
                         header[n2-1][index]=potIndex; //Modify the header in case of too many erasures
                     }
                 } else {// need to perform decoding and send original symbols
-                    for (int aa = 0; aa < n - symInd; aa++)
-                        stam_erasure_vector[aa] = temp_erasure_vector_state_dependent[aa+T_TOT-1-index];
+                    for (int aa = 0; aa < n - symInd; aa++) {
+//                        stam_erasure_vector[aa] = temp_erasure_vector_state_dependent[aa+T_TOT-1-index];
+                        stam_erasure_vector[aa] = temp_erasure_vector_state_dependent[aa+symInd +T_TOT-n+1];
+                    }
                     for (int aa = n - symInd; aa < n; aa++)
                         stam_erasure_vector[aa] = 1;
+                    int erasure_count=0;
+                    for (int aa=0;aa<n;aa++) {
+                        if (stam_erasure_vector[aa] == 1)
+                            erasure_count++;
+                    }
                     decodeBlock(&temp_codeword[0], decoder_current->getG(), &temp_codeword[0], stam_erasure_vector, k,
                                 n, n - 1, 0);// T=n-1
-                    memcpy(temp_encoded_codeword, temp_codeword, k * sizeof(unsigned char));
-                    encodeBlock(&temp_codeword[0], encoder_current->getG(), &temp_encoded_codeword[0], k2, n2, k2 - 1);
+                    memcpy(temp_encoded_codeword, temp_codeword, n * sizeof(unsigned char));
+                    if (erasure_count<= n-k)
+                        encodeBlock(&temp_codeword[0], encoder_current->getG(), &temp_encoded_codeword[0], k2, n2, k2 - 1);
+
                     // check which symbol was not sent in the past
                     for (int i=0;i<n2;i++)
                         tempHeader[i]=0;
                     int symbolIndex2 = -1;
-                    for (int i = symbolIndex - 1; i >= 1; i--) {
+                    for (int i = symbolIndex - N_INITIAL; i >= 1; i--) {
+//                    for (int i = n2 - 1; i >= 0; i--) {
                         symbolIndex2++;
-                        tempHeader[symbolIndex2] = header[n2 - i - 1][symbolIndex2];
+                        tempHeader[symbolIndex2] = header[n2 - i  - 1][symbolIndex2];
                     }
                     //int indexToSend=-1;
                     bool notFoundFlag = true;
-                    for (int i = 0; i < symbolIndex; i++) {
+                    for (int i = 0; i <= symbolIndex; i++) {
                         notFoundFlag = true;
-                        for (int kk = 0; kk < symbolIndex-1; kk++) {
+                        for (int kk = 0; kk < symbolIndex-N_INITIAL; kk++) {
                             if (tempHeader[kk] == i + 1) {
                                 notFoundFlag = false;
                                 break;
                             }
                         }
                         if (notFoundFlag) {
-                            codeword_new_symbol_wise[2 + (j) * n2 + index] = temp_encoded_codeword[i];
-                            header[n2 - 1][index] = i + 1;
-                            break;
+                            if (erasure_count<= n-k) {
+                                codeword_new_symbol_wise[2 + (j) * n2 + index] = temp_encoded_codeword[i];
+                                header[n2 - 1][index] = i + 1;
+                                break;
+                            }else{// didn't decode, need to forward
+                                if (stam_erasure_vector[i]==0){
+                                    codeword_new_symbol_wise[2 + (j) * n2 + index] = temp_encoded_codeword[i];
+                                    header[n2 - 1][index] = i + 1;
+                                    break;
+                                }
+                            }
                         }
                     }
 //                    if (notFoundFlag==false){//need to handle case with too many erasure (failed to recover...)

@@ -48,7 +48,6 @@ int main(int argc, const char *argv[]) {
     remove("packet_loss_MWDF.txt" );
     remove("packet_loss_SWDF.txt" );
     remove("packet_loss_SD_SWDF.txt" );
-//    for (RELAYING_TYPE=1;RELAYING_TYPE<=3;RELAYING_TYPE++) {
     for (RELAYING_TYPE=3;RELAYING_TYPE<=3;RELAYING_TYPE++) {
         int B = N_INITIAL;                       //if B=-1 and N=-1, then it is adaptive; otherwise, it is non-adaptive
         int N = N_INITIAL;
@@ -171,8 +170,9 @@ int main(int argc, const char *argv[]) {
         erasure_simulator.erasure_seq[i] = '\000';
     }
     erasure_simulator.erasure_seq[1] = '\001';
+    erasure_simulator.erasure_seq[2] = '\001';
     erasure_simulator2.erasure_seq[4] = '\001';
-    erasure_simulator2.erasure_seq[5] = '\001';
+//    erasure_simulator2.erasure_seq[5] = '\001';
 //    erasure_simulator.erasure_seq[6] = '\001';
 //    erasure_simulator.erasure_seq[2] = '\001';
 //    erasure_simulator.erasure_seq[3] = '\001';
