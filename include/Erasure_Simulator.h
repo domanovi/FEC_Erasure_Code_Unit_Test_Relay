@@ -15,10 +15,6 @@ namespace siphon {
 
     class Erasure_Simulator {
 
-    private:
-        //unsigned char *erasure_seq;
-        long number_of_erasure;
-
     public:
         unsigned char *erasure_seq;
         bool is_erasure(int seq);
@@ -28,6 +24,9 @@ namespace siphon {
         Erasure_Simulator(string filename_value);
 
         ~Erasure_Simulator();
+
+        //unsigned char *erasure_seq;
+        long number_of_erasure;
     };
 
 }

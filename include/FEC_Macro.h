@@ -30,9 +30,9 @@ extern int RELAYING_TYPE;
 #define T_TOT 5 // T_TOT needs to be >= T_INITAL+T_INTIAL_2, if RELAYING_TYPE=1 not used, if RELAYING_TYPE=2 ignoring T_INITIAL && N_INITIAL_2
 #define T_INITIAL 4
 #define B_INITIAL -1
-#define N_INITIAL 2
+#define N_INITIAL 1
 
-#define T_INITIAL_2 3
+#define T_INITIAL_2 4
 #define B_INITIAL_2 2
 #define N_INITIAL_2 1
 
@@ -89,7 +89,7 @@ extern int RELAYING_TYPE;
 
 /*************** The following is used for displaying debugging messages *******************/
 
-#define DEBUG_FEC 1 //debugging messages hidden if DEBUG_FEC is 0
+#define DEBUG_FEC 0 //debugging messages hidden if DEBUG_FEC is 0
 #define DEBUG_COMM 0
 #define DEBUG_CHAR 1
 #define DEBUG_SAVE_SEQ_OF_DROPPED_TO_FILE 1

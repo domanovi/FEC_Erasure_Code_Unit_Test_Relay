@@ -48,7 +48,7 @@ int main(int argc, const char *argv[]) {
     remove("packet_loss_MWDF.txt" );
     remove("packet_loss_SWDF.txt" );
     remove("packet_loss_SD_SWDF.txt" );
-    for (RELAYING_TYPE=3;RELAYING_TYPE<=3;RELAYING_TYPE++) {
+    for (RELAYING_TYPE=1;RELAYING_TYPE<=3;RELAYING_TYPE++) {
         int B = N_INITIAL;                       //if B=-1 and N=-1, then it is adaptive; otherwise, it is non-adaptive
         int N = N_INITIAL;
 
@@ -151,8 +151,8 @@ int main(int argc, const char *argv[]) {
         erasure_generator2.generate_IID(stream_duration + T + T2, 0.1, "erasure2.bin", 2);
 
 
-        siphon::Erasure_Simulator erasure_simulator("../Experimental_Logs/erasure40.bin");
-        siphon::Erasure_Simulator erasure_simulator2("../Experimental_Logs/erasure50.bin");
+        siphon::Erasure_Simulator erasure_simulator("../Experimental_Logs/erasure50.bin");
+        siphon::Erasure_Simulator erasure_simulator2("../Experimental_Logs/erasure20.bin");
 //    siphon::Erasure_Simulator erasure_simulator("erasure.bin");
 //    siphon::Erasure_Simulator erasure_simulator2("erasure2.bin");
 
@@ -161,17 +161,28 @@ int main(int argc, const char *argv[]) {
 
 //    erasure_simulator.erasure_seq[4]='\001';
 //    erasure_simulator.erasure_seq[5]='\001';
-
-    for (int i=0;i<361000;i++) {
+    for (int i=360000;i<erasure_simulator2.number_of_erasure;i++) {
         erasure_simulator2.erasure_seq[i] = '\000';
     }
 //
-    for (int i=0;i<361000;i++) {
+    for (int i=360000;i<erasure_simulator.number_of_erasure;i++) {
         erasure_simulator.erasure_seq[i] = '\000';
     }
-    erasure_simulator.erasure_seq[1] = '\001';
-    erasure_simulator.erasure_seq[2] = '\001';
-    erasure_simulator2.erasure_seq[4] = '\001';
+
+//    for (int i=0;i<361000;i++) {
+//        erasure_simulator2.erasure_seq[i] = '\000';
+//    }
+////
+//    for (int i=0;i<361000;i++) {
+//        erasure_simulator.erasure_seq[i] = '\000';
+//    }
+//    erasure_simulator.erasure_seq[1] = '\001';
+//    erasure_simulator.erasure_seq[2] = '\001';
+//    erasure_simulator.erasure_seq[3] = '\001';
+//    erasure_simulator.erasure_seq[4] = '\001';
+
+//////    erasure_simulator.erasure_seq[2] = '\001';
+//    erasure_simulator2.erasure_seq[4] = '\001';
 //    erasure_simulator2.erasure_seq[5] = '\001';
 //    erasure_simulator.erasure_seq[6] = '\001';
 //    erasure_simulator.erasure_seq[2] = '\001';

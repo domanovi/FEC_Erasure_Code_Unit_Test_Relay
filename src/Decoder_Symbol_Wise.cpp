@@ -234,6 +234,8 @@ namespace siphon {
                         header[n2-1][index]=potIndex; //Modify the header in case of too many erasures
                     }
                 } else {// need to perform decoding and send original symbols
+                    for (int aa=0;aa<n2;aa++)
+                        stam_erasure_vector[aa] = 0;
                     for (int aa = 0; aa < n - symInd; aa++) {
 //                        stam_erasure_vector[aa] = temp_erasure_vector_state_dependent[aa+T_TOT-1-index];
                         stam_erasure_vector[aa] = temp_erasure_vector_state_dependent[aa+symInd +T_TOT-n+1];
@@ -248,8 +250,8 @@ namespace siphon {
                     decodeBlock(&temp_codeword[0], decoder_current->getG(), &temp_codeword[0], stam_erasure_vector, k,
                                 n, n - 1, 0);// T=n-1
                     memcpy(temp_encoded_codeword, temp_codeword, n * sizeof(unsigned char));
-                    if (erasure_count<= n-k)
-                        encodeBlock(&temp_codeword[0], encoder_current->getG(), &temp_encoded_codeword[0], k2, n2, k2 - 1);
+//                    if (erasure_count<= n-k)
+                    encodeBlock(&temp_codeword[0], encoder_current->getG(), &temp_encoded_codeword[0], k2, n2, k2 - 1);
 
                     // check which symbol was not sent in the past
                     for (int i=0;i<n2;i++)
@@ -262,7 +264,9 @@ namespace siphon {
                     }
                     //int indexToSend=-1;
                     bool notFoundFlag = true;
-                    for (int i = 0; i <= symbolIndex; i++) {
+                    bool not_assinged_val = true;
+//                    for (int i = 0; i <= symbolIndex; i++) {
+                    for (int i = 0; i < n2; i++) {
                         notFoundFlag = true;
                         for (int kk = 0; kk < symbolIndex-N_INITIAL; kk++) {
                             if (tempHeader[kk] == i + 1) {
@@ -274,22 +278,45 @@ namespace siphon {
                             if (erasure_count<= n-k) {
                                 codeword_new_symbol_wise[2 + (j) * n2 + index] = temp_encoded_codeword[i];
                                 header[n2 - 1][index] = i + 1;
+                                not_assinged_val=false;
                                 break;
                             }else{// didn't decode, need to forward
                                 if (stam_erasure_vector[i]==0){
                                     codeword_new_symbol_wise[2 + (j) * n2 + index] = temp_encoded_codeword[i];
                                     header[n2 - 1][index] = i + 1;
+                                    not_assinged_val=false;
                                     break;
                                 }
                             }
                         }
                     }
-//                    if (notFoundFlag==false){//need to handle case with too many erasure (failed to recover...)
-//                        codeword_new_symbol_wise[2 + (j) * n + index] = 0;
+                    if (not_assinged_val==true){//need to handle case with too many erasure (failed to recover...)
+                        codeword_new_symbol_wise[2 + (j) * n2 + index] = 0;
+
+                        for (int i=0;i<n2;i++){
+                            notFoundFlag = true;
+                            for (int kk = 0; kk < index; kk++) {
+                                if (tempHeader[kk] == i + 1) {
+                                    notFoundFlag = false;
+                                    break;
+                                }
+                            }
+                            if (notFoundFlag==true) {
+                                header[n2 - 1][index] = i + 1;
+                                break;
+                            }
+                        }
 //                        header[n2-1][index]=index+1;
-//                    }
+                    }
                 }
             }
+//            if (j<=4){
+//                cout << "[";
+//                for (int i = 0; i < n2; i++)
+//                    cout << header[n2 - 1][i];
+//                cout << "]" << endl;
+//                cout << "Elad" << endl;
+//            }
         }
         for (int j=0;j<number_of_code_blocks;j++) {
             for (int i = 0; i < n2; i++) {
@@ -301,6 +328,7 @@ namespace siphon {
             for (int i = 0; i < n2; i++)
                 cout << header[n2 - 1][i];
             cout << "]" << endl;
+            cout << "Elad" << endl;
         }
 //        cout << "Elad" << endl;
 //        cout << "Elad" << endl;
