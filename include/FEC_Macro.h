@@ -89,7 +89,7 @@
 
 /*************** The following is used for displaying debugging messages *******************/
 
-#define DEBUG_FEC 0 //debugging messages hidden if DEBUG_FEC is 0
+#define DEBUG_FEC 1 //debugging messages hidden if DEBUG_FEC is 0
 #define DEBUG_COMM 0
 #define DEBUG_CHAR 1
 #define DEBUG_SAVE_SEQ_OF_DROPPED_TO_FILE 1
