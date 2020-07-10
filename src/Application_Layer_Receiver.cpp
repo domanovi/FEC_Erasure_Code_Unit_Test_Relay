@@ -52,7 +52,7 @@ void Application_Layer_Receiver::set_receiver_index(int index){
     fec_decoder->receiver_index=index;
 }
 
-int Application_Layer_Receiver::receive_message_and_symbol_wise_encode(unsigned char *udp_parameters, unsigned char *udp_codeword,
+int Application_Layer_Receiver::receive_message_and_symbol_wise_encode(unsigned char *udp_parameters,unsigned char *udp_parameters2, unsigned char *udp_codeword,
                                                                        int *udp_codeword_size, siphon::Erasure_Simulator *erasure_simulator,
                                                                        int k2, int n2,int *codeword_size_final,int *k2_out,int *n2_out) {
     //int temp_size;
@@ -155,7 +155,7 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_encode(unsigned 
     temp_parameters2[4] = (unsigned char) (fec_message->B);
     temp_parameters2[5] = (unsigned char) (fec_message->N);
     for (int i=6;i<12;i++)
-        temp_parameters2[i]=response_from_dest_buffer[i-6];
+        temp_parameters2[i]=udp_parameters2[i-6];
     if (udp_parameters == nullptr) {
         connection_manager->UDPsendResponse(temp_parameters2, 12);
         if (DEBUG_COMM==1) {
@@ -288,7 +288,7 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_decode(unsigned 
 
 }
 
-int Application_Layer_Receiver::receive_message_and_decode(unsigned char *udp_parameters, unsigned char *udp_codeword,
+int Application_Layer_Receiver::receive_message_and_decode(unsigned char *udp_parameters,unsigned char *udp_parameters2, unsigned char *udp_codeword,
                                                            int *udp_codeword_size, siphon::Erasure_Simulator
                                                            *erasure_simulator) {
 
@@ -381,7 +381,7 @@ int Application_Layer_Receiver::receive_message_and_decode(unsigned char *udp_pa
         temp_parameters2[4] = (unsigned char) (fec_message->B);
         temp_parameters2[5] = (unsigned char) (fec_message->N);
         for (int i=6;i<12;i++)
-            temp_parameters2[i]=response_from_dest_buffer[i-6];
+            temp_parameters2[i]=udp_parameters2[i-6];
         if (udp_parameters == nullptr) {
             connection_manager->UDPsendResponse(temp_parameters2, 12);
             if (DEBUG_COMM==1) {

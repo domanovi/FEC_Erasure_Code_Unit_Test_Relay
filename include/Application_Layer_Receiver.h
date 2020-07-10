@@ -39,10 +39,10 @@ public:
     adaptive_mode_MDS_value, int flag);
     ~Application_Layer_Receiver();
 
-    int receive_message_and_decode(unsigned char *udp_parameters, unsigned char *udp_codeword, int
+    int receive_message_and_decode(unsigned char *udp_parameters, unsigned char *udp_parameters2,unsigned char *udp_codeword, int
   *udp_codeword_size, siphon::Erasure_Simulator *erasure_simulator);          //to be called recursively at the decoder
 
-    int receive_message_and_symbol_wise_encode(unsigned char *udp_parameters, unsigned char *udp_codeword,
+    int receive_message_and_symbol_wise_encode(unsigned char *udp_parameters,unsigned char *udp_parameters2, unsigned char *udp_codeword,
                                                int *udp_codeword_size, siphon::Erasure_Simulator
                                                                        *erasure_simulator,int k2, int n2,
                                                                        int *codeword_size_final,int *k2_out,int *n2_out);

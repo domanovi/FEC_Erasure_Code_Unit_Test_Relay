@@ -57,16 +57,12 @@ public:
     int debug_rate_second_hop_num_packets;
 
     void message_wise_encode_at_relay(unsigned char *received_data, int orig_seq_num, unsigned char *udp_parameters,
-                                      unsigned char *udp_codeword, int *udp_codeword_size,unsigned char *response_buffer);
+                                      unsigned char *udp_codeword, int *udp_codeword_size);
 
-    void send_sym_wise_message(unsigned char string[30000], int i, unsigned char *string1, unsigned char string2[30000],
-                               int *pInt,int missing_packets,unsigned char *response_buffer,int k2,int n2);
+    void send_sym_wise_message(unsigned char *encoded_symwise_word, int encoded_symwise_word_size,
+                          unsigned char *udp_parameters, unsigned char *udp_codeword, int *udp_codeword_size,int missing_packets,
+                          int k2,int n2,int counter_for_start_and_end);
 
-    void
-    send_sym_wise_message(unsigned char *encoded_symwise_word, int encoded_symwise_word_size,
-                          unsigned char *udp_parameters,
-                          unsigned char *udp_codeword, int *udp_codeword_size, int missing_packets,
-                          unsigned char *response_buffer, int k2, int n2, int counter_for_start_and_end);
 };
 
 

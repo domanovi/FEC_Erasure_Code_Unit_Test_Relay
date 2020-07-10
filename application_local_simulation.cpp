@@ -48,7 +48,7 @@ int main(int argc, const char *argv[]) {
     remove("packet_loss_MWDF.txt" );
     remove("packet_loss_SWDF.txt" );
     remove("packet_loss_SD_SWDF.txt" );
-    for (RELAYING_TYPE=1;RELAYING_TYPE<=3;RELAYING_TYPE++) {
+    for (RELAYING_TYPE=1;RELAYING_TYPE<=2;RELAYING_TYPE++) {
         int B = N_INITIAL;                       //if B=-1 and N=-1, then it is adaptive; otherwise, it is non-adaptive
         int N = N_INITIAL;
 
@@ -265,7 +265,7 @@ int main(int argc, const char *argv[]) {
                 application_layer_sender.generate_message_and_encode(udp_parameters, buffer,
                                                                      &buffer_size); //udp_codeword is
 
-                seq_number = application_layer_relay_receiver->receive_message_and_decode(udp_parameters, buffer,
+                seq_number = application_layer_relay_receiver->receive_message_and_decode(udp_parameters, nullptr,buffer,
                                                                                           &buffer_size,
                                                                                           &erasure_simulator);
             } else if (relaying_type == 1) {//Message-wise decode and forward
@@ -280,10 +280,10 @@ int main(int argc, const char *argv[]) {
                 //if (i >= T) {
 
                 // message wise DF
-                for (int j = 0; j < 6; j++)
-                    application_layer_relay_receiver->response_from_dest_buffer[j] = response_from_dest_buffer[j];
+//                for (int j = 0; j < 6; j++)
+//                    application_layer_relay_receiver->response_from_dest_buffer[j] = udp_parameters2[j];
 
-                seq_number = application_layer_relay_receiver->receive_message_and_decode(udp_parameters, buffer,
+                seq_number = application_layer_relay_receiver->receive_message_and_decode(udp_parameters,udp_parameters2, buffer,
                                                                                           &buffer_size,
                                                                                           &erasure_simulator);
                 if (i >= T) {
@@ -296,9 +296,9 @@ int main(int argc, const char *argv[]) {
                                     application_layer_relay_receiver->fec_decoder->message_vector_to_transmit_stored[kk],
                                     application_layer_relay_receiver->fec_decoder->message_vector_to_transmit_stored_seq[kk],
                                     udp_parameters2, buffer2,
-                                    &buffer_size2, response_from_dest_buffer);
+                                    &buffer_size2);
                             application_layer_destination_receiver->receive_message_and_decode(
-                                    udp_parameters2, buffer2,
+                                    udp_parameters2, nullptr,buffer2,
                                     &buffer_size2,
                                     &erasure_simulator2);
                         }
@@ -393,10 +393,11 @@ int main(int argc, const char *argv[]) {
 //                k2=n2;
                 int codeword_size_final = 0;
 
-                for (int j = 0; j < 6; j++)
-                    application_layer_relay_receiver->response_from_dest_buffer[j] = response_from_dest_buffer[j];
+//                for (int j = 0; j < 6; j++)
+//                    application_layer_relay_receiver->response_from_dest_buffer[j] = udp_parameters2[j];
 
                 seq_number = application_layer_relay_receiver->receive_message_and_symbol_wise_encode(udp_parameters,
+                                                                                                      udp_parameters2,
                                                                                                       buffer,
                                                                                                       &buffer_size,
                                                                                                       &erasure_simulator,
@@ -419,7 +420,7 @@ int main(int argc, const char *argv[]) {
                         application_layer_relay_sender.send_sym_wise_message(
                                 application_layer_relay_receiver->fec_decoder->codeword_vector_to_transmit_stored[kk],
                                 size_of_codeword, udp_parameters2, buffer2, &buffer_size2, seq,
-                                response_from_dest_buffer, k2_new, n2_new,
+                                k2_new, n2_new,
                                 counter_for_start_and_end);
                         application_layer_destination_receiver->receive_message_and_symbol_wise_decode(
                                 udp_parameters2, buffer2,
@@ -440,10 +441,10 @@ int main(int argc, const char *argv[]) {
 //                k2=n2;
                 int codeword_size_final = 0;
 
-                for (int j = 0; j < 6; j++)
-                    application_layer_relay_receiver->response_from_dest_buffer[j] = response_from_dest_buffer[j];
+//                for (int j = 0; j < 6; j++)
+//                    application_layer_relay_receiver->response_from_dest_buffer[j] = udp_parameters2[j];
 
-                seq_number = application_layer_relay_receiver->receive_message_and_symbol_wise_encode(udp_parameters,
+                seq_number = application_layer_relay_receiver->receive_message_and_symbol_wise_encode(udp_parameters,udp_parameters2,
                                                                                                       buffer,
                                                                                                       &buffer_size,
                                                                                                       &erasure_simulator,
@@ -465,11 +466,10 @@ int main(int argc, const char *argv[]) {
 //                    cout<<counter_for_start_and_end<<endl;
                         application_layer_relay_sender.send_sym_wise_message(
                                 application_layer_relay_receiver->fec_decoder->codeword_vector_to_transmit_stored[kk],
-                                size_of_codeword, udp_parameters2, buffer2, &buffer_size2, seq,
-                                response_from_dest_buffer, k2_new, n2_new,
+                                size_of_codeword, udp_parameters2, buffer2, &buffer_size2, seq, k2_new, n2_new,
                                 counter_for_start_and_end);
                         application_layer_destination_receiver->receive_message_and_symbol_wise_decode(
-                                udp_parameters2, buffer2,
+                                udp_parameters2,buffer2,
                                 &buffer_size2,
                                 &erasure_simulator2, 0);
                     }

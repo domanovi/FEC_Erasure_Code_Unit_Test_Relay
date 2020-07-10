@@ -30,11 +30,11 @@ extern int RELAYING_TYPE;
 #define T_TOT 5 // T_TOT needs to be >= T_INITAL+T_INTIAL_2, if RELAYING_TYPE=1 not used, if RELAYING_TYPE=2 ignoring T_INITIAL && N_INITIAL_2
 #define T_INITIAL 4
 #define B_INITIAL -1
-#define N_INITIAL 1
+#define N_INITIAL -1
 
 #define T_INITIAL_2 4
 #define B_INITIAL_2 2
-#define N_INITIAL_2 1
+#define N_INITIAL_2 -1
 
 #define MIN_T2 0
 #define MIN_N2 0

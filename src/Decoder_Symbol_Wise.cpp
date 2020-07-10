@@ -27,23 +27,23 @@ namespace siphon {
         temp_erasure_vector_state_dependent = (bool *) malloc(sizeof(bool) * 2*T_TOT);
         header = (int **) malloc(sizeof(int *) * (2*T_TOT));
 
-        int maxSizeOfHeader = T_TOT-std::min(N_INITIAL,N_INITIAL_2)+1;
+        int maxSizeOfHeader = T_TOT-std::max(std::min(N_INITIAL,N_INITIAL_2),0)+1;
         for (int i = 0; i < T_TOT + 1; i++) {
             codeword_vector[i] = (unsigned char *) malloc(
                     sizeof(unsigned char) * GLOBAL_MAX_SIZE_OF_CODEWORD); //4-byte sequence number + 4-byte
-            memset(codeword_vector[i], '\000', GLOBAL_MAX_SIZE_OF_CODEWORD);
+            memset(codeword_vector[i], '\000', sizeof(unsigned char) *GLOBAL_MAX_SIZE_OF_CODEWORD);
             codeword_new_vector[i] = (unsigned char *) malloc(
                     sizeof(unsigned char) * GLOBAL_MAX_SIZE_OF_CODEWORD); //4-byte sequence number + 4-byte
-            memset(codeword_new_vector[i], '\000', GLOBAL_MAX_SIZE_OF_CODEWORD);
+            memset(codeword_new_vector[i], '\000', sizeof(unsigned char) *GLOBAL_MAX_SIZE_OF_CODEWORD);
             codeword_vector_store_in_burst[i] = (unsigned char *) malloc(
                     sizeof(unsigned char) * GLOBAL_MAX_SIZE_OF_CODEWORD); //4-byte sequence number + 4-byte
-            memset(codeword_vector_store_in_burst[i], '\000', GLOBAL_MAX_SIZE_OF_CODEWORD);
+            memset(codeword_vector_store_in_burst[i], '\000', sizeof(unsigned char) *GLOBAL_MAX_SIZE_OF_CODEWORD);
             codeword_vector_to_trasnmit_store[i]=(unsigned char *) malloc(
                     sizeof(unsigned char) * GLOBAL_MAX_SIZE_OF_CODEWORD); //4-byte sequence number + 4-byte
-            memset(codeword_vector_to_trasnmit_store[i], '\000', GLOBAL_MAX_SIZE_OF_CODEWORD);
+            memset(codeword_vector_to_trasnmit_store[i], '\000', sizeof(unsigned char) *GLOBAL_MAX_SIZE_OF_CODEWORD);
             codeword_vector_to_transmit[i]=(unsigned char *) malloc(
                     sizeof(unsigned char) * GLOBAL_MAX_SIZE_OF_CODEWORD); //4-byte sequence number + 4-byte
-            memset(codeword_vector_to_transmit[i], '\000', GLOBAL_MAX_SIZE_OF_CODEWORD);
+            memset(codeword_vector_to_transmit[i], '\000', sizeof(unsigned char) *GLOBAL_MAX_SIZE_OF_CODEWORD);
 
             n2_vector[i]=0;
             k2_vector[i]=0;
@@ -53,7 +53,7 @@ namespace siphon {
         for (int i = 0; i < 2* T_TOT ; i++) {
             codeword_vector_state_dependent[i]=(unsigned char *) malloc(
                     sizeof(unsigned char) * GLOBAL_MAX_SIZE_OF_CODEWORD); //4-byte sequence number + 4-byte
-            memset(codeword_vector_state_dependent[i], '\000', GLOBAL_MAX_SIZE_OF_CODEWORD);
+            memset(codeword_vector_state_dependent[i], '\000', sizeof(unsigned char) * GLOBAL_MAX_SIZE_OF_CODEWORD);
             temp_erasure_vector_state_dependent[i]=0;
             header[i]=(int *) malloc(sizeof(int) * T_TOT+1);
             for (int jj=0;jj<maxSizeOfHeader;jj++)

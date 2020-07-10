@@ -271,10 +271,10 @@ seq_number++;
 
 void Application_Layer_Sender::send_sym_wise_message(unsigned char *encoded_symwise_word, int encoded_symwise_word_size,
                                                      unsigned char *udp_parameters, unsigned char *udp_codeword, int *udp_codeword_size,int missing_packets,
-                                                     unsigned char *response_buffer,int k2,int n2,int counter_for_start_and_end) {
+                                                     int k2,int n2,int counter_for_start_and_end) {
 
     int response_size;
-    //unsigned char response_buffer[6];
+    unsigned char response_buffer[6];
 
 //    seq_number=seq_number+missing_packets;
     seq_number=missing_packets;
@@ -334,7 +334,7 @@ void Application_Layer_Sender::send_sym_wise_message(unsigned char *encoded_symw
 }
 
 void Application_Layer_Sender::message_wise_encode_at_relay(unsigned char *received_data, int orig_seq_num, unsigned char *udp_parameters, unsigned char
-*udp_codeword, int *udp_codeword_size,unsigned char *response_buffer) {
+*udp_codeword, int *udp_codeword_size) {
 
     // This
     // function is
@@ -342,8 +342,7 @@ void Application_Layer_Sender::message_wise_encode_at_relay(unsigned char *recei
     //payload_simulator->generate_payload(raw_data);                                  //fill raw data
 
     int response_size;
-    //unsigned char response_buffer[6];
-
+    unsigned char response_buffer[6];
     if (udp_parameters == nullptr)
         update_parameter(&response_size, response_buffer);
     else{
