@@ -20,8 +20,8 @@
 //#define B_INITIAL -1
 //#define N_INITIAL -1
 
-//#define RELAYING_TYPE 3
-extern int RELAYING_TYPE;
+#define RELAYING_TYPE 1
+//extern int RELAYING_TYPE;
 // if RELAYING_TYPE=0 P2P
 // if RELAYING_TYPE=1 message-wise decode and forward
 // if RELAYING_TYPE=2 symbol-wise decode and forward

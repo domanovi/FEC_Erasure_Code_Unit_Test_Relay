@@ -42,13 +42,13 @@ using std::cerr;
 using std::endl;
 using namespace std::chrono;
 
-int RELAYING_TYPE;
+//int RELAYING_TYPE;
 
 int main(int argc, const char *argv[]) {
     remove("packet_loss_MWDF.txt" );
     remove("packet_loss_SWDF.txt" );
     remove("packet_loss_SD_SWDF.txt" );
-    for (RELAYING_TYPE=1;RELAYING_TYPE<=2;RELAYING_TYPE++) {
+//    for (RELAYING_TYPE=1;RELAYING_TYPE<=2;RELAYING_TYPE++) {
         int B = N_INITIAL;                       //if B=-1 and N=-1, then it is adaptive; otherwise, it is non-adaptive
         int N = N_INITIAL;
 
@@ -786,6 +786,6 @@ int main(int argc, const char *argv[]) {
         free(udp_parameters);
         delete application_layer_relay_receiver;
         delete application_layer_destination_receiver;
-    }
+//    }
     return 0;
 }
