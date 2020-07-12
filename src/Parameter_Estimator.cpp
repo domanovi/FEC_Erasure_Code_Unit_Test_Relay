@@ -69,7 +69,7 @@ namespace siphon {
             seq_start = 0;
         }
 
-        if (RELAYING_TYPE==2) {
+        if (RELAYING_TYPE==2 || RELAYING_TYPE==3) {
 //            T = message->T;
             T=T_TOT;
         }

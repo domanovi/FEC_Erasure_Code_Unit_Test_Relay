@@ -42,13 +42,17 @@ using std::cerr;
 using std::endl;
 using namespace std::chrono;
 
-//int RELAYING_TYPE;
+int RELAYING_TYPE;
 
 int main(int argc, const char *argv[]) {
-    remove("packet_loss_MWDF.txt" );
-    remove("packet_loss_SWDF.txt" );
-    remove("packet_loss_SD_SWDF.txt" );
-//    for (RELAYING_TYPE=1;RELAYING_TYPE<=2;RELAYING_TYPE++) {
+
+    for (RELAYING_TYPE=1;RELAYING_TYPE<=3;RELAYING_TYPE++) {
+        if (RELAYING_TYPE==1)
+            remove("packet_loss_MWDF.txt" );
+        else if (RELAYING_TYPE==2)
+            remove("packet_loss_SWDF.txt" );
+        else if (RELAYING_TYPE==3)
+            remove("packet_loss_SD_SWDF.txt" );
         int B = N_INITIAL;                       //if B=-1 and N=-1, then it is adaptive; otherwise, it is non-adaptive
         int N = N_INITIAL;
 
@@ -151,8 +155,8 @@ int main(int argc, const char *argv[]) {
         erasure_generator2.generate_IID(stream_duration + T + T2, 0.1, "erasure2.bin", 2);
 
 
-        siphon::Erasure_Simulator erasure_simulator("../Experimental_Logs/erasure50.bin");
-        siphon::Erasure_Simulator erasure_simulator2("../Experimental_Logs/erasure20.bin");
+        siphon::Erasure_Simulator erasure_simulator("../Experimental_Logs/erasure40.bin");
+        siphon::Erasure_Simulator erasure_simulator2("../Experimental_Logs/erasure50.bin");
 //    siphon::Erasure_Simulator erasure_simulator("erasure.bin");
 //    siphon::Erasure_Simulator erasure_simulator2("erasure2.bin");
 
@@ -384,7 +388,7 @@ int main(int argc, const char *argv[]) {
                         application_layer_relay_sender.debug_rate_second_hop_curr);
 
 
-            } else if (relaying_type == 2) { // Symbol-wise decode and forward
+            } else if (relaying_type == 2 || relaying_type == 3) { // Symbol-wise decode and forward
                 application_layer_sender.generate_message_and_encode(udp_parameters, buffer,
                                                                      &buffer_size); //udp_codeword is
 
@@ -432,53 +436,54 @@ int main(int argc, const char *argv[]) {
                 min_rate_debug_debug += std::min(
                         application_layer_sender.variable_rate_FEC_encoder->debug_rate_first_hop_curr,
                         application_layer_destination_receiver->fec_decoder->debug_rate_second_hop_curr);
-            } else if (relaying_type == 3) { // Symbol-wise decode and forward
-                application_layer_sender.generate_message_and_encode(udp_parameters, buffer,
-                                                                     &buffer_size); //udp_codeword is
-
-
-//            if (k2>n2)
-//                k2=n2;
-                int codeword_size_final = 0;
-
-//                for (int j = 0; j < 6; j++)
-//                    application_layer_relay_receiver->response_from_dest_buffer[j] = udp_parameters2[j];
-
-                seq_number = application_layer_relay_receiver->receive_message_and_symbol_wise_encode(udp_parameters,udp_parameters2,
-                                                                                                      buffer,
-                                                                                                      &buffer_size,
-                                                                                                      &erasure_simulator,
-                                                                                                      k2_new,
-                                                                                                      n2_new,
-                                                                                                      &codeword_size_final,
-                                                                                                      &k2_new, &n2_new);
-                if (seq_number > -1) {
-                    int numOfStoredCodeWords = application_layer_relay_receiver->fec_decoder->codeword_vector_to_transmit_stored_index;
-                    for (int kk = 0; kk <= numOfStoredCodeWords; kk++) {
-                        int size_of_codeword = application_layer_relay_receiver->fec_decoder->codeword_vector_to_transmit_stored_word_size[kk];
-                        int seq = application_layer_relay_receiver->fec_decoder->codeword_vector_to_transmit_stored_seq[kk];
-                        int counter_for_start_and_end =
-                                application_layer_relay_receiver->fec_decoder->codeword_vector_to_transmit_stored_counter_for_start_and_end[kk] -
-                                numOfStoredCodeWords + kk;
-                        if (counter_for_start_and_end < 0)
-                            counter_for_start_and_end = 255 + counter_for_start_and_end;
-//                    printMatrix(application_layer_relay_receiver->fec_decoder->codeword_vector_to_transmit_stored[kk],1,size_of_codeword);
-//                    cout<<counter_for_start_and_end<<endl;
-                        application_layer_relay_sender.send_sym_wise_message(
-                                application_layer_relay_receiver->fec_decoder->codeword_vector_to_transmit_stored[kk],
-                                size_of_codeword, udp_parameters2, buffer2, &buffer_size2, seq, k2_new, n2_new,
-                                counter_for_start_and_end);
-                        application_layer_destination_receiver->receive_message_and_symbol_wise_decode(
-                                udp_parameters2,buffer2,
-                                &buffer_size2,
-                                &erasure_simulator2, 0);
-                    }
-                }
-                min_rate_debug_packet_count += 1;
-                min_rate_debug_debug += std::min(
-                        application_layer_sender.variable_rate_FEC_encoder->debug_rate_first_hop_curr,
-                        application_layer_destination_receiver->fec_decoder->debug_rate_second_hop_curr);
             }
+//            } else if (relaying_type == 3) { // Symbol-wise decode and forward
+//                application_layer_sender.generate_message_and_encode(udp_parameters, buffer,
+//                                                                     &buffer_size); //udp_codeword is
+//
+//
+////            if (k2>n2)
+////                k2=n2;
+//                int codeword_size_final = 0;
+//
+////                for (int j = 0; j < 6; j++)
+////                    application_layer_relay_receiver->response_from_dest_buffer[j] = udp_parameters2[j];
+//
+//                seq_number = application_layer_relay_receiver->receive_message_and_symbol_wise_encode(udp_parameters,udp_parameters2,
+//                                                                                                      buffer,
+//                                                                                                      &buffer_size,
+//                                                                                                      &erasure_simulator,
+//                                                                                                      k2_new,
+//                                                                                                      n2_new,
+//                                                                                                      &codeword_size_final,
+//                                                                                                      &k2_new, &n2_new);
+//                if (seq_number > -1) {
+//                    int numOfStoredCodeWords = application_layer_relay_receiver->fec_decoder->codeword_vector_to_transmit_stored_index;
+//                    for (int kk = 0; kk <= numOfStoredCodeWords; kk++) {
+//                        int size_of_codeword = application_layer_relay_receiver->fec_decoder->codeword_vector_to_transmit_stored_word_size[kk];
+//                        int seq = application_layer_relay_receiver->fec_decoder->codeword_vector_to_transmit_stored_seq[kk];
+//                        int counter_for_start_and_end =
+//                                application_layer_relay_receiver->fec_decoder->codeword_vector_to_transmit_stored_counter_for_start_and_end[kk] -
+//                                numOfStoredCodeWords + kk;
+//                        if (counter_for_start_and_end < 0)
+//                            counter_for_start_and_end = 255 + counter_for_start_and_end;
+////                    printMatrix(application_layer_relay_receiver->fec_decoder->codeword_vector_to_transmit_stored[kk],1,size_of_codeword);
+////                    cout<<counter_for_start_and_end<<endl;
+//                        application_layer_relay_sender.send_sym_wise_message(
+//                                application_layer_relay_receiver->fec_decoder->codeword_vector_to_transmit_stored[kk],
+//                                size_of_codeword, udp_parameters2, buffer2, &buffer_size2, seq, k2_new, n2_new,
+//                                counter_for_start_and_end);
+//                        application_layer_destination_receiver->receive_message_and_symbol_wise_decode(
+//                                udp_parameters2,buffer2,
+//                                &buffer_size2,
+//                                &erasure_simulator2, 0);
+//                    }
+//                }
+//                min_rate_debug_packet_count += 1;
+//                min_rate_debug_debug += std::min(
+//                        application_layer_sender.variable_rate_FEC_encoder->debug_rate_first_hop_curr,
+//                        application_layer_destination_receiver->fec_decoder->debug_rate_second_hop_curr);
+//            }
 
 
 //            bool flag_for_using_backup=false;
@@ -786,6 +791,6 @@ int main(int argc, const char *argv[]) {
         free(udp_parameters);
         delete application_layer_relay_receiver;
         delete application_layer_destination_receiver;
-//    }
+    }// for RELAYING_TYPE
     return 0;
 }

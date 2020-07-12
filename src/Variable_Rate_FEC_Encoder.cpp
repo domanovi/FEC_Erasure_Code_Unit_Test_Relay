@@ -104,7 +104,7 @@ namespace siphon {
                 B = message->B;
                 N = message->N;
 
-                if (RELAYING_TYPE==2) {
+                if (RELAYING_TYPE==2 || RELAYING_TYPE==3) {
                     T2_old = T2;
                     B2_old = B2;
                     N2_old = N2;
@@ -146,7 +146,7 @@ namespace siphon {
 
         message->counter_for_start_and_end = counter_transition;
 
-        if (RELAYING_TYPE==2){
+        if (RELAYING_TYPE==2 || RELAYING_TYPE==3){
             if (counter_transition <= T_TOT+1) {
 
                 if (counter_transition == T_TOT+1) {

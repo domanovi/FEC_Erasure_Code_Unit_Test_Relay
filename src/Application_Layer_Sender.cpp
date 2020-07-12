@@ -106,7 +106,7 @@ void Application_Layer_Sender::generate_message_and_encode(unsigned char *udp_pa
         variable_rate_FEC_encoder->B2_ack = B2_ack;
     }
 
-    if (RELAYING_TYPE==2 && seq_number>0 && adaptive_coding==1){
+    if ((RELAYING_TYPE==2 || RELAYING_TYPE==3) && seq_number>0 && adaptive_coding==1){
 //        if (N>=T_TOT) {
 //            cout << "N1=T_TOT" << endl;
 //            N=N_ack;

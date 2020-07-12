@@ -225,9 +225,9 @@ namespace siphon {
                 DEBUG_MSG("\033[1;35m" << "Packet dropped in (s,r) #" << seq << ": " << "\033[0m");
                 decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n_last_used, n2_last_used, size_received,
                                                                           codeword_r_d_size_current, true);
-                memset(decoder_Symbol_Wise->codeword_vector_state_dependent[T_TOT], '\000',
-                        sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
-                decoder_Symbol_Wise->temp_erasure_vector_state_dependent[T_TOT]=1;
+                memset(decoder_Symbol_Wise->codeword_vector_state_dependent[2*T_TOT], '\000',
+                       sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
+                decoder_Symbol_Wise->temp_erasure_vector_state_dependent[2*T_TOT]=1;
 
                 decoder_Symbol_Wise->symbol_wise_encode_state_dependent(k_last_used, n_last_used, k2_last_used,
                                                                         n2_last_used, &flag);
@@ -267,9 +267,9 @@ namespace siphon {
             decoder_Symbol_Wise->push_current_codeword(codeword_received, n, n2, size_received,
                                                        codeword_r_d_size_current);
 
-            memcpy(&decoder_Symbol_Wise->codeword_vector_state_dependent[T_TOT][2],codeword_received,
-                    sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
-            decoder_Symbol_Wise->temp_erasure_vector_state_dependent[T_TOT] = 0;
+            memcpy(&decoder_Symbol_Wise->codeword_vector_state_dependent[2*T_TOT][2],codeword_received,
+                   sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
+            decoder_Symbol_Wise->temp_erasure_vector_state_dependent[2*T_TOT] = 0;
 
             decoder_Symbol_Wise->symbol_wise_encode_state_dependent(k, n, k2, n2, &flag);
             if (flag == true) {
@@ -389,12 +389,12 @@ namespace siphon {
             if (double_coding_flag==0){
                 // the k,n inserted from above are the new ones in case packet dropped before beginning of transition...
                 decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n_last_used,0,size_received,
-                        0,false);
+                                                                          0,false);
                 for (int i=0;i<T_TOT+1;i++)
-                    decoder_Symbol_Wise->header[2*T_TOT-1][i]=0;
-                memset(decoder_Symbol_Wise->codeword_vector_state_dependent[2*T_TOT-1],'\000',
-                        sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
-                decoder_Symbol_Wise->temp_erasure_vector_state_dependent[2*T_TOT-1] = 1;
+                    decoder_Symbol_Wise->header[3*T_TOT-1][i]=0;
+                memset(decoder_Symbol_Wise->codeword_vector_state_dependent[3*T_TOT-1],'\000',
+                       sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
+                decoder_Symbol_Wise->temp_erasure_vector_state_dependent[3*T_TOT-1] = 1;
                 flag=false;
                 decoder_Symbol_Wise->symbol_wise_decode_state_dependent(buffer,&flag,k_last_used,n_last_used);
                 if (flag) {
@@ -461,10 +461,10 @@ namespace siphon {
         if (double_coding_flag==0) {
             decoder_Symbol_Wise->push_current_codeword(codeword_received,n_last_used,0,size_received,0);
             for (int i=0;i<T_TOT+1;i++)
-                decoder_Symbol_Wise->header[2*T_TOT-1][i]=new_Header[i];
-            memcpy(&decoder_Symbol_Wise->codeword_vector_state_dependent[2*T_TOT-1][2],codeword_received,
+                decoder_Symbol_Wise->header[3*T_TOT-1][i]=new_Header[i];
+            memcpy(&decoder_Symbol_Wise->codeword_vector_state_dependent[3*T_TOT-1][2],codeword_received,
                    sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
-            decoder_Symbol_Wise->temp_erasure_vector_state_dependent[2*T_TOT-1] = 0;
+            decoder_Symbol_Wise->temp_erasure_vector_state_dependent[3*T_TOT-1] = 0;
             flag=false;
             decoder_Symbol_Wise->symbol_wise_decode_state_dependent(buffer,&flag,k_last_used,n_last_used);
             if (flag) {
@@ -628,16 +628,38 @@ namespace siphon {
                 if (double_coding_flag == 0) {
                     decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n_last_used,n2_last_used,size_received,codeword_r_d_size_current,true);
 //                    DEBUG_MSG("\033[1;34m" << "Packet dropped in (s,r) #" << seq << ": " << "\033[0m");
-                    decoder_Symbol_Wise->symbol_wise_encode_1(k_last_used,n_last_used,k2_last_used,n2_last_used,&flag);
+                    //SWDF or SD-SWDF
+                    if (RELAYING_TYPE==3){
+                        memset(decoder_Symbol_Wise->codeword_vector_state_dependent[2*T_TOT], '\000',
+                               sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
+                        decoder_Symbol_Wise->temp_erasure_vector_state_dependent[2*T_TOT]=1;
+
+                        decoder_Symbol_Wise->symbol_wise_encode_state_dependent(k_last_used, n_last_used, k2_last_used,
+                                                                                n2_last_used, &flag);
+                    }else
+                        decoder_Symbol_Wise->symbol_wise_encode_1(k_last_used,n_last_used,k2_last_used,n2_last_used,&flag);
                     if (flag==true){
                         loss_counter_++;
                         final_loss_counter_++;
                     }
-                    *codeword_size_final = codeword_r_d_size_last+2;  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
-                    int codeword_size_final_temp = codeword_r_d_size_last+2;
+                    int codeword_size_final_temp;
+                    if (RELAYING_TYPE==3){
+                        *codeword_size_final = codeword_r_d_size_last +
+                                               2 + T_TOT + 1 ;  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
+                        codeword_size_final_temp = codeword_r_d_size_last + 2 + T_TOT + 1;
+                        for (int aa=0;aa<T_TOT+1;aa++)
+                            codeword_final[2+aa]= (unsigned char) (decoder_Symbol_Wise->header[n2-1][aa]);
+                    } else {
+                        *codeword_size_final = codeword_r_d_size_last +
+                                               2;  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
+                        codeword_size_final_temp = codeword_r_d_size_last + 2;
+                    }
                     codeword_final[1] = (unsigned char) (codeword_r_d_size_last);
                     codeword_final[0] = (unsigned char) ((codeword_r_d_size_last) / 256);
-                    memcpy(codeword_final + 2, decoder_Symbol_Wise->codeword_new_vector[n2_last_used-1], size_t(codeword_r_d_size_last));
+                    if (RELAYING_TYPE==3)
+                        memcpy(codeword_final + 2 + T_TOT +1, decoder_Symbol_Wise->codeword_new_vector[n2_last_used-1], size_t(codeword_r_d_size_last));
+                    else
+                        memcpy(codeword_final + 2, decoder_Symbol_Wise->codeword_new_vector[n2_last_used-1], size_t(codeword_r_d_size_last));
                     memcpy(decoder_Symbol_Wise->codeword_vector_to_transmit[n2_last_used-1],codeword_final,size_t(codeword_size_final_temp));
                     decoder_Symbol_Wise->k2_vector[n2_last_used-1]=k2_last_used;
                     decoder_Symbol_Wise->n2_vector[n2_last_used-1]=n2_last_used;
@@ -657,29 +679,66 @@ namespace siphon {
                     codeword_vector_to_transmit_stored_word_size[codeword_vector_to_transmit_stored_index]=codeword_size_final_temp;
                     codeword_vector_to_transmit_stored_seq[codeword_vector_to_transmit_stored_index]=seq;
                     codeword_vector_to_transmit_stored_counter_for_start_and_end[codeword_vector_to_transmit_stored_index]=message->counter_for_start_and_end;
-                } else{
+                } else{//double_coding_flag == 1
                     decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n_old,n2_old,size_received_transition,codeword_r_d_size_old,true);
-                    decoder_Symbol_Wise_new->rotate_pointers_and_insert_zero_word(n,n2,size_received,codeword_r_d_size_current,true);
-                    decoder_Symbol_Wise->symbol_wise_encode_1(k_old,n_old,k2_old,n2_old,&flag);
+                    //SWDF or SD-SWDF
+                    if (RELAYING_TYPE==3){
+                        memset(decoder_Symbol_Wise->codeword_vector_state_dependent[2*T_TOT], '\000',
+                               sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
+                        decoder_Symbol_Wise->temp_erasure_vector_state_dependent[2*T_TOT]=1;
+
+                        decoder_Symbol_Wise->symbol_wise_encode_state_dependent(k_old,n_old,k2_old,n2_old, &flag);
+                    }else
+                        decoder_Symbol_Wise->symbol_wise_encode_1(k_old,n_old,k2_old,n2_old,&flag);
                     if (flag==true){
                         loss_counter_++;
                         final_loss_counter_++;
                     }
-                    decoder_Symbol_Wise_new->symbol_wise_encode_1(k,n,k2,n2,&flag);
+                    decoder_Symbol_Wise_new->rotate_pointers_and_insert_zero_word(n,n2,size_received,codeword_r_d_size_current,true);
+                    if (RELAYING_TYPE==3){
+                        memset(decoder_Symbol_Wise->codeword_vector_state_dependent[2*T_TOT], '\000',
+                               sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
+                        decoder_Symbol_Wise_new->temp_erasure_vector_state_dependent[2*T_TOT]=1;
+
+                        decoder_Symbol_Wise_new->symbol_wise_encode_state_dependent(k,n,k2,n2,&flag);
+                    }else
+                        decoder_Symbol_Wise_new->symbol_wise_encode_1(k,n,k2,n2,&flag);
 //                    DEBUG_MSG("\033[1;34m" << "Packet dropped in (s,r) #" << seq << ": " << "\033[0m");
-                    int codeword_size_final_temp = codeword_r_d_size_current + codeword_r_d_size_old + 2;  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
-                    *codeword_size_final = codeword_size_final_temp;
+                    int codeword_size_final_temp;
+                    memset(codeword_final, 0, size_t(codeword_size_final_temp));
+                    if (RELAYING_TYPE==3){
+                        *codeword_size_final = codeword_r_d_size_current + codeword_r_d_size_old +
+                                               2 + 2*(T_TOT + 1);  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
+
+                        codeword_size_final_temp = codeword_r_d_size_current +codeword_r_d_size_old + 2 + 2*(T_TOT + 1);
+                        for (int aa=0;aa<T_TOT+1;aa++)
+                            codeword_final[2+aa]= (unsigned char) (decoder_Symbol_Wise_new->header[n2-1][aa]);
+                        for (int aa=0;aa<T_TOT+1;aa++)
+                            codeword_final[2+codeword_r_d_size_current+T_TOT+1+aa]= (unsigned char) (decoder_Symbol_Wise->header[n2-1][aa]);
+                    }
+                    else {
+                        *codeword_size_final = codeword_r_d_size_current + codeword_r_d_size_old + 2;
+                        codeword_size_final_temp = codeword_r_d_size_current + codeword_r_d_size_old + 2;
+                    }
 
                     int temp_remainder;
-
-                    memset(codeword_final, 0, size_t(codeword_size_final_temp));
 
                     temp_remainder = codeword_r_d_size_current % 256;
                     codeword_final[1] = (unsigned char) (temp_remainder);
                     codeword_final[0] = (unsigned char) ((codeword_r_d_size_current - temp_remainder) / 256);
 
-                    memcpy(codeword_final + 2, decoder_Symbol_Wise_new->codeword_new_vector[n2-1], size_t(codeword_r_d_size_current));
-                    memcpy(codeword_final + codeword_r_d_size_current + 2, decoder_Symbol_Wise->codeword_new_vector[n2_old - 1], size_t(codeword_r_d_size_old));
+                    if (RELAYING_TYPE==3){
+                        memcpy(codeword_final + 2 + T_TOT + 1, decoder_Symbol_Wise_new->codeword_new_vector[n2 - 1],
+                               size_t(codeword_r_d_size_current));
+                        memcpy(codeword_final + codeword_r_d_size_current + 2 + 2*(T_TOT + 1),
+                               decoder_Symbol_Wise->codeword_new_vector[n2_old - 1], size_t(codeword_r_d_size_old));
+                    }else{
+                        memcpy(codeword_final + 2, decoder_Symbol_Wise_new->codeword_new_vector[n2 - 1],
+                               size_t(codeword_r_d_size_current));
+                        memcpy(codeword_final + codeword_r_d_size_current + 2,
+                               decoder_Symbol_Wise->codeword_new_vector[n2_old - 1], size_t(codeword_r_d_size_old));
+                    }
+
                     memcpy(decoder_Symbol_Wise->codeword_vector_to_transmit[n2_old-1],codeword_final,size_t(codeword_size_final_temp));
                     decoder_Symbol_Wise->k2_vector[n2_old-1]=k2_old;
                     decoder_Symbol_Wise->n2_vector[n2_old-1]=n2_old;
@@ -737,12 +796,36 @@ namespace siphon {
                 DEBUG_MSG("\033[1;35m" << "Burst: packet dropped in (s,r) #" << seq << ": " << "\033[0m");
                 if (double_coding_flag==0){
                     decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n_last_used,n2_last_used,size_received,codeword_r_d_size_current,false);
-                    decoder_Symbol_Wise->symbol_wise_encode_1(k_last_used,n_last_used,k2_last_used,n2_last_used,&flag);
-                }else{
+                    if (RELAYING_TYPE==3){
+                        memset(decoder_Symbol_Wise->codeword_vector_state_dependent[2*T_TOT], '\000',
+                               sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
+                        decoder_Symbol_Wise->temp_erasure_vector_state_dependent[2*T_TOT]=1;
+
+                        decoder_Symbol_Wise->symbol_wise_encode_state_dependent(k_last_used, n_last_used, k2_last_used,
+                                                                                n2_last_used, &flag);
+                    }else
+                        decoder_Symbol_Wise->symbol_wise_encode_1(k_last_used,n_last_used,k2_last_used,n2_last_used,&flag);
+                }else{//double_coding_flag == 1
                     decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n_old,n2_old,size_received_transition,codeword_r_d_size_old,false);
+                    //SWDF or SD-SWDF
+                    if (RELAYING_TYPE==3){
+                        memset(decoder_Symbol_Wise->codeword_vector_state_dependent[2*T_TOT], '\000',
+                               sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
+                        decoder_Symbol_Wise->temp_erasure_vector_state_dependent[2*T_TOT]=1;
+
+                        decoder_Symbol_Wise->symbol_wise_encode_state_dependent(k_old,n_old,k2_old,n2_old, &flag);
+                    }else
+                        decoder_Symbol_Wise->symbol_wise_encode_1(k_old,n_old,k2_old,n2_old,&flag);
                     decoder_Symbol_Wise_new->rotate_pointers_and_insert_zero_word(n,n2,size_received,codeword_r_d_size_current,false);
-                    decoder_Symbol_Wise->symbol_wise_encode_1(k_old,n_old,k2_old,n2_old,&flag);
-                    decoder_Symbol_Wise_new->symbol_wise_encode_1(k,n,k2,n2,&flag);
+                    //SWDF or SD-SWDF
+                    if (RELAYING_TYPE==3){
+                        memset(decoder_Symbol_Wise->codeword_vector_state_dependent[2*T_TOT], '\000',
+                               sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
+                        decoder_Symbol_Wise_new->temp_erasure_vector_state_dependent[2*T_TOT]=1;
+
+                        decoder_Symbol_Wise_new->symbol_wise_encode_state_dependent(k,n,k2,n2,&flag);
+                    }else
+                        decoder_Symbol_Wise_new->symbol_wise_encode_1(k,n,k2,n2,&flag);
                 }
                 display_udp_statistics(seq);
             }
@@ -783,20 +866,40 @@ namespace siphon {
 
                 if (double_coding_flag == 0) {
                     DEBUG_MSG("\033[1;35m" << "Packet dropped in (s,r) #" << seq << ": " << "\033[0m");
-//                    decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n,n2,size_received,codeword_r_d_size_current,true);
-//                    decoder_Symbol_Wise->symbol_wise_encode_1(k,n,k2,n2,&flag);
                     decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n_last_used,n2_last_used,size_received,codeword_r_d_size_current,true);
-                    decoder_Symbol_Wise->symbol_wise_encode_1(k_last_used,n_last_used,k2_last_used,n2_last_used,&flag);
+                    //SWDF or SD-SWDF
+                    if (RELAYING_TYPE==3){
+                        memset(decoder_Symbol_Wise->codeword_vector_state_dependent[2*T_TOT], '\000',
+                               sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
+                        decoder_Symbol_Wise->temp_erasure_vector_state_dependent[2*T_TOT]=1;
+
+                        decoder_Symbol_Wise->symbol_wise_encode_state_dependent(k_last_used, n_last_used, k2_last_used,
+                                                                                n2_last_used, &flag);
+                    }else
+                        decoder_Symbol_Wise->symbol_wise_encode_1(k_last_used,n_last_used,k2_last_used,n2_last_used,&flag);
                     if (flag==true){
                         loss_counter_++;
                         final_loss_counter_++;
                     }
-
-                    *codeword_size_final = codeword_r_d_size_last+2;  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
-                    int codeword_size_final_temp = codeword_r_d_size_last+2;
+                    int codeword_size_final_temp;
+                    if (RELAYING_TYPE==3){
+                        *codeword_size_final = codeword_r_d_size_last +
+                                               2 + T_TOT + 1 ;  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
+                        codeword_size_final_temp = codeword_r_d_size_last + 2 + T_TOT + 1;
+                        for (int aa=0;aa<T_TOT+1;aa++)
+                            codeword_final[2+aa]= (unsigned char) (decoder_Symbol_Wise->header[n2-1][aa]);
+                    } else {
+                        *codeword_size_final = codeword_r_d_size_last +
+                                               2;  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
+                        codeword_size_final_temp = codeword_r_d_size_last + 2;
+                    }
+                    codeword_size_final_temp = codeword_r_d_size_last+2;
                     codeword_final[1] = (unsigned char) (codeword_r_d_size_last);
                     codeword_final[0] = (unsigned char) ((codeword_r_d_size_last) / 256);
-                    memcpy(codeword_final + 2, decoder_Symbol_Wise->codeword_new_vector[n2_last_used-1], size_t(codeword_r_d_size_last));
+                    if (RELAYING_TYPE==3)
+                        memcpy(codeword_final + 2 +T_TOT+1, decoder_Symbol_Wise->codeword_new_vector[n2_last_used-1], size_t(codeword_r_d_size_last));
+                    else
+                        memcpy(codeword_final + 2, decoder_Symbol_Wise->codeword_new_vector[n2_last_used-1], size_t(codeword_r_d_size_last));
                     memcpy(decoder_Symbol_Wise->codeword_vector_to_transmit[n2_last_used-1],codeword_final,size_t(codeword_size_final_temp));
                     decoder_Symbol_Wise->k2_vector[n2_last_used-1]=k2_last_used;
                     decoder_Symbol_Wise->n2_vector[n2_last_used-1]=n2_last_used;
@@ -809,36 +912,66 @@ namespace siphon {
                     codeword_vector_to_transmit_stored_word_size[codeword_vector_to_transmit_stored_index]=codeword_size_final_temp;
                     codeword_vector_to_transmit_stored_seq[codeword_vector_to_transmit_stored_index]=seq;
                     codeword_vector_to_transmit_stored_counter_for_start_and_end[codeword_vector_to_transmit_stored_index]=message->counter_for_start_and_end;
-
-//                    // Storing in store_vector
-//                    memcpy(decoder_Symbol_Wise->codeword_vector_to_trasnmit_store[n_old - 1],
-//                           decoder_Symbol_Wise->codeword_vector_to_transmit[n2_old - 1], size_t(codeword_size_final_temp));
-//                    decoder_Symbol_Wise->store_codeword_size_vector[n_old-1]=codeword_size_final_temp;
-
                     display_udp_statistics(seq);
-                } else{
+                } else{ //double_coding_flag==1
                     decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n_old,n2_old,size_received_transition,codeword_r_d_size_old,true);
-                    decoder_Symbol_Wise_new->rotate_pointers_and_insert_zero_word(n,n2,size_received,codeword_r_d_size_current,true);
-                    decoder_Symbol_Wise->symbol_wise_encode_1(k_old,n_old,k2_old,n2_old,&flag);
+                    //SWDF or SD-SWDF
+                    if (RELAYING_TYPE==3){
+                        memset(decoder_Symbol_Wise->codeword_vector_state_dependent[2*T_TOT], '\000',
+                               sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
+                        decoder_Symbol_Wise->temp_erasure_vector_state_dependent[2*T_TOT]=1;
+
+                        decoder_Symbol_Wise->symbol_wise_encode_state_dependent(k_old,n_old,k2_old,n2_old, &flag);
+                    }else
+                        decoder_Symbol_Wise->symbol_wise_encode_1(k_old,n_old,k2_old,n2_old,&flag);
                     if (flag==true){
                         loss_counter_++;
                         final_loss_counter_++;
                     }
-                    decoder_Symbol_Wise_new->symbol_wise_encode_1(k,n,k2,n2,&flag);
+                    decoder_Symbol_Wise_new->rotate_pointers_and_insert_zero_word(n,n2,size_received,codeword_r_d_size_current,true);
+                    if (RELAYING_TYPE==3){
+                        memset(decoder_Symbol_Wise_new->codeword_vector_state_dependent[2*T_TOT], '\000',
+                               sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
+                        decoder_Symbol_Wise_new->temp_erasure_vector_state_dependent[2*T_TOT]=1;
+
+                        decoder_Symbol_Wise_new->symbol_wise_encode_state_dependent(k,n,k2,n2,&flag);
+                    }else
+                        decoder_Symbol_Wise_new->symbol_wise_encode_1(k,n,k2,n2,&flag);
                     DEBUG_MSG("\033[1;35m" << "Packet dropped in (s,r) #" << seq << ": " << "\033[0m");
-                    int codeword_size_final_temp = codeword_r_d_size_current + codeword_r_d_size_old + 2;  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
-                    *codeword_size_final = codeword_size_final_temp;
-
-                    int temp_remainder;
-
+                    int codeword_size_final_temp;
                     memset(codeword_final, 0, size_t(codeword_size_final_temp));
+                    if (RELAYING_TYPE==3){
+                        *codeword_size_final = codeword_r_d_size_current + codeword_r_d_size_old +
+                                               2 + 2*(T_TOT + 1);  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
+
+                        codeword_size_final_temp = codeword_r_d_size_current +codeword_r_d_size_old + 2 + 2*(T_TOT + 1);
+                        for (int aa=0;aa<T_TOT+1;aa++)
+                            codeword_final[2+aa]= (unsigned char) (decoder_Symbol_Wise_new->header[n2-1][aa]);
+                        for (int aa=0;aa<T_TOT+1;aa++)
+                            codeword_final[2+codeword_r_d_size_current+T_TOT+1+aa]= (unsigned char) (decoder_Symbol_Wise->header[n2-1][aa]);
+                    }
+                    else {
+                        *codeword_size_final = codeword_r_d_size_current + codeword_r_d_size_old + 2;
+                        codeword_size_final_temp = codeword_r_d_size_current + codeword_r_d_size_old + 2;
+                    }
+                    int temp_remainder;
 
                     temp_remainder = codeword_r_d_size_current % 256;
                     codeword_final[1] = (unsigned char) (temp_remainder);
                     codeword_final[0] = (unsigned char) ((codeword_r_d_size_current - temp_remainder) / 256);
 
-                    memcpy(codeword_final + 2, decoder_Symbol_Wise_new->codeword_new_vector[n2-1], size_t(codeword_r_d_size_current));
-                    memcpy(codeword_final + codeword_r_d_size_current + 2, decoder_Symbol_Wise->codeword_new_vector[n2_old - 1], size_t(codeword_r_d_size_old));
+                    if (RELAYING_TYPE==3){
+                        memcpy(codeword_final + 2 + T_TOT + 1, decoder_Symbol_Wise_new->codeword_new_vector[n2 - 1],
+                               size_t(codeword_r_d_size_current));
+                        memcpy(codeword_final + codeword_r_d_size_current + 2 + 2*(T_TOT + 1),
+                               decoder_Symbol_Wise->codeword_new_vector[n2_old - 1], size_t(codeword_r_d_size_old));
+                    }else{
+                        memcpy(codeword_final + 2, decoder_Symbol_Wise_new->codeword_new_vector[n2 - 1],
+                               size_t(codeword_r_d_size_current));
+                        memcpy(codeword_final + codeword_r_d_size_current + 2,
+                               decoder_Symbol_Wise->codeword_new_vector[n2_old - 1], size_t(codeword_r_d_size_old));
+                    }
+
                     memcpy(decoder_Symbol_Wise->codeword_vector_to_transmit[n2_old-1],codeword_final,size_t(codeword_size_final_temp));
                     decoder_Symbol_Wise->k2_vector[n2_old-1]=k2_old;
                     decoder_Symbol_Wise->n2_vector[n2_old-1]=n2_old;
@@ -885,6 +1018,11 @@ namespace siphon {
                 delete decoder_Symbol_Wise_new;
             k_old=T-N+1;
             n_old=T+1;
+            // TODO: remove this PROTECTION
+            if (k2_old!=k_old){
+                n2_old=T_TOT-N+1;
+                k2_old=T-N+1;
+            }
             T=message->T;
             B=message->B;
             N=message->N;
@@ -897,17 +1035,38 @@ namespace siphon {
         trans_vec[received_seq-latest_seq]=double_coding_flag;
         if (double_coding_flag==0) {
             decoder_Symbol_Wise->push_current_codeword(codeword_received, n, n2, size_received,codeword_r_d_size_current);
-            decoder_Symbol_Wise->symbol_wise_encode_1(k, n, k2,n2,&flag);
+            if (RELAYING_TYPE==3){
+                memcpy(&decoder_Symbol_Wise->codeword_vector_state_dependent[2*T_TOT][2],codeword_received,
+                       sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
+                decoder_Symbol_Wise->temp_erasure_vector_state_dependent[2*T_TOT] = 0;
+
+                decoder_Symbol_Wise->symbol_wise_encode_state_dependent(k, n, k2, n2, &flag);
+            }else
+                decoder_Symbol_Wise->symbol_wise_encode_1(k, n, k2,n2,&flag);
             if (flag==true){
                 loss_counter_++;
                 final_loss_counter_++;
             }
-            *codeword_size_final = codeword_r_d_size_current+2;  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
+            int codeword_size_final_temp;
+            if (RELAYING_TYPE==3){
+                *codeword_size_final = codeword_r_d_size_current +
+                                       2 + T_TOT + 1;  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
 
-            int codeword_size_final_temp = codeword_r_d_size_current+2;
+                codeword_size_final_temp = codeword_r_d_size_current + 2 + T_TOT + 1;
+                for (int aa=0;aa<T_TOT+1;aa++)
+                    codeword_final[2+aa]= (unsigned char) (decoder_Symbol_Wise->header[n2-1][aa]);
+            }
+            else {
+                *codeword_size_final = codeword_r_d_size_current +
+                                       2;  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
+                codeword_size_final_temp = codeword_r_d_size_current + 2;
+            }
             codeword_final[1] = (unsigned char) (codeword_r_d_size_current);
             codeword_final[0] = (unsigned char) ((codeword_r_d_size_current) / 256);
-            memcpy(codeword_final + 2, decoder_Symbol_Wise->codeword_new_vector[n2-1], size_t(codeword_r_d_size_current));
+            if (RELAYING_TYPE==3)
+                memcpy(codeword_final + 2 + T_TOT + 1, decoder_Symbol_Wise->codeword_new_vector[n2-1], size_t(codeword_r_d_size_current));
+            else
+                memcpy(codeword_final + 2, decoder_Symbol_Wise->codeword_new_vector[n2-1], size_t(codeword_r_d_size_current));
             memcpy(decoder_Symbol_Wise->codeword_vector_to_transmit[n2-1],codeword_final,size_t(codeword_size_final_temp));
             decoder_Symbol_Wise->codeword_size_vector[n2-1]=codeword_size_final_temp;
             //STORE
@@ -918,16 +1077,51 @@ namespace siphon {
             codeword_vector_to_transmit_stored_seq[codeword_vector_to_transmit_stored_index]=received_seq;
             codeword_vector_to_transmit_stored_counter_for_start_and_end[codeword_vector_to_transmit_stored_index]=message->counter_for_start_and_end;
 
-        }else{
+        }else{//double_coding_flag==1
             decoder_Symbol_Wise->push_current_codeword(codeword_received_transition, n_old, n2_old, size_received_transition,codeword_r_d_size_old);
-            decoder_Symbol_Wise->symbol_wise_encode_1(k_old, n_old, k2_old,n2_old,&flag);
+            if (RELAYING_TYPE==3){
+                memcpy(&decoder_Symbol_Wise->codeword_vector_state_dependent[2*T_TOT][2],codeword_received_transition,
+                       sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
+                decoder_Symbol_Wise->temp_erasure_vector_state_dependent[2*T_TOT] = 0;
+
+                decoder_Symbol_Wise->symbol_wise_encode_state_dependent(k_old, n_old, k2_old, n2_old, &flag);
+            }else
+                decoder_Symbol_Wise->symbol_wise_encode_1(k_old, n_old, k2_old,n2_old,&flag);
+//            decoder_Symbol_Wise->symbol_wise_encode_1(k_old, n_old, k2_old,n2_old,&flag);
             if (flag==true){
                 loss_counter_++;
                 final_loss_counter_++;
             }
             decoder_Symbol_Wise_new->push_current_codeword(codeword_received, n, n2, size_received,codeword_r_d_size_current);
-            decoder_Symbol_Wise_new->symbol_wise_encode_1(k, n, k2,n2,&flag);
-            int codeword_size_final_temp = codeword_r_d_size_current + codeword_r_d_size_old + 2;  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
+            if (RELAYING_TYPE==3){
+                memcpy(&decoder_Symbol_Wise_new->codeword_vector_state_dependent[2*T_TOT][2],codeword_received,
+                       sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
+                decoder_Symbol_Wise_new->temp_erasure_vector_state_dependent[2*T_TOT] = 0;
+
+                decoder_Symbol_Wise_new->symbol_wise_encode_state_dependent(k, n, k2,n2,&flag);
+            }else
+                decoder_Symbol_Wise_new->symbol_wise_encode_1(k, n, k2,n2,&flag);
+//            decoder_Symbol_Wise_new->symbol_wise_encode_1(k, n, k2,n2,&flag);
+
+            int codeword_size_final_temp;
+            memset(codeword_final, 0, size_t(codeword_size_final_temp));
+            if (RELAYING_TYPE==3){
+                *codeword_size_final = codeword_r_d_size_current + codeword_r_d_size_old +
+                                       2 + 2*(T_TOT + 1);  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
+
+                codeword_size_final_temp = codeword_r_d_size_current +codeword_r_d_size_old + 2 + 2*(T_TOT + 1);
+                for (int aa=0;aa<T_TOT+1;aa++)
+                    codeword_final[2+aa]= (unsigned char) (decoder_Symbol_Wise_new->header[n2-1][aa]);
+                for (int aa=0;aa<T_TOT+1;aa++)
+                    codeword_final[2+codeword_r_d_size_current+T_TOT+1+aa]= (unsigned char) (decoder_Symbol_Wise->header[n2-1][aa]);
+
+            }
+            else {
+                *codeword_size_final = codeword_r_d_size_current + codeword_r_d_size_old + 2;
+                codeword_size_final_temp = codeword_r_d_size_current + codeword_r_d_size_old + 2;
+            }
+
+//            int codeword_size_final_temp = codeword_r_d_size_current + codeword_r_d_size_old + 2;  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
             *codeword_size_final = codeword_size_final_temp;
 
 
@@ -938,14 +1132,21 @@ namespace siphon {
 //                                      2;  //2 extra bytes at the very beginning to indicate codeword_r_d_size_current
             int temp_remainder;
 
-            memset(codeword_final, 0, size_t(codeword_size_final_temp));
-
             temp_remainder = codeword_r_d_size_current % 256;
             codeword_final[1] = (unsigned char) (temp_remainder);
             codeword_final[0] = (unsigned char) ((codeword_r_d_size_current - temp_remainder) / 256);
 
-            memcpy(codeword_final + 2, decoder_Symbol_Wise_new->codeword_new_vector[n2-1], size_t(codeword_r_d_size_current));
-            memcpy(codeword_final + codeword_r_d_size_current + 2, decoder_Symbol_Wise->codeword_new_vector[n2_old - 1], size_t(codeword_r_d_size_old));
+            if (RELAYING_TYPE==3){
+                memcpy(codeword_final + 2 + T_TOT + 1, decoder_Symbol_Wise_new->codeword_new_vector[n2 - 1],
+                       size_t(codeword_r_d_size_current));
+                memcpy(codeword_final + codeword_r_d_size_current + 2 + 2*(T_TOT + 1),
+                       decoder_Symbol_Wise->codeword_new_vector[n2_old - 1], size_t(codeword_r_d_size_old));
+            }else{
+                memcpy(codeword_final + 2, decoder_Symbol_Wise_new->codeword_new_vector[n2 - 1],
+                       size_t(codeword_r_d_size_current));
+                memcpy(codeword_final + codeword_r_d_size_current + 2,
+                       decoder_Symbol_Wise->codeword_new_vector[n2_old - 1], size_t(codeword_r_d_size_old));
+            }
             memcpy(decoder_Symbol_Wise->codeword_vector_to_transmit[n2_old-1],codeword_final,size_t(codeword_size_final_temp));
 //            // add also 2 chars to decoder_Symbol_Wise_new->codeword_new_vector[n2-1]
 //            memcpy(decoder_Symbol_Wise_new->codeword_vector_to_transmit[n2-1]+2,codeword_final,size_t(codeword_r_d_size_current+2));
@@ -1012,13 +1213,33 @@ namespace siphon {
             cout<<"Start double coding at the destination"<<endl;
         }
 
+        int new_Header[T_TOT+1];
+        int new_Header_trans[T_TOT+1];
+
         unsigned char *codeword_received_with_header = message->buffer;
 //        unsigned char *codeword_received = codeword_received_with_header + 2;
-        unsigned char *codeword_received = codeword_received_with_header+2;
+        unsigned char *codeword_received;
+        if (RELAYING_TYPE==3)
+            codeword_received = codeword_received_with_header+2 + T_TOT+1;
+        else
+            codeword_received = codeword_received_with_header+2;
+
         int size_received = int(codeword_received_with_header[0]) * 256 + int(codeword_received_with_header[1]);
-        unsigned char *codeword_received_transition = codeword_received + size_received;
+        int size_received_transition;
+        unsigned char *codeword_received_transition;
+        if (RELAYING_TYPE==3){
+            for (int i=0;i<T_TOT+1;i++)
+                new_Header_trans[i]=(int)codeword_received_with_header[2+T_TOT+1+size_received+i];
+            codeword_received_transition = codeword_received + size_received+ (T_TOT+1);// codeword_received=codeword_received_with_header+2 + T_TOT+1
+            size_received_transition=message->size - size_received -2-2*(T_TOT+1);
+        }else {
+            codeword_received_transition = codeword_received + size_received;
+            size_received_transition = message->size - size_received-2;
+        }
 //        int size_received_transition = message->size - 2 - size_received;
-        int size_received_transition = message->size - size_received-2;
+
+        for (int i=0;i<T_TOT+1;i++)
+            new_Header[i]=(int)codeword_received_with_header[2+i];
 
         unsigned char buffer[30000];
         unsigned char temp_buffer[30000];
@@ -1061,7 +1282,16 @@ namespace siphon {
                 // the k,n inserted from above are the new ones in case packet dropped before beginning of transition...
                 decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n_last_used,0,size_received,0,false);
                 flag=false;
-                decoder_Symbol_Wise->symbol_wise_decode_1(buffer,&flag,k_last_used,n_last_used);
+                if (RELAYING_TYPE==3){
+                    for (int i=0;i<T_TOT+1;i++)
+                        decoder_Symbol_Wise->header[3*T_TOT-1][i]=0;
+                    memset(decoder_Symbol_Wise->codeword_vector_state_dependent[3*T_TOT-1],'\000',
+                           sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
+                    decoder_Symbol_Wise->temp_erasure_vector_state_dependent[3*T_TOT-1] = 1;
+                    decoder_Symbol_Wise->symbol_wise_decode_state_dependent(buffer,&flag,k_last_used,n_last_used);
+                }
+                else
+                    decoder_Symbol_Wise->symbol_wise_decode_1(buffer,&flag,k_last_used,n_last_used);
                 if (flag) {
                     loss_counter_++;
                     final_loss_counter_++;
@@ -1076,7 +1306,17 @@ namespace siphon {
             }else{
                 decoder_Symbol_Wise->rotate_pointers_and_insert_zero_word(n_old,0,size_received_transition,0,false);
                 flag=false;
-                decoder_Symbol_Wise->symbol_wise_decode_1(buffer,&flag,k_old,n_old);
+                if (RELAYING_TYPE==3){
+                    for (int i=0;i<T_TOT+1;i++)
+                        decoder_Symbol_Wise->header[3*T_TOT-1][i]=0;
+                    memset(decoder_Symbol_Wise->codeword_vector_state_dependent[3*T_TOT-1],'\000',
+                           sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
+                    decoder_Symbol_Wise->temp_erasure_vector_state_dependent[3*T_TOT-1] = 1;
+                    decoder_Symbol_Wise->symbol_wise_decode_state_dependent(buffer,&flag,k_old,n_old);
+                }
+                else
+                    decoder_Symbol_Wise->symbol_wise_decode_1(buffer,&flag,k_old,n_old);
+//                decoder_Symbol_Wise->symbol_wise_decode_1(buffer,&flag,k_old,n_old);
                 if (flag) {
                     loss_counter_++;
                     final_loss_counter_++;
@@ -1091,7 +1331,17 @@ namespace siphon {
                 }
                 counter_++;
                 decoder_Symbol_Wise_new->rotate_pointers_and_insert_zero_word(n,0,size_received,0,false);
-                decoder_Symbol_Wise_new->symbol_wise_decode_1(buffer,&flag,k,n);
+                if (RELAYING_TYPE==3){
+                    for (int i=0;i<T_TOT+1;i++)
+                        decoder_Symbol_Wise_new->header[3*T_TOT-1][i]=0;
+                    memset(decoder_Symbol_Wise->codeword_vector_state_dependent[3*T_TOT-1],'\000',
+                           sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
+                    decoder_Symbol_Wise_new->temp_erasure_vector_state_dependent[3*T_TOT-1] = 1;
+                    decoder_Symbol_Wise_new->symbol_wise_decode_state_dependent(buffer,&flag,k,n);
+                }
+                else
+                    decoder_Symbol_Wise_new->symbol_wise_decode_1(buffer,&flag,k,n);
+//                decoder_Symbol_Wise_new->symbol_wise_decode_1(buffer,&flag,k,n);
             }
             display_udp_statistics(seq);
         }
@@ -1126,7 +1376,16 @@ namespace siphon {
         if (double_coding_flag==0) {
             decoder_Symbol_Wise->push_current_codeword(codeword_received,n_last_used,0,size_received,0);
             flag=false;
-            decoder_Symbol_Wise->symbol_wise_decode_1(buffer,&flag,k_last_used,n_last_used);
+            if (RELAYING_TYPE==3){
+                for (int i=0;i<T_TOT+1;i++)
+                    decoder_Symbol_Wise->header[3*T_TOT-1][i]=new_Header[i];
+                memcpy(&decoder_Symbol_Wise->codeword_vector_state_dependent[3*T_TOT-1][2],codeword_received,
+                       sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
+                decoder_Symbol_Wise->temp_erasure_vector_state_dependent[3*T_TOT-1] = 0;
+                decoder_Symbol_Wise->symbol_wise_decode_state_dependent(buffer,&flag,k_last_used,n_last_used);
+            }
+            else
+                decoder_Symbol_Wise->symbol_wise_decode_1(buffer,&flag,k_last_used,n_last_used);
             if (flag) {
                 loss_counter_++;
                 final_loss_counter_++;
@@ -1138,25 +1397,21 @@ namespace siphon {
             if (DEBUG_CHAR==1) {
                 calc_missed_chars(received_seq,temp_buffer);
             }
-
-//            // temp extraction of data
-//            unsigned char temp_buffer[30000];
-//            int ind=0;
-//            for (int j=0;j<100;j++) {
-//                for (int i = 0; i < k; i++) {
-//                    temp_buffer[ind++]=buffer[(j) * n + n-k + i];
-//                }
-//            }
-//            // Need to add decoding...
-//            DEBUG_MSG("\033[1;34m" << "Message recovered at destination from symbol-wise DF #" << received_seq << ": " << "\033[0m");
-//            printMatrix(&temp_buffer[2], 1, 300);
             counter_++;
-            //            symbol_wise_decode(k, n, decoder_current->decoder->getG(), received_seq);
         }else{
             decoder_Symbol_Wise->push_current_codeword(codeword_received_transition,n_old,0,size_received_transition,0);
-            bool flag=false;
-            decoder_Symbol_Wise->symbol_wise_decode_1(buffer,&flag,k_old,n_old);
-
+            flag=false;
+            if (RELAYING_TYPE==3){
+                for (int i=0;i<T_TOT+1;i++)
+                    decoder_Symbol_Wise->header[3*T_TOT-1][i]=new_Header_trans[i];
+                memcpy(&decoder_Symbol_Wise->codeword_vector_state_dependent[3*T_TOT-1][2],codeword_received_transition,
+                       sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
+                decoder_Symbol_Wise->temp_erasure_vector_state_dependent[3*T_TOT-1] = 0;
+                decoder_Symbol_Wise->symbol_wise_decode_state_dependent(buffer,&flag,k_old,n_old);
+            }
+            else
+                decoder_Symbol_Wise->symbol_wise_decode_1(buffer,&flag,k_old,n_old);
+//            decoder_Symbol_Wise->symbol_wise_decode_1(buffer,&flag,k_old,n_old);
             if (flag) {
                 loss_counter_++;
                 final_loss_counter_++;
@@ -1182,7 +1437,17 @@ namespace siphon {
 //            printMatrix(&temp_buffer[2], 1, 300);
             counter_++;
             decoder_Symbol_Wise_new->push_current_codeword(codeword_received,n,0,size_received,0);
-            decoder_Symbol_Wise_new->symbol_wise_decode_1(buffer,&flag,k,n);
+            if (RELAYING_TYPE==3){
+                for (int i=0;i<T_TOT+1;i++)
+                    decoder_Symbol_Wise_new->header[3*T_TOT-1][i]=new_Header[i];
+                memcpy(&decoder_Symbol_Wise_new->codeword_vector_state_dependent[3*T_TOT-1][2],codeword_received,
+                       sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
+                decoder_Symbol_Wise_new->temp_erasure_vector_state_dependent[3*T_TOT-1] = 0;
+                decoder_Symbol_Wise_new->symbol_wise_decode_state_dependent(buffer,&flag,k,n);
+            }
+            else
+                decoder_Symbol_Wise_new->symbol_wise_decode_1(buffer,&flag,k,n);
+//            decoder_Symbol_Wise_new->symbol_wise_decode_1(buffer,&flag,k,n);
         }
 
         display_udp_statistics(received_seq);

@@ -23,11 +23,13 @@ namespace siphon {
 
         temp_erasure_vector = (bool *) malloc(sizeof(bool) * T_TOT+1);
 
-        codeword_vector_state_dependent = (unsigned char **) malloc(sizeof(unsigned char *) * (2*T_TOT));
-        temp_erasure_vector_state_dependent = (bool *) malloc(sizeof(bool) * 2*T_TOT);
-        header = (int **) malloc(sizeof(int *) * (2*T_TOT));
+        codeword_vector_state_dependent = (unsigned char **) malloc(sizeof(unsigned char *) * (3*T_TOT));
+        temp_erasure_vector_state_dependent = (bool *) malloc(sizeof(bool) * 3*T_TOT);
+        header = (int **) malloc(sizeof(int *) * (3*T_TOT));
 
-        int maxSizeOfHeader = T_TOT-std::max(std::min(N_INITIAL,N_INITIAL_2),0)+1;
+//        int maxSizeOfHeader = T_TOT-std::max(std::min(N_INITIAL,N_INITIAL_2),0)+1;
+
+
         for (int i = 0; i < T_TOT + 1; i++) {
             codeword_vector[i] = (unsigned char *) malloc(
                     sizeof(unsigned char) * GLOBAL_MAX_SIZE_OF_CODEWORD); //4-byte sequence number + 4-byte
@@ -50,13 +52,13 @@ namespace siphon {
             temp_erasure_vector[i] = 0;
 
         }
-        for (int i = 0; i < 2* T_TOT ; i++) {
+        for (int i = 0; i < 3*T_TOT ; i++) {
             codeword_vector_state_dependent[i]=(unsigned char *) malloc(
                     sizeof(unsigned char) * GLOBAL_MAX_SIZE_OF_CODEWORD); //4-byte sequence number + 4-byte
             memset(codeword_vector_state_dependent[i], '\000', sizeof(unsigned char) * GLOBAL_MAX_SIZE_OF_CODEWORD);
             temp_erasure_vector_state_dependent[i]=0;
             header[i]=(int *) malloc(sizeof(int) * T_TOT+1);
-            for (int jj=0;jj<maxSizeOfHeader;jj++)
+            for (int jj=0;jj<T_TOT+1;jj++)
                 header[i][jj]=jj+1;
         }
 
@@ -70,7 +72,7 @@ namespace siphon {
             free(codeword_vector_to_transmit[i]);
             free(codeword_vector_to_trasnmit_store[i]);
         }
-        for (int i=0;i<2*T_TOT;i++) {
+        for (int i=0;i<3*T_TOT;i++) {
             free(codeword_vector_state_dependent[i]);
             free(header[i]);
         }
@@ -89,6 +91,14 @@ namespace siphon {
             temp_erasure_vector[i]=source->temp_erasure_vector[i];
             burst_codeword_size_vector[i]=source->burst_codeword_size_vector[i];
             codeword_size_vector[i]=source->codeword_size_vector[i];
+        }
+        for (int i=0;i<3*T_TOT;i++) {
+            for (int j = 0;j<GLOBAL_MAX_SIZE_OF_CODEWORD;j++) {
+                codeword_vector_state_dependent[i][j] = source->codeword_vector_state_dependent[i][j];
+            }
+            for (int j=0;j<T_TOT+1;j++)
+                header[i][j]=source->header[i][j];
+            temp_erasure_vector_state_dependent[i]=source->temp_erasure_vector_state_dependent[i];
         }
         if (decoder_current!=NULL)
             delete decoder_current;
@@ -113,7 +123,7 @@ namespace siphon {
             k2_vector[i]=k2_vector[i+1];
         }
 
-        for (int i=0;i<2*T_TOT-1;i++) {
+        for (int i=0;i<3*T_TOT-1;i++) {
             memcpy(codeword_vector_state_dependent[i], codeword_vector_state_dependent[i + 1], sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
             memcpy(header[i],header[i+1],sizeof(int)*T_TOT);
             temp_erasure_vector_state_dependent[i]=temp_erasure_vector_state_dependent[i+1];
@@ -149,7 +159,7 @@ namespace siphon {
             codeword_size_vector[i] = codeword_size_vector[i+1];
             k2_vector[i]=k2_vector[i+1];
         }
-        for (int i=0;i<2*T_TOT-1;i++) {
+        for (int i=0;i<3*T_TOT-1;i++) {
             memcpy(codeword_vector_state_dependent[i], codeword_vector_state_dependent[i + 1], sizeof(unsigned char)*GLOBAL_MAX_SIZE_OF_CODEWORD);
             memcpy(header[i],header[i+1],sizeof(int)*T_TOT);
             temp_erasure_vector_state_dependent[i]=temp_erasure_vector_state_dependent[i+1];
@@ -175,20 +185,22 @@ namespace siphon {
         unsigned char temp_codeword[n];
         unsigned char temp_encoded_codeword[n2];
         //memset(codeword_new_vector[T_INITIAL],'\000',(300 + 12) * 4 * T_INITIAL);//ELAD maxpayload
-        bool *stam_erasure_vector = (bool *) malloc(sizeof(bool) * T_TOT);
+//        bool *stam_erasure_vector = (bool *) malloc(sizeof(bool) * T_TOT);
+        bool stam_erasure_vector[T_TOT+1];
         *flag = false;
         for (int j = 0; j < number_of_code_blocks; j++) {
             int index = -1;
-            int tempHeader[T_TOT];
+            int tempHeader[T_TOT+1];
 //            for (int symInd = k - N_INITIAL; symInd >= -N_INITIAL_2; symInd--) {
-            for (int symInd = k - 1; symInd >= -N_INITIAL_2; symInd--) {
+//            for (int symInd = k - 1; symInd >= -N_INITIAL_2; symInd--) {
+            for (int symInd = k - 1; symInd >= -(n2-k2); symInd--) {
                 index++;
                 int symbolIndex = -1;
                 for (int i = symInd; i < n; i++) {
                     // Need to add decoding
                     //codeword_new_symbol_wise[10+(j)*n+i] = codeword_vector[n -1 - i][10+(j+1)*n-(n-k) - i];
                     symbolIndex++;
-                    temp_codeword[symbolIndex] = codeword_vector_state_dependent[i+T_TOT-n+1][2 + j * n +
+                    temp_codeword[symbolIndex] = codeword_vector_state_dependent[i+2*T_TOT-n+1][2 + j * n +
                                                                     symbolIndex]; // temp_codeword holds the diagonal (a_0,b_1,c_2...)!!!
                 }
                 if (n - symInd <= k) {// In case the # of sym <=k forward
@@ -196,12 +208,13 @@ namespace siphon {
                     int symbolIndex2 = -1;
                     for (int i=0;i<n;i++)
                         tempHeader[i]=0;
-                    for (int i = symbolIndex - N_INITIAL; i >= 1; i--) {
+//                    for (int i = symbolIndex - N_INITIAL; i >= 1; i--) {
+                        for (int i = symbolIndex - (n-k); i >= 1; i--) {
                         symbolIndex2++;
                         tempHeader[symbolIndex2] = header[n2 - i - 1][symbolIndex2];
                     }
                     for (int kk = index; kk < n - symInd; kk++) {
-                        if (temp_erasure_vector_state_dependent[kk+symInd + T_TOT - n +1] == 0) {
+                        if (temp_erasure_vector_state_dependent[kk+symInd + 2*T_TOT - n +1] == 0) {
                             // check that this symbol was not sent before
                             bool notFoundFlag = true;
                             for (int jj=0;jj<kk;jj++){
@@ -238,7 +251,7 @@ namespace siphon {
                         stam_erasure_vector[aa] = 0;
                     for (int aa = 0; aa < n - symInd; aa++) {
 //                        stam_erasure_vector[aa] = temp_erasure_vector_state_dependent[aa+T_TOT-1-index];
-                        stam_erasure_vector[aa] = temp_erasure_vector_state_dependent[aa+symInd +T_TOT-n+1];
+                        stam_erasure_vector[aa] = temp_erasure_vector_state_dependent[aa+symInd +2*T_TOT-n+1];
                     }
                     for (int aa = n - symInd; aa < n; aa++)
                         stam_erasure_vector[aa] = 1;
@@ -257,7 +270,8 @@ namespace siphon {
                     for (int i=0;i<n2;i++)
                         tempHeader[i]=0;
                     int symbolIndex2 = -1;
-                    for (int i = symbolIndex - N_INITIAL; i >= 1; i--) {
+//                    for (int i = symbolIndex - N_INITIAL; i >= 1; i--) {
+                    for (int i = symbolIndex - (n-k); i >= 1; i--) {
 //                    for (int i = n2 - 1; i >= 0; i--) {
                         symbolIndex2++;
                         tempHeader[symbolIndex2] = header[n2 - i  - 1][symbolIndex2];
@@ -268,7 +282,8 @@ namespace siphon {
 //                    for (int i = 0; i <= symbolIndex; i++) {
                     for (int i = 0; i < n2; i++) {
                         notFoundFlag = true;
-                        for (int kk = 0; kk < symbolIndex-N_INITIAL; kk++) {
+//                        for (int kk = 0; kk < symbolIndex-N_INITIAL; kk++) {
+                        for (int kk = 0; kk < symbolIndex-(n-k); kk++) {
                             if (tempHeader[kk] == i + 1) {
                                 notFoundFlag = false;
                                 break;
@@ -328,7 +343,7 @@ namespace siphon {
             for (int i = 0; i < n2; i++)
                 cout << header[n2 - 1][i];
             cout << "]" << endl;
-            cout << "Elad" << endl;
+//            cout << "Elad" << endl;
         }
 //        cout << "Elad" << endl;
 //        cout << "Elad" << endl;
@@ -395,7 +410,7 @@ namespace siphon {
 //        unsigned char buffer[30000];
         unsigned char temp_codeword[n];
         int number_of_code_blocks=ceil(max_payload/k)+1;
-        bool *stam_erasure_vector=(bool *) malloc(sizeof(bool)*T_INITIAL);
+        bool *stam_erasure_vector=(bool *) malloc(sizeof(bool)*n);
         int tempHeader[T_TOT+1];
         *flag=false;
         for (int j=0;j<number_of_code_blocks;j++) {
@@ -403,10 +418,10 @@ namespace siphon {
                 for (int i = 0; i < n; i++) {
 //                    temp_codeword[n - 1 - i] = codeword_vector_state_dependent[n - 1 - i][4 + (j + 1) * n - 1 -
 //                                                                          i];// code word is [c_0,b_0,a_0,...]
-                    temp_codeword[n - 1 - i] = codeword_vector_state_dependent[2*T_TOT-k_shift - i-1][4 + (j + 1) * n - 1 -
+                    temp_codeword[n - 1 - i] = codeword_vector_state_dependent[3*T_TOT-k_shift - i-1][4 + (j + 1) * n - 1 -
                                                                                           i];// code word is [c_0,b_0,a_0,...]
                     //buffer[(j)*n+i] = codeword_vector[n -1 - i][10+(j+1)*n-(n-k) - i];
-                    tempHeader[n-1-i] = header[2*T_TOT-k_shift - i-1][n-1-i];
+                    tempHeader[n-1-i] = header[3*T_TOT-k_shift - i-1][n-1-i];
                 }
 
                 unsigned char temp_temp_codeword[n];
@@ -443,6 +458,7 @@ namespace siphon {
 //                }
             }
         }
+        free(stam_erasure_vector);
     }
 
     void Decoder_Symbol_Wise::symbol_wise_encode_1(int k,int n,int k2,int n2, bool *flag){
