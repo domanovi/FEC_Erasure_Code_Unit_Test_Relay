@@ -112,6 +112,10 @@ void Application_Layer_Sender::generate_message_and_encode(unsigned char *udp_pa
 //            N=N_ack;
 //        }
 //        else if (N+N2<=T_TOT) {
+        if (DOUBLE_ERAUSRE_NUM==1) {
+            N = std::min(T_TOT, (int)floor(2 * N));
+            N2 = std::min(T_TOT, (int) floor(2 * N2));
+        }
         if (N+N2<=T_TOT) {
             T = T_TOT - N2;
             T2 = T_TOT - N;
@@ -163,38 +167,38 @@ void Application_Layer_Sender::generate_message_and_encode(unsigned char *udp_pa
         }else {//N+N2>T_TOT
             // split proportionally
             if (SPLIT_PROP == 1) {
-            int N_temp = (int) floor((N * T_TOT) / (N + N2));
-            int N2_temp = (int) floor((N2 * T_TOT) / (N + N2));
-            cout << "N1=" << N << "+N2=" << N2 << ">T_TOT=" << T_TOT << " N1new=" << N_temp << ", N2new=" << N2_temp
-                 << endl;
-            N = N_temp;
-            N2 = N2_temp;
-            T = T_TOT - N2;
-            T2 = T_TOT - N;
-            variable_rate_FEC_encoder->N2 = N2;
-            variable_rate_FEC_encoder->B2 = N2;
-        }else{
+                int N_temp = (int) floor((N * T_TOT) / (N + N2));
+                int N2_temp = (int) floor((N2 * T_TOT) / (N + N2));
+                cout << "N1=" << N << "+N2=" << N2 << ">T_TOT=" << T_TOT << " N1new=" << N_temp << ", N2new=" << N2_temp
+                     << endl;
+                N = N_temp;
+                N2 = N2_temp;
+                T = T_TOT - N2;
+                T2 = T_TOT - N;
+                variable_rate_FEC_encoder->N2 = N2;
+                variable_rate_FEC_encoder->B2 = N2;
+            }else{
 //           // give priority to the 2nd hop
 //            N=T_TOT-N2;
 //            T = T_TOT - N2;
 //            variable_rate_FEC_encoder->N2 = N2;
 //            variable_rate_FEC_encoder->B2 = N2;
-            // Stay with current values
-            cout<<"N1="<<N << "+N2=" << N2 <<">T_TOT="<<T_TOT<<endl;
-            N=N_ack;
-            T=T_ack;
+                // Stay with current values
+                cout<<"N1="<<N << "+N2=" << N2 <<">T_TOT="<<T_TOT<<endl;
+                N=N_ack;
+                T=T_ack;
+            }
         }
+
+        variable_rate_FEC_encoder->T2_ack = T2_ack;
+        variable_rate_FEC_encoder->B2_ack = B2_ack;
+        variable_rate_FEC_encoder->N2_ack = N2_ack;
     }
 
-    variable_rate_FEC_encoder->T2_ack = T2_ack;
-    variable_rate_FEC_encoder->B2_ack = B2_ack;
-    variable_rate_FEC_encoder->N2_ack = N2_ack;
-}
-
-if (RELAYING_TYPE>0)// Currently supporting only arbitrary erasures
-message_transmitted->set_parameters(seq_number, T, N, N, max_payload, raw_data);
-else
-message_transmitted->set_parameters(seq_number, T, B, N, max_payload, raw_data);
+    if (RELAYING_TYPE>0)// Currently supporting only arbitrary erasures
+        message_transmitted->set_parameters(seq_number, T, N, N, max_payload, raw_data);
+    else
+        message_transmitted->set_parameters(seq_number, T, B, N, max_payload, raw_data);
 //    if (RELAYING_TYPE==2 && adaptive_coding==1) {
 //        variable_rate_FEC_encoder->T2_ack = T2_ack;
 //        variable_rate_FEC_encoder->B2_ack = B2_ack;
@@ -208,64 +212,70 @@ message_transmitted->set_parameters(seq_number, T, B, N, max_payload, raw_data);
 //    }
 
 
-variable_rate_FEC_encoder->encode(message_transmitted, T_ack, B_ack, N_ack,flag);
+    variable_rate_FEC_encoder->encode(message_transmitted, T_ack, B_ack, N_ack,flag);
 
 //   for (int i = 0; i < message_transmitted->size; i++)
 //  codeword[8 + i] = (message_transmitted->buffer)[i];
 
-if (RELAYING_TYPE==2 || RELAYING_TYPE==3){
-memcpy(codeword + 12, message_transmitted->buffer, message_transmitted->size);
+    if (RELAYING_TYPE==2 || RELAYING_TYPE==3){
+        memcpy(codeword + 16, message_transmitted->buffer, message_transmitted->size);
 
-codeword[11] = (unsigned char) (message_transmitted->counter_for_start_and_end);
-codeword[10] = (unsigned char) (variable_rate_FEC_encoder->N2);
-codeword[9] = (unsigned char) (variable_rate_FEC_encoder->B2);
-codeword[8] = (unsigned char) (variable_rate_FEC_encoder->T2);
+        codeword[15] = (unsigned char) (variable_rate_FEC_encoder->N2_old);
+        codeword[14] = (unsigned char) (variable_rate_FEC_encoder->T2_old);
 
-codeword[7] = (unsigned char) (message_transmitted->counter_for_start_and_end);
-codeword[6] = (unsigned char) (message_transmitted->N);
-codeword[5] = (unsigned char) (message_transmitted->B);
-codeword[4] = (unsigned char) (message_transmitted->T);
+        codeword[13] = (unsigned char) (variable_rate_FEC_encoder->N_old);
+        codeword[12] = (unsigned char) (variable_rate_FEC_encoder->T_old);
 
-codeword[3] = (unsigned char) (seq_number % 256);
-codeword[2] = (unsigned char) ((seq_number / 256) % 256);
-codeword[1] = (unsigned char) ((seq_number / 256 / 256) % 256);
-codeword[0] = (unsigned char) ((seq_number / 256 / 256 / 256) % 256);
-if (DEBUG_COMM==1) {
-cout << "Sending from source to relay (in codeword)" << endl;
-printMatrix(codeword, 1, 12);
-}
+        codeword[11] = (unsigned char) (message_transmitted->counter_for_start_and_end);
+        codeword[10] = (unsigned char) (variable_rate_FEC_encoder->N2);
+        codeword[9] = (unsigned char) (variable_rate_FEC_encoder->B2);
+        codeword[8] = (unsigned char) (variable_rate_FEC_encoder->T2);
 
-// send(8 + message_transmitted->size, codeword, udp_codeword, udp_codeword_size);
-if (udp_parameters == nullptr)
-connection_manager->UDPsend(12 + message_transmitted->size, codeword);
-else {
-*udp_codeword_size = 12 + message_transmitted->size;
-memcpy(udp_codeword, codeword, size_t(*udp_codeword_size));
-}
-}else {
+        codeword[7] = (unsigned char) (message_transmitted->counter_for_start_and_end);
+        codeword[6] = (unsigned char) (message_transmitted->N);
+        codeword[5] = (unsigned char) (message_transmitted->B);
+        codeword[4] = (unsigned char) (message_transmitted->T);
 
-memcpy(codeword + 8, message_transmitted->buffer, message_transmitted->size);
-
-codeword[7] = (unsigned char) (message_transmitted->counter_for_start_and_end);
-codeword[6] = (unsigned char) (message_transmitted->N);
-codeword[5] = (unsigned char) (message_transmitted->B);
-codeword[4] = (unsigned char) (message_transmitted->T);
-
-codeword[3] = (unsigned char) (seq_number % 256);
-codeword[2] = (unsigned char) ((seq_number / 256) % 256);
-codeword[1] = (unsigned char) ((seq_number / 256 / 256) % 256);
-codeword[0] = (unsigned char) ((seq_number / 256 / 256 / 256) % 256);
+        codeword[3] = (unsigned char) (seq_number % 256);
+        codeword[2] = (unsigned char) ((seq_number / 256) % 256);
+        codeword[1] = (unsigned char) ((seq_number / 256 / 256) % 256);
+        codeword[0] = (unsigned char) ((seq_number / 256 / 256 / 256) % 256);
+        if (DEBUG_COMM==1) {
+            cout << "Sending from source to relay (in codeword)" << endl;
+            printMatrix(codeword, 1, 12);
+        }
 
 // send(8 + message_transmitted->size, codeword, udp_codeword, udp_codeword_size);
-if (udp_parameters == nullptr)
-connection_manager->UDPsend(8 + message_transmitted->size, codeword);
-else {
-*udp_codeword_size = 8 + message_transmitted->size;//ELAD to change 300
-memcpy(udp_codeword, codeword, size_t(*udp_codeword_size));
-}
-}
+        if (udp_parameters == nullptr)
+            connection_manager->UDPsend(12 + message_transmitted->size, codeword);
+        else {
+            *udp_codeword_size = 12 + message_transmitted->size;
+            memcpy(udp_codeword, codeword, size_t(*udp_codeword_size));
+        }
+    }else {
 
-seq_number++;
+        memcpy(codeword + 8, message_transmitted->buffer, message_transmitted->size);
+
+        codeword[7] = (unsigned char) (message_transmitted->counter_for_start_and_end);
+        codeword[6] = (unsigned char) (message_transmitted->N);
+        codeword[5] = (unsigned char) (message_transmitted->B);
+        codeword[4] = (unsigned char) (message_transmitted->T);
+
+        codeword[3] = (unsigned char) (seq_number % 256);
+        codeword[2] = (unsigned char) ((seq_number / 256) % 256);
+        codeword[1] = (unsigned char) ((seq_number / 256 / 256) % 256);
+        codeword[0] = (unsigned char) ((seq_number / 256 / 256 / 256) % 256);
+
+// send(8 + message_transmitted->size, codeword, udp_codeword, udp_codeword_size);
+        if (udp_parameters == nullptr)
+            connection_manager->UDPsend(8 + message_transmitted->size, codeword);
+        else {
+            *udp_codeword_size = 8 + message_transmitted->size;//ELAD to change 300
+            memcpy(udp_codeword, codeword, size_t(*udp_codeword_size));
+        }
+    }
+
+    seq_number++;
 
 }
 

@@ -112,6 +112,8 @@ namespace siphon {
         float debug_rate_second_hop_curr;
         int debug_rate_second_hop_num_packets;
 
+        void decode_erased_packet(FEC_Message *message);
+
     private:
 
         int T{}, B{}, N{}, max_payload;
@@ -175,6 +177,7 @@ namespace siphon {
 
         void symbol_wise_decode(int k, int n, unsigned char *generator, int temp_seq, size_t *loss_counter_,
                                 size_t *final_loss_counter_);
+
     };
 
 }

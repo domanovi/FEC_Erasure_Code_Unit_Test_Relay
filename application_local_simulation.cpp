@@ -42,11 +42,11 @@ using std::cerr;
 using std::endl;
 using namespace std::chrono;
 
-int RELAYING_TYPE;
+//int RELAYING_TYPE;
 
 int main(int argc, const char *argv[]) {
 
-    for (RELAYING_TYPE=1;RELAYING_TYPE<=3;RELAYING_TYPE++) {
+//    for (RELAYING_TYPE=1;RELAYING_TYPE<=1;RELAYING_TYPE++) {
         if (RELAYING_TYPE==1)
             remove("packet_loss_MWDF.txt" );
         else if (RELAYING_TYPE==2)
@@ -180,7 +180,7 @@ int main(int argc, const char *argv[]) {
 //    for (int i=0;i<361000;i++) {
 //        erasure_simulator.erasure_seq[i] = '\000';
 //    }
-//    erasure_simulator.erasure_seq[1] = '\001';
+//    erasure_simulator.erasure_seq[4] = '\001';
 //    erasure_simulator.erasure_seq[2] = '\001';
 //    erasure_simulator.erasure_seq[3] = '\001';
 //    erasure_simulator.erasure_seq[4] = '\001';
@@ -271,7 +271,7 @@ int main(int argc, const char *argv[]) {
 
                 seq_number = application_layer_relay_receiver->receive_message_and_decode(udp_parameters, nullptr,buffer,
                                                                                           &buffer_size,
-                                                                                          &erasure_simulator);
+                                                                                          &erasure_simulator,false);
             } else if (relaying_type == 1) {//Message-wise decode and forward
                 // 1. Currently there is no signalling from the relay to the destination about erased packets at the relay.
                 // This means that the destination may try to recover erased packets (resulting with false recovery)
@@ -287,9 +287,21 @@ int main(int argc, const char *argv[]) {
 //                for (int j = 0; j < 6; j++)
 //                    application_layer_relay_receiver->response_from_dest_buffer[j] = udp_parameters2[j];
 
-                seq_number = application_layer_relay_receiver->receive_message_and_decode(udp_parameters,udp_parameters2, buffer,
-                                                                                          &buffer_size,
-                                                                                          &erasure_simulator);
+                if (FLAG_FOR_CONSTANT_TRANS && (i < NUMBER_OF_ITERATIONS + T_INITIAL) &&
+                    (erasure_simulator.is_erasure(i) == true)) {//artificial erasure
+                    seq_number = application_layer_relay_receiver->receive_message_and_decode(udp_parameters,
+                                                                                              udp_parameters2,
+                                                                                              buffer,
+                                                                                              &buffer_size,
+                                                                                              &erasure_simulator,
+                                                                                              true);
+                }else {
+                    seq_number = application_layer_relay_receiver->receive_message_and_decode(udp_parameters,
+                                                                                              udp_parameters2, buffer,
+                                                                                              &buffer_size,
+                                                                                              &erasure_simulator,
+                                                                                              false);
+                }
                 if (i >= T) {
                     if (seq_number > -1) {
                         int numOfMessagesStored = application_layer_relay_receiver->fec_decoder->message_vector_to_transmit_stored_index;
@@ -304,7 +316,7 @@ int main(int argc, const char *argv[]) {
                             application_layer_destination_receiver->receive_message_and_decode(
                                     udp_parameters2, nullptr,buffer2,
                                     &buffer_size2,
-                                    &erasure_simulator2);
+                                    &erasure_simulator2,false);
                         }
                     }
                 }
@@ -391,7 +403,8 @@ int main(int argc, const char *argv[]) {
             } else if (relaying_type == 2 || relaying_type == 3) { // Symbol-wise decode and forward
                 application_layer_sender.generate_message_and_encode(udp_parameters, buffer,
                                                                      &buffer_size); //udp_codeword is
-
+                float R1=(float)((int)buffer[4]-(int)buffer[6]+1)/((int)buffer[4]+1);
+                float R2=(float)((int)buffer[8]-(int)buffer[10]+1)/((int)buffer[8]+1);
 
 //            if (k2>n2)
 //                k2=n2;
@@ -791,6 +804,6 @@ int main(int argc, const char *argv[]) {
         free(udp_parameters);
         delete application_layer_relay_receiver;
         delete application_layer_destination_receiver;
-    }// for RELAYING_TYPE
+//    }// for RELAYING_TYPE
     return 0;
 }

@@ -13,6 +13,7 @@ erasure_type_value, bool adaptive_mode_MDS_value, int flag) {
     erasure_type = erasure_type_value;
 
     temp_seq=-1;
+    last_recieved_seq=-1;
 
     estimator = new siphon::Parameter_Estimator(T_TOT, adaptive_mode_MDS_value);
     background_estimator = new siphon::Parameter_Estimator(T_TOT, adaptive_mode_MDS_value);
@@ -80,7 +81,7 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_encode(unsigned 
 
     // Perform estimation
     fec_message->set_parameters(temp_seq, int(codeword[4]), int(codeword[5]), int(codeword[6]),
-                                temp_size - 12, codeword + 12);
+                                temp_size - 16, codeword + 16);
     fec_message->counter_for_start_and_end = int(codeword[7]);
 
     estimator->estimate(fec_message);
@@ -101,18 +102,30 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_encode(unsigned 
     int B_value=int(codeword[5]);
     int N_value=int(codeword[6]);
 
+//    int T_value_old = int(codeword[12]);
+//    int N_value_old = int(codeword[13]);
+
     int T_value_2=int(codeword[8]);
     int B_value_2=int(codeword[9]);
     int N_value_2=int(codeword[10]);
+
+//    int T_value_2_old = int(codeword[14]);
+//    int N_value_2_old = int(codeword[15]);
 
 
 
     int k=T_value-N_value+1;
     int n=T_value+1;
+//    int k_old=T_value_old-N_value_old+1;
+//    int n_old=T_value_old+1;
+//    int k2_2=T_value_2-N_value_2+1;
+//    int n2_2=T_value_2+1;
+//    int k2_2_old=T_value_2_old-N_value_2_old+1;
+//    int n2_2_old=T_value_2_old+1;
 //    int k2_new;
 //    int n2_new;
 
-    if (T_s_r!=T_value || N_s_r!=N_value){//any change in T1,N1->change in T2,N2
+    if (T_s_r!=T_value || N_s_r!=N_value){//any change in T1,N1->change T2,N2
         T_s_r=T_value;
         N_s_r=N_value;
         k2_new = T_value_2 - N_value_2 + 1;
@@ -293,7 +306,7 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_decode(unsigned 
 
 int Application_Layer_Receiver::receive_message_and_decode(unsigned char *udp_parameters,unsigned char *udp_parameters2, unsigned char *udp_codeword,
                                                            int *udp_codeword_size, siphon::Erasure_Simulator
-                                                           *erasure_simulator) {
+                                                           *erasure_simulator,bool is_erasure) {
 
 //receive udp_codeword using a blocking function and obtain udp_codeword and udp_codeword_size
     int temp_size;
@@ -310,10 +323,21 @@ int Application_Layer_Receiver::receive_message_and_decode(unsigned char *udp_pa
             (codeword[0]);
     int second_seg_seq;
 
-    if (erasure_type != 0) {
-        if ((temp_seq < NUMBER_OF_ITERATIONS + T_INITIAL) &&
-            ((erasure_simulator->is_erasure(temp_seq) == true))) {//artificial erasure
+    if (is_erasure){
+        temp_seq = last_recieved_seq + 1;
+        fec_message->set_parameters(temp_seq, 0, 0, 0, 0, nullptr);
+        fec_decoder->decode_erased_packet(fec_message);
+        last_recieved_seq = temp_seq;
+        return temp_seq;
+    }
 
+
+    if (erasure_type != 0) {
+        int temp_seq_test=temp_seq;
+        if (RELAYING_TYPE==1 && receiver_index==1)
+            temp_seq_test=temp_seq_test+T_INITIAL;
+        if ((temp_seq_test < NUMBER_OF_ITERATIONS + T_INITIAL) &&
+            ((erasure_simulator->is_erasure(temp_seq_test) == true))) {//artificial erasure2
             return -1;
         }
     }
@@ -342,7 +366,7 @@ int Application_Layer_Receiver::receive_message_and_decode(unsigned char *udp_pa
                                     temp_size - 12, codeword + 12);
     }
 
-     if ((temp_seq + 1) >flag_for_estimation_cycle*ESTIMATION_WINDOW_SIZE/ESTIMATION_WINDOW_SIZE_REDUCTION_FACTOR){
+    if ((temp_seq + 1) >flag_for_estimation_cycle*ESTIMATION_WINDOW_SIZE/ESTIMATION_WINDOW_SIZE_REDUCTION_FACTOR){
         if (RELAYING_TYPE==0 || receiver_index==0)
             cout << "Old (T,B,N) at relay receiver=" << "(" << estimator->T << "," << estimator->B_current << "," << estimator->N_current << ")" << endl;
         else
@@ -423,7 +447,7 @@ int Application_Layer_Receiver::receive_message_and_decode(unsigned char *udp_pa
             }
         }
     }
-
+    last_recieved_seq=received_seq;
     return received_seq;
 }
 

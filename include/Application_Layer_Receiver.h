@@ -34,13 +34,15 @@ private:
     int temp_seq;
     int k2_new,n2_new;
 
+    int last_recieved_seq;
+
 public:
     Application_Layer_Receiver(const char *Tx, const char *Rx, int max_payload, int erasure_type_value, bool
     adaptive_mode_MDS_value, int flag);
     ~Application_Layer_Receiver();
 
     int receive_message_and_decode(unsigned char *udp_parameters, unsigned char *udp_parameters2,unsigned char *udp_codeword, int
-  *udp_codeword_size, siphon::Erasure_Simulator *erasure_simulator);          //to be called recursively at the decoder
+  *udp_codeword_size, siphon::Erasure_Simulator *erasure_simulator,bool is_erasure);          //to be called recursively at the decoder
 
     int receive_message_and_symbol_wise_encode(unsigned char *udp_parameters,unsigned char *udp_parameters2, unsigned char *udp_codeword,
                                                int *udp_codeword_size, siphon::Erasure_Simulator

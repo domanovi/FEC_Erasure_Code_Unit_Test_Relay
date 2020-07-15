@@ -174,6 +174,12 @@ namespace siphon {
         free(raw_data);
         delete payload_simulator;
 
+        delete decoder_Symbol_Wise;
+        delete decoder_Symbol_Backup;
+
+        if (decoder_Symbol_Wise_new != NULL)
+            delete decoder_Symbol_Wise_new;
+
     }
 
     void Variable_Rate_FEC_Decoder::receive_message_and_state_dependent_symbol_wise_encode(FEC_Message *message,int n,int k,int n2,
@@ -1454,6 +1460,258 @@ namespace siphon {
         display_fec_statistics(received_seq);
 
         latest_seq = received_seq + 1;
+    }
+
+    void Variable_Rate_FEC_Decoder::decode_erased_packet(FEC_Message *message) {
+
+        if (seq_start == -1) //initialize the decoder upon receiving the first packet
+            initialize_decoder(message);
+
+        int received_seq = message->seq_number;
+        int received_seq_2;
+
+        if (received_seq < latest_seq) { //if an out-of-order sequence is received, just discard it
+            //cout << "\033[1;31mOut-of-sequence packet: #" << received_seq << "\033[0m" << endl;
+            return;
+        }
+
+//        if ((T != message->T) || (B != message->B) || (N != message->N)) { //record when the double_coding begins
+//            seq_start_double_coding = received_seq - message->counter_for_start_and_end;
+//            cout<<"Start double coding at the destination"<<endl;
+//        }
+
+        // first decode the old message using the old decoder
+
+//        unsigned char *codeword_received_with_header = message->buffer;
+//        unsigned char *codeword_received = codeword_received_with_header + 2;
+//        int size_received = int(codeword_received_with_header[0]) * 256 + int(codeword_received_with_header[1]);
+//        unsigned char *codeword_received_transition = codeword_received + size_received;
+//        int size_received_transition = message->size - 2 - size_received;
+
+        if (receiver_index==0) {
+            if (received_seq - latest_seq > 0) {
+                if (received_seq - latest_seq <= erasure_length_cap) {
+                    erasure_counter[received_seq - latest_seq]++;
+                    erasure_counter_total[received_seq - latest_seq]++;
+                } else {
+                    erasure_counter[0]++;
+                    erasure_counter_total[0]++;
+                }
+            }
+        }else{
+            received_seq_2 = message->seq_number2;
+            if (received_seq_2 - latest_seq_2 > 0) {
+                if (received_seq_2 - latest_seq_2 <= erasure_length_cap) {
+                    erasure_counter[received_seq_2 - latest_seq_2]++;
+                    erasure_counter_total[received_seq_2 - latest_seq_2]++;
+                } else {
+                    erasure_counter[0]++;
+                    erasure_counter_total[0]++;
+                }
+            }
+        }
+
+        unsigned char zero = 0x0;
+        unsigned char one = 0x1;
+
+        for (int i=0;i<T_INITIAL;i++) {
+            recovered_message_vector[i]->buffer = NULL;
+        }
+        for (int i=0;i<MAX_BURST_SIZE_MWDF;i++) {
+            burst_erased_message_vector[i]->buffer = NULL;
+        }
+        recovered_message->buffer = NULL;
+        message_old_encoder->buffer = NULL;
+
+        int index=-1;
+        int burst_index=-1;
+        message_vector_to_transmit_stored_index=-1;
+        int seq=received_seq;
+//        for (int seq = latest_seq; seq < received_seq; seq++) {
+            UDP_loss_counter_++;
+            final_UDP_loss_counter_++;
+            if (RELAYING_TYPE>0 && receiver_index==0){
+                DEBUG_MSG("\033[1;31mMissing packet at relay: #" << seq << "\033[0m" << endl);
+            }else{
+                DEBUG_MSG("\033[1;31mMissing packet at dest: #" << seq << "\033[0m" << endl);
+            }
+//            if (receiver_index==1) {
+//                loss_counter_two_seg_++;
+//                final_loss_counter_two_seg_++;
+//            }
+            if (erasure_recorder == 1)
+                file_write_erasures.write((char *) &one, 1);
+
+            display_udp_statistics(seq);
+
+            if ((seq > seq_end_double_coding) && (double_coding_flag == 1)) {
+                double_coding_flag = 0;
+                cout << "Stopped double coding at the destination" << endl;
+            }
+
+            if (seq == seq_start_double_coding) {
+                seq_end_double_coding = seq_start_double_coding + T - 1;
+                update_decoder(message);
+                double_coding_flag = 1;
+            }
+
+            if (double_coding_flag == 0) {
+
+                decode_for_erased_codeword(recovered_message, seq,
+                                           decoder_current); //message is for output by calling onDecodedMessage()
+
+                if (seq - T >= seq_start)
+                    onDecodedMessage(recovered_message);
+                if (recovered_message->buffer!=NULL) {
+                    index++;
+                    unsigned char *buffer_data = memory_object->allocate_memory(recovered_message->size);
+                    memcpy(buffer_data, recovered_message->buffer, size_t(recovered_message->size));
+                    recovered_message_vector[index]->buffer = buffer_data;
+                    recovered_message_vector[index]->seq_number = recovered_message->seq_number;
+                    message_vector_to_transmit_stored_index++;
+                    memcpy(message_vector_to_transmit_stored[message_vector_to_transmit_stored_index],
+                           buffer_data, size_t(recovered_message->size));
+                    message_vector_to_transmit_stored_seq[message_vector_to_transmit_stored_index]=recovered_message->seq_number;
+//                }
+                }else if (seq>=T && index==T-1){
+                    burst_index++;
+                    unsigned char *buffer_data = memory_object->allocate_memory(max_payload);
+                    memset(buffer_data, '\000', max_payload);
+                    burst_erased_message_vector[burst_index]->buffer=buffer_data;
+                    burst_erased_message_vector[burst_index]->seq_number=recovered_message->seq_number;
+                    message_vector_to_transmit_stored_index++;
+                    memcpy(message_vector_to_transmit_stored[message_vector_to_transmit_stored_index],
+                           buffer_data, max_payload);
+                    message_vector_to_transmit_stored_seq[message_vector_to_transmit_stored_index]=recovered_message->seq_number;
+                }
+
+            } else {
+                int tempIndex=index+1;
+                if (decoder_old != NULL) {
+                    decode_for_erased_codeword(recovered_message, seq, decoder_old);
+
+                    if (seq - T >= seq_start) {
+                        onDecodedMessage(recovered_message);
+                        if (recovered_message->buffer!=NULL){
+                            unsigned char *buffer_data = memory_object->allocate_memory(recovered_message->size);
+                            memcpy(buffer_data, recovered_message->buffer, size_t(recovered_message->size));
+                            recovered_message_vector[tempIndex]->buffer=buffer_data;
+                            recovered_message_vector[tempIndex]->seq_number=recovered_message->seq_number;
+                            index=tempIndex;
+                            message_vector_to_transmit_stored_index++;
+                            memcpy(message_vector_to_transmit_stored[message_vector_to_transmit_stored_index],
+                                   buffer_data, size_t(recovered_message->size));
+                            message_vector_to_transmit_stored_seq[message_vector_to_transmit_stored_index]=recovered_message->seq_number;
+                        }else if (seq>=T && tempIndex==T-1){
+                            burst_index++;
+                            unsigned char *buffer_data = memory_object->allocate_memory(max_payload);
+                            memset(buffer_data, '\000', max_payload);
+                            burst_erased_message_vector[burst_index]->buffer=buffer_data;
+                            burst_erased_message_vector[burst_index]->seq_number=recovered_message->seq_number;
+                            message_vector_to_transmit_stored_index++;
+                            memcpy(message_vector_to_transmit_stored[message_vector_to_transmit_stored_index],
+                                   buffer_data, max_payload);
+                            message_vector_to_transmit_stored_seq[message_vector_to_transmit_stored_index]=recovered_message->seq_number;
+                        }
+                    }
+                }
+                // Elad - decoding with new decoder
+                decode_for_erased_codeword(recovered_message, seq, decoder_current);
+                if (recovered_message->buffer!=NULL){ // ELAD - very delicate... if both decoders managed to recover???
+                    unsigned char *buffer_data = memory_object->allocate_memory(recovered_message->size);
+                    memcpy(buffer_data, recovered_message->buffer, size_t(recovered_message->size));
+                    recovered_message_vector[tempIndex]->buffer=buffer_data;
+                    recovered_message_vector[tempIndex]->seq_number=recovered_message->seq_number;
+                    index=tempIndex;
+                    message_vector_to_transmit_stored_index++;
+                    memcpy(message_vector_to_transmit_stored[message_vector_to_transmit_stored_index],
+                           buffer_data, size_t(recovered_message->size));
+                    message_vector_to_transmit_stored_seq[message_vector_to_transmit_stored_index]=recovered_message->seq_number;
+                }else if (seq>=T && tempIndex==T-1){
+                    burst_index++;
+                    unsigned char *buffer_data = memory_object->allocate_memory(max_payload);
+                    memset(buffer_data, '\000', max_payload);
+                    burst_erased_message_vector[burst_index]->buffer=buffer_data;
+                    burst_erased_message_vector[burst_index]->seq_number=recovered_message->seq_number;
+                    message_vector_to_transmit_stored_index++;
+                    memcpy(message_vector_to_transmit_stored[message_vector_to_transmit_stored_index],
+                           buffer_data, max_payload);
+                    message_vector_to_transmit_stored_seq[message_vector_to_transmit_stored_index]=recovered_message->seq_number;
+                }
+            }
+
+//        }
+//
+//        if (erasure_recorder == 1)
+//            file_write_erasures.write((char *) &zero, 1);
+//
+//        if ((received_seq > seq_end_double_coding) && (double_coding_flag == 1)) {
+//            double_coding_flag = 0;
+//            cout<<"Stopped double coding at the destination"<<endl;
+//        }
+//
+//        if (received_seq == seq_start_double_coding) {
+//            seq_end_double_coding = seq_start_double_coding + T - 1;
+//            update_decoder(message);
+//            double_coding_flag = 1;
+//        }
+//
+//        display_udp_statistics(received_seq);
+//
+//        if (double_coding_flag == 0) {
+//
+//            decode_for_current_codeword(message, codeword_received, size_received, received_seq,
+//                                        decoder_current); //message is for output by calling onDecodedMessage()
+//
+//            if (received_seq - T >= seq_start)
+//                onDecodedMessage(message);
+//
+//            if (message->buffer != NULL) {
+//                message_vector_to_transmit_stored_index++;
+//                memcpy(message_vector_to_transmit_stored[message_vector_to_transmit_stored_index],
+//                       message->buffer, size_t(message->size));
+//                message_vector_to_transmit_stored_seq[message_vector_to_transmit_stored_index] = message->seq_number;
+//            }
+//
+//        } else {
+//            if (decoder_old != NULL) {
+//
+//                decode_for_current_codeword(message, codeword_received_transition,
+//                                            size_received_transition, received_seq, decoder_old);
+//
+//                if (received_seq - T >= seq_start) {
+//                    onDecodedMessage(message);
+//                    if (message->buffer != NULL) {
+//                        message_old_encoder->buffer = message->buffer;
+//                        message_vector_to_transmit_stored_index++;
+//                        memcpy(message_vector_to_transmit_stored[message_vector_to_transmit_stored_index],
+//                               message->buffer, size_t(message->size));
+//                        message_vector_to_transmit_stored_seq[message_vector_to_transmit_stored_index] = message->seq_number;
+//                    }
+//                }
+//            }
+//
+//            decode_for_current_codeword(message, codeword_received, size_received, received_seq,
+//                                        decoder_current);
+//            if (message->buffer != NULL) {
+//                message_old_encoder->buffer = message->buffer;
+//                message_vector_to_transmit_stored_index++;
+//                memcpy(message_vector_to_transmit_stored[message_vector_to_transmit_stored_index],
+//                       message->buffer, size_t(message->size));
+//                message_vector_to_transmit_stored_seq[message_vector_to_transmit_stored_index] = message->seq_number;
+//            }
+//        }
+
+        latest_seq = received_seq + 1;    //the next expected sequence number = latest_seq
+        if (receiver_index==1)
+            latest_seq_2 = received_seq_2 + 1;
+//        if (message->buffer != NULL) {
+//            message_vector_to_transmit_stored_index++;
+//            memcpy(message_vector_to_transmit_stored[message_vector_to_transmit_stored_index],
+//                   message->buffer, size_t(message->size));
+//            message_vector_to_transmit_stored_seq[message_vector_to_transmit_stored_index] = message->seq_number;
+//        }
+        return;
     }
 
     void Variable_Rate_FEC_Decoder::decode(FEC_Message *message) {

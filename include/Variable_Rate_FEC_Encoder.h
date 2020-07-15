@@ -44,11 +44,11 @@ namespace siphon {
         int debug_rate_first_hop_num_packets;
         float debug_rate_first_hop,debug_rate_first_hop_curr;
 
-
-    private:
-
         int B_old, N_old,T_old;
         int B2_old,N2_old,T2_old;
+
+
+    private:
 
         int number_of_encoded_total,counter_encoded, final_number_of_encoded_total, final_counter_encoded;
 

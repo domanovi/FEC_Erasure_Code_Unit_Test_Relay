@@ -410,7 +410,8 @@ namespace siphon {
 //        unsigned char buffer[30000];
         unsigned char temp_codeword[n];
         int number_of_code_blocks=ceil(max_payload/k)+1;
-        bool *stam_erasure_vector=(bool *) malloc(sizeof(bool)*n);
+//        bool *stam_erasure_vector=(bool *) malloc(sizeof(bool)*n);
+        bool stam_erasure_vector[n];
         int tempHeader[T_TOT+1];
         *flag=false;
         for (int j=0;j<number_of_code_blocks;j++) {
@@ -428,7 +429,7 @@ namespace siphon {
                 for (int i = 0; i < n; i++)
                     temp_temp_codeword[i]='\000';
                 for (int i = 0; i < n; i++) {
-                    if (tempHeader[i]!=0)
+                    if (tempHeader[i]!=0 && tempHeader[i]<n+1)
                         temp_temp_codeword[tempHeader[i] - 1] = temp_codeword[i];
                 }
                 for (int i = 0; i < n; i++)
@@ -458,7 +459,7 @@ namespace siphon {
 //                }
             }
         }
-        free(stam_erasure_vector);
+//        free(stam_erasure_vector);
     }
 
     void Decoder_Symbol_Wise::symbol_wise_encode_1(int k,int n,int k2,int n2, bool *flag){

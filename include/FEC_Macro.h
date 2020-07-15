@@ -20,22 +20,26 @@
 //#define B_INITIAL -1
 //#define N_INITIAL -1
 
-//#define RELAYING_TYPE 3
-extern int RELAYING_TYPE;
+#define RELAYING_TYPE 1
+//extern int RELAYING_TYPE;
 // if RELAYING_TYPE=0 P2P
 // if RELAYING_TYPE=1 message-wise decode and forward
 // if RELAYING_TYPE=2 symbol-wise decode and forward
 // if RELAYING_TYPE=3 SD-symbol-wise decode and forward
 
+#define FLAG_FOR_CONSTANT_TRANS 1
+
 #define T_TOT 6 // T_TOT needs to be >= T_INITAL+T_INTIAL_2, if RELAYING_TYPE=1 not used, if RELAYING_TYPE=2 ignoring T_INITIAL && N_INITIAL_2
-#define T_INITIAL 3
+#define T_INITIAL 4
 #define B_INITIAL -1
-#define N_INITIAL -1
+#define N_INITIAL 1
 
-#define T_INITIAL_2 3
+#define T_INITIAL_2 4
 #define B_INITIAL_2 2
-#define N_INITIAL_2 -1
+#define N_INITIAL_2 1
 
+
+#define DOUBLE_ERAUSRE_NUM 1
 #define MIN_T2 0
 #define MIN_N2 0
 #define SPLIT_PROP 0
@@ -65,7 +69,7 @@ extern int RELAYING_TYPE;
 
 /**************** The following is used for arbitrary erasures ******************/
 
-#define SEED_ARTIFICIAL_ERASURE 1       //the seed for generating artificial erasures
+#define SEED_ARTIFICIAL_ERASURE 0       //the seed for generating artificial erasures
 
 //#define EPSILON 0.001       //probability of random erasures
 #define EPSILON 0.1       //probability of random erasures
