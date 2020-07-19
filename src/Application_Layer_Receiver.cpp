@@ -326,7 +326,9 @@ int Application_Layer_Receiver::receive_message_and_decode(unsigned char *udp_pa
     if (is_erasure){
         temp_seq = last_recieved_seq + 1;
         fec_message->set_parameters(temp_seq, 0, 0, 0, 0, nullptr);
+        int temp_latest_seq=fec_decoder->latest_seq;
         fec_decoder->decode_erased_packet(fec_message);
+        fec_decoder->latest_seq=temp_latest_seq;
         last_recieved_seq = temp_seq;
         return temp_seq;
     }

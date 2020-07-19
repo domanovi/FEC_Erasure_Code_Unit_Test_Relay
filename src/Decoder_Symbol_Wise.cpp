@@ -78,6 +78,9 @@ namespace siphon {
         }
         free(temp_erasure_vector_state_dependent);
         free(temp_erasure_vector);
+
+        if (decoder_current!=NULL)
+            delete decoder_current;
     }
 
     void Decoder_Symbol_Wise::copy_elements(Decoder_Symbol_Wise *source,bool encode){

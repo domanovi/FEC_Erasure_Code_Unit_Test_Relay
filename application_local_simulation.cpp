@@ -47,12 +47,18 @@ using namespace std::chrono;
 int main(int argc, const char *argv[]) {
 
 //    for (RELAYING_TYPE=1;RELAYING_TYPE<=1;RELAYING_TYPE++) {
-        if (RELAYING_TYPE==1)
-            remove("packet_loss_MWDF.txt" );
-        else if (RELAYING_TYPE==2)
-            remove("packet_loss_SWDF.txt" );
-        else if (RELAYING_TYPE==3)
-            remove("packet_loss_SD_SWDF.txt" );
+        if (RELAYING_TYPE==1) {
+            remove("packet_loss_MWDF.txt");
+            remove("affected MWDF.txt");
+        }
+        else if (RELAYING_TYPE==2) {
+            remove("packet_loss_SWDF.txt");
+            remove("affected SWDF.txt");
+        }
+        else if (RELAYING_TYPE==3) {
+            remove("packet_loss_SD_SWDF.txt");
+            remove("affected SD-SWDF.txt");
+        }
         int B = N_INITIAL;                       //if B=-1 and N=-1, then it is adaptive; otherwise, it is non-adaptive
         int N = N_INITIAL;
 
@@ -149,10 +155,10 @@ int main(int argc, const char *argv[]) {
             default:
                 erasure_generator.generate_periodic(stream_duration + T, T, 0, 0, "erasure.bin");
         }
-        erasure_generator.generate_three_sections_IID(30000, 0.1, 40000, 0, stream_duration - 30000 - 40000 + T + T2,
-                                                      0.1, "erasure.bin");
-//    erasure_generator.generate_three_sections_IID(4000,0,2000,0.33,stream_duration-4000-2000 + T+T2,0,"erasure.bin");
-        erasure_generator2.generate_IID(stream_duration + T + T2, 0.1, "erasure2.bin", 2);
+//        erasure_generator.generate_three_sections_IID(30000, 0.1, 40000, 0, stream_duration - 30000 - 40000 + T + T2,
+//                                                      0.1, "erasure.bin");
+////    erasure_generator.generate_three_sections_IID(4000,0,2000,0.33,stream_duration-4000-2000 + T+T2,0,"erasure.bin");
+//        erasure_generator2.generate_IID(stream_duration + T + T2, 0.1, "erasure2.bin", 2);
 
 
         siphon::Erasure_Simulator erasure_simulator("../Experimental_Logs/erasure40.bin");
@@ -165,14 +171,13 @@ int main(int argc, const char *argv[]) {
 
 //    erasure_simulator.erasure_seq[4]='\001';
 //    erasure_simulator.erasure_seq[5]='\001';
-    for (int i=360000;i<erasure_simulator2.number_of_erasure;i++) {
-        erasure_simulator2.erasure_seq[i] = '\000';
-    }
+        for (int i=360000;i<erasure_simulator2.number_of_erasure;i++) {
+            erasure_simulator2.erasure_seq[i] = '\000';
+        }
 //
-    for (int i=360000;i<erasure_simulator.number_of_erasure;i++) {
-        erasure_simulator.erasure_seq[i] = '\000';
-    }
-
+        for (int i=360000;i<erasure_simulator.number_of_erasure;i++) {
+            erasure_simulator.erasure_seq[i] = '\000';
+        }
 //    for (int i=0;i<361000;i++) {
 //        erasure_simulator2.erasure_seq[i] = '\000';
 //    }
@@ -180,6 +185,7 @@ int main(int argc, const char *argv[]) {
 //    for (int i=0;i<361000;i++) {
 //        erasure_simulator.erasure_seq[i] = '\000';
 //    }
+
 //    erasure_simulator.erasure_seq[4] = '\001';
 //    erasure_simulator.erasure_seq[2] = '\001';
 //    erasure_simulator.erasure_seq[3] = '\001';
@@ -256,6 +262,8 @@ int main(int argc, const char *argv[]) {
         int packet_counter = 0;
         float min_rate_debug_debug = 0;
         int min_rate_debug_packet_count = 0;
+        float min_rate_affected_debug = 0;
+        int min_rate_affected_debug_packet_count = 0;
         for (int i = 0;; i++) {
             packet_counter++;
 //        application_layer_sender.generate_message_and_encode(udp_parameters, buffer, &buffer_size); //udp_codeword is
@@ -302,24 +310,36 @@ int main(int argc, const char *argv[]) {
                                                                                               &erasure_simulator,
                                                                                               false);
                 }
-                if (i >= T) {
-                    if (seq_number > -1) {
-                        int numOfMessagesStored = application_layer_relay_receiver->fec_decoder->message_vector_to_transmit_stored_index;
-                        for (int kk = 0; kk <= numOfMessagesStored; kk++) {
+//                if (i >= T) {
+//                    if (seq_number >= -1) {
+                if (seq_number >= T) {
+                    int numOfMessagesStored = application_layer_relay_receiver->fec_decoder->message_vector_to_transmit_stored_index;
+                    int start_index;
+                    if (FLAG_FOR_CONSTANT_TRANS)
+                        if (numOfMessagesStored>=0)
+                            start_index=numOfMessagesStored;
+                        else
+                            start_index=numOfMessagesStored+1;
+                    else
+                        start_index=0;
+
+//                    if (numOfMessagesStored>=0) {
+                    for (int kk = start_index; kk <= numOfMessagesStored; kk++) {
 //                    printMatrix(application_layer_relay_receiver->fec_decoder->message_vector_to_transmit_stored[kk],1,300);
 //                    cout << application_layer_relay_receiver->fec_decoder->message_vector_to_transmit_stored_seq[kk] << endl;
-                            application_layer_relay_sender.message_wise_encode_at_relay(
-                                    application_layer_relay_receiver->fec_decoder->message_vector_to_transmit_stored[kk],
-                                    application_layer_relay_receiver->fec_decoder->message_vector_to_transmit_stored_seq[kk],
-                                    udp_parameters2, buffer2,
-                                    &buffer_size2);
-                            application_layer_destination_receiver->receive_message_and_decode(
-                                    udp_parameters2, nullptr,buffer2,
-                                    &buffer_size2,
-                                    &erasure_simulator2,false);
-                        }
+                        application_layer_relay_sender.message_wise_encode_at_relay(
+                                application_layer_relay_receiver->fec_decoder->message_vector_to_transmit_stored[kk],
+                                application_layer_relay_receiver->fec_decoder->message_vector_to_transmit_stored_seq[kk],
+                                udp_parameters2, buffer2,
+                                &buffer_size2);
+                        application_layer_destination_receiver->receive_message_and_decode(
+                                udp_parameters2, nullptr, buffer2,
+                                &buffer_size2,
+                                &erasure_simulator2, false);
                     }
+//                    }
                 }
+//                }
 //            if (i>=T) {
 //                if (application_layer_relay_receiver->fec_decoder->recovered_message_vector[0]->buffer != NULL) {//recover past messages
 //                    // check if there are codewords recovered in the past
@@ -398,6 +418,16 @@ int main(int argc, const char *argv[]) {
                 min_rate_debug_debug += std::min(
                         application_layer_sender.variable_rate_FEC_encoder->debug_rate_first_hop_curr,
                         application_layer_relay_sender.debug_rate_second_hop_curr);
+                if (application_layer_sender.variable_rate_FEC_encoder->debug_rate_first_hop_curr<1 || application_layer_relay_sender.debug_rate_second_hop_curr<1){
+                    min_rate_affected_debug_packet_count += 1;
+                    min_rate_affected_debug += std::min(
+                            application_layer_sender.variable_rate_FEC_encoder->debug_rate_first_hop_curr,
+                            application_layer_relay_sender.debug_rate_second_hop_curr);
+                    ofstream myfile;
+                    myfile.open("affected MWDF.txt", std::ios_base::app);
+                    myfile << i << "," << application_layer_sender.variable_rate_FEC_encoder->debug_rate_first_hop_curr << "," << application_layer_relay_sender.debug_rate_second_hop_curr << " \n";
+                    myfile.close();
+                }
 
 
             } else if (relaying_type == 2 || relaying_type == 3) { // Symbol-wise decode and forward
@@ -405,6 +435,18 @@ int main(int argc, const char *argv[]) {
                                                                      &buffer_size); //udp_codeword is
                 float R1=(float)((int)buffer[4]-(int)buffer[6]+1)/((int)buffer[4]+1);
                 float R2=(float)((int)buffer[8]-(int)buffer[10]+1)/((int)buffer[8]+1);
+
+                if (R1<1 || R2<1) {
+                    min_rate_affected_debug_packet_count += 1;
+                    min_rate_affected_debug += std::min(R1, R2);
+                    ofstream myfile;
+                    if (relaying_type==3)
+                        myfile.open("affected SD-SWDF.txt", std::ios_base::app);
+                    else
+                        myfile.open("affected SWDF.txt", std::ios_base::app);
+                    myfile << i << "," << R1 << "," << R2 << " \n";
+                    myfile.close();
+                }
 
 //            if (k2>n2)
 //                k2=n2;
@@ -697,7 +739,7 @@ int main(int argc, const char *argv[]) {
                                            << "\033[0m");
                     myfile << "adaptive SD-SWDF, T_TOT=" << T_TOT << " estimation window=" <<
                            ESTIMATION_WINDOW_SIZE / ESTIMATION_WINDOW_SIZE_REDUCTION_FACTOR
-                           << ",";
+                           << " multFactor=" << DOUBLE_ERAUSRE_NUM << ",";
                 } else {
                     DEBUG_MSG(
                             "\033[1;34m" << "Fixed-rate SD-SWDF, hop1 (T1=" << T_TOT - N_INITIAL_2 << ", N1="
@@ -715,7 +757,7 @@ int main(int argc, const char *argv[]) {
                                            << "\033[0m");
                     myfile << "adaptive SWDF, T_TOT=" << T_TOT << " estimation window=" <<
                            ESTIMATION_WINDOW_SIZE / ESTIMATION_WINDOW_SIZE_REDUCTION_FACTOR
-                           << ",";
+                           << " multFactor=" << DOUBLE_ERAUSRE_NUM << ",";
                 } else {
                     DEBUG_MSG(
                             "\033[1;34m" << "Fixed-rate SWDF, hop1 (T1=" << T_TOT - N_INITIAL_2 << ", N1=" << N_INITIAL
@@ -790,7 +832,9 @@ int main(int argc, const char *argv[]) {
                 DEBUG_MSG("\033[1;34m" << "Average min rate " << min_rate_debug_debug / min_rate_debug_packet_count
                                        << "\033[0m");
                 myfile << "Average min rate " << min_rate_debug_debug / min_rate_debug_packet_count << ",";
-
+                DEBUG_MSG("\033[1;34m" << "Average min affected rate " << min_rate_affected_debug / min_rate_affected_debug_packet_count
+                                       << "\033[0m");
+                myfile << "Average min affected rate " << min_rate_affected_debug / min_rate_affected_debug_packet_count << ",";
             }
             myfile << "\n";
             myfile.close();

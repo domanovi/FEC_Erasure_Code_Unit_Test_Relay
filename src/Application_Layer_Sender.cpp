@@ -112,10 +112,12 @@ void Application_Layer_Sender::generate_message_and_encode(unsigned char *udp_pa
 //            N=N_ack;
 //        }
 //        else if (N+N2<=T_TOT) {
-        if (DOUBLE_ERAUSRE_NUM==1) {
-            N = std::min(T_TOT, (int)floor(2 * N));
-            N2 = std::min(T_TOT, (int) floor(2 * N2));
-        }
+//        if (DOUBLE_ERAUSRE_NUM>1) {
+//            N = std::min(T_TOT, (int)floor(DOUBLE_ERAUSRE_NUM * N));
+//            N2 = std::min(T_TOT, (int) floor(DOUBLE_ERAUSRE_NUM * N2));
+//        }
+        N = std::min(T_TOT, (int)floor(DOUBLE_ERAUSRE_NUM * N));
+        N2 = std::min(T_TOT, (int) floor(DOUBLE_ERAUSRE_NUM * N2));
         if (N+N2<=T_TOT) {
             T = T_TOT - N2;
             T2 = T_TOT - N;

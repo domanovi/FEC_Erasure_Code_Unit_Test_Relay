@@ -625,6 +625,12 @@ namespace siphon {
                     k_old=k_last_used;
                     n_old=n_last_used;
 
+                    //TODO: remove this protection
+                    if (k2_old!=k_old){
+                        n2_old=T_TOT-(n_last_used-k_last_used)+1;
+                        k2_old=k_last_used;
+                    }
+
                     decoder_Symbol_Wise_new=new Decoder_Symbol_Wise(max_payload);
                     decoder_Symbol_Wise_new->decoder_current=new Decoder(T,B,N, max_payload);
                     decoder_Symbol_Wise_new->encoder_current=new Encoder(n2-1,n2-k2,n2-k2, max_payload);

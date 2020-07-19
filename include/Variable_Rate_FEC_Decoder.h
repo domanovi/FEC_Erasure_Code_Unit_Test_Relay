@@ -114,6 +114,7 @@ namespace siphon {
 
         void decode_erased_packet(FEC_Message *message);
 
+        int latest_seq;
     private:
 
         int T{}, B{}, N{}, max_payload;
@@ -123,7 +124,6 @@ namespace siphon {
         int n_last_used,k_last_used;
         int n2_last_used,k2_last_used;
 
-        int latest_seq;
         int latest_seq_2;
 
         int seq_start, seq_start_double_coding, seq_end_double_coding;

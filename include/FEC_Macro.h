@@ -29,17 +29,17 @@
 
 #define FLAG_FOR_CONSTANT_TRANS 1
 
-#define T_TOT 6 // T_TOT needs to be >= T_INITAL+T_INTIAL_2, if RELAYING_TYPE=1 not used, if RELAYING_TYPE=2 ignoring T_INITIAL && N_INITIAL_2
+#define T_TOT 8 // T_TOT needs to be >= T_INITAL+T_INTIAL_2, if RELAYING_TYPE=1 not used, if RELAYING_TYPE=2 ignoring T_INITIAL && N_INITIAL_2
 #define T_INITIAL 4
 #define B_INITIAL -1
-#define N_INITIAL 1
+#define N_INITIAL -1
 
 #define T_INITIAL_2 4
 #define B_INITIAL_2 2
-#define N_INITIAL_2 1
+#define N_INITIAL_2 -1
 
 
-#define DOUBLE_ERAUSRE_NUM 1
+#define DOUBLE_ERAUSRE_NUM 1 // set to 1 to be inactive
 #define MIN_T2 0
 #define MIN_N2 0
 #define SPLIT_PROP 0
