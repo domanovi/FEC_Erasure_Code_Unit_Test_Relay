@@ -47,7 +47,7 @@ public:
     int receive_message_and_symbol_wise_encode(unsigned char *udp_parameters,unsigned char *udp_parameters2, unsigned char *udp_codeword,
                                                int *udp_codeword_size, siphon::Erasure_Simulator
                                                                        *erasure_simulator,int k2, int n2,
-                                                                       int *codeword_size_final,int *k2_out,int *n2_out);
+                                                                       int *codeword_size_final,int *k2_out,int *n2_out,bool is_erasure);
     int receive_message_and_symbol_wise_decode(unsigned char *udp_parameters, unsigned char *udp_codeword,
                                            int *udp_codeword_size, siphon::Erasure_Simulator
                                            *erasure_simulator,int length_of_burst);

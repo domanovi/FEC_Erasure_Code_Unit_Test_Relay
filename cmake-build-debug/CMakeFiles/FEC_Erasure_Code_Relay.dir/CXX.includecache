@@ -155,6 +155,10 @@ Encoder.h
 ../include/Encoder.h
 Decoder_Symbol_Wise.h
 ../include/Decoder_Symbol_Wise.h
+Payload_Simulator.h
+../include/Payload_Simulator.h
+Erasure_Simulator.h
+../include/Erasure_Simulator.h
 
 ../include/Variable_Rate_FEC_Encoder.h
 FEC_Encoder.h

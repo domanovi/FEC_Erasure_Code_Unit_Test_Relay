@@ -8,6 +8,7 @@ CMakeFiles/FEC_Erasure_Code_Sender.dir/application_sender_main.cpp.o
  ../include/Decoder.h
  ../include/Decoder_Basic.h
  ../include/Decoder_Block_Code.h
+ ../include/Decoder_Symbol_Wise.h
  ../include/Encoder.h
  ../include/Encoder_Basic.h
  ../include/Encoder_Block_Code.h

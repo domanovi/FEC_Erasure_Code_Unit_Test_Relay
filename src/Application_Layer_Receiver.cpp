@@ -55,7 +55,8 @@ void Application_Layer_Receiver::set_receiver_index(int index){
 
 int Application_Layer_Receiver::receive_message_and_symbol_wise_encode(unsigned char *udp_parameters,unsigned char *udp_parameters2, unsigned char *udp_codeword,
                                                                        int *udp_codeword_size, siphon::Erasure_Simulator *erasure_simulator,
-                                                                       int k2, int n2,int *codeword_size_final,int *k2_out,int *n2_out) {
+                                                                       int k2, int n2,int *codeword_size_final,int *k2_out,int *n2_out,
+                                                                       bool is_erasure) {
     //int temp_size;
 
     //receive(&temp_size, codeword, udp_codeword, udp_codeword_size);
@@ -71,6 +72,19 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_encode(unsigned 
     }
     temp_seq = int(codeword[3]) + 256 * int(codeword[2]) + 256 * 256 * int(codeword[1]) + 256 * 256 * 256 * int
             (codeword[0]);
+
+    if (is_erasure){
+        temp_seq = last_recieved_seq + 1;
+        fec_message->set_parameters(temp_seq, 0, 0, 0, 0, nullptr);
+        int temp_latest_seq=fec_decoder->latest_seq;
+//        fec_decoder->decode_erased_packet_for_constnat_trans(fec_message);
+        fec_decoder->receive_message_and_symbol_wise_encode_erased_packet_for_constnat_trans(fec_message,0,0,0,0,0,codeword_size_final);
+        fec_decoder->latest_seq=temp_latest_seq+1;
+        last_recieved_seq = temp_seq;
+        return temp_seq;
+    }
+
+
 
     if (erasure_type != 0) {
         if ((temp_seq < NUMBER_OF_ITERATIONS + T_TOT) &&
@@ -185,7 +199,7 @@ int Application_Layer_Receiver::receive_message_and_symbol_wise_encode(unsigned 
             printMatrix(udp_parameters, 1, 12);
         }
     }
-
+    last_recieved_seq=temp_seq;
     return temp_seq;
 }
 
@@ -327,7 +341,7 @@ int Application_Layer_Receiver::receive_message_and_decode(unsigned char *udp_pa
         temp_seq = last_recieved_seq + 1;
         fec_message->set_parameters(temp_seq, 0, 0, 0, 0, nullptr);
         int temp_latest_seq=fec_decoder->latest_seq;
-        fec_decoder->decode_erased_packet(fec_message);
+        fec_decoder->decode_erased_packet_for_constnat_trans(fec_message);
         fec_decoder->latest_seq=temp_latest_seq;
         last_recieved_seq = temp_seq;
         return temp_seq;

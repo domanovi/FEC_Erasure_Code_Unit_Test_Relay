@@ -1,4 +1,4 @@
-/snap/clion/114/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /home/elad/FEC_Erasure_Code_Unit_Test_Relay
+/snap/clion/121/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /home/elad/FEC_Erasure_Code_Unit_Test_Relay
 -- Configuring done
 -- Generating done
 -- Build files have been written to: /home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug

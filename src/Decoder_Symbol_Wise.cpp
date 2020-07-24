@@ -81,6 +81,8 @@ namespace siphon {
 
         if (decoder_current!=NULL)
             delete decoder_current;
+//        if (encoder_current!=NULL)
+//            free(encoder_current);
     }
 
     void Decoder_Symbol_Wise::copy_elements(Decoder_Symbol_Wise *source,bool encode){
@@ -299,8 +301,10 @@ namespace siphon {
                                 not_assinged_val=false;
                                 break;
                             }else{// didn't decode, need to forward
+                                //TODO: I changed here from temp_encoded_codeword to temp_codeword to forward!!!
                                 if (stam_erasure_vector[i]==0){
-                                    codeword_new_symbol_wise[2 + (j) * n2 + index] = temp_encoded_codeword[i];
+//                                    codeword_new_symbol_wise[2 + (j) * n2 + index] = temp_encoded_codeword[i];
+                                    codeword_new_symbol_wise[2 + (j) * n2 + index] = temp_codeword[i];
                                     header[n2 - 1][index] = i + 1;
                                     not_assinged_val=false;
                                     break;
@@ -447,7 +451,7 @@ namespace siphon {
                     for (int aa = 0; aa < n ; aa++)
                         stam_erasure_vector[aa] = 1;
                     for (int aa = 0; aa < n ; aa++) {
-                        if (tempHeader[aa]!=0)
+                        if (tempHeader[aa]!=0 && tempHeader[aa]<n+1)
                             stam_erasure_vector[tempHeader[aa]-1] = 0;
                     }
                     decodeBlock(&temp_codeword[0], decoder_current->getG(), &temp_codeword[0], stam_erasure_vector, k,
