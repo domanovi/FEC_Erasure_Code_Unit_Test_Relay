@@ -29,29 +29,35 @@ extern int RELAYING_TYPE;
 
 #define FLAG_FOR_CONSTANT_TRANS 0
 
-#define T_TOT 10 // T_TOT needs to be >= T_INITAL+T_INTIAL_2, if RELAYING_TYPE=1 not used, if RELAYING_TYPE=2 ignoring T_INITIAL && N_INITIAL_2
-#define T_INITIAL 5
+#define T_TOT 6 // T_TOT needs to be >= T_INITAL+T_INTIAL_2, if RELAYING_TYPE=1 not used, if RELAYING_TYPE=2 ignoring T_INITIAL && N_INITIAL_2
+#define T_INITIAL 3
 #define B_INITIAL -1
-#define N_INITIAL -1
+//#define N_INITIAL 2
+extern int N_INITIAL;
 
-#define T_INITIAL_2 5
+#define T_INITIAL_2 3
 #define B_INITIAL_2 2
-#define N_INITIAL_2 -1
+//#define N_INITIAL_2 2
+extern int N_INITIAL_2;
 
 
-#define DOUBLE_ERAUSRE_NUM 1.5 // set to 1 to be inactive
+#define DOUBLE_ERAUSRE_NUM 1 // set to 1 to be inactive
 #define MIN_T2 0
 #define MIN_N2 0
 #define SPLIT_PROP 0
 #define MAX_BURST_SIZE_MWDF 500
 #define GLOBAL_MAX_SIZE_OF_CODEWORD 20000
+#define FLAG_FOR_SDBO 0
+
+
 
 #define ESTIMATION_WINDOW_SIZE 1000    //the size of window used for estimating coding parameters.
-#define ESTIMATION_WINDOW_SIZE_REDUCTION_FACTOR 10  // divide ESTIMATION_WINDOW_SIZE to accelerate estimation
+#define ESTIMATION_WINDOW_SIZE_REDUCTION_FACTOR 10 // divide ESTIMATION_WINDOW_SIZE to accelerate estimation
 
 //#define NUMBER_OF_ITERATIONS 361000   //total number of iterations. Recommended: 50 times ESTIMATION_WINDOW_SIZE,
 #define NUMBER_OF_ITERATIONS 360000
 //#define NUMBER_OF_ITERATIONS 100000
+//#define NUMBER_OF_ITERATIONS 100
 // 360000 packets = 3600 seconds =  60 minutes, 1 minute = 6000 packets
 
 #define ERASURE_TYPE 1
@@ -67,13 +73,15 @@ extern int RELAYING_TYPE;
 #define ERASURE_RECORDER 0         //If ERASURE_RECORDER equals 1, erasure will be saved to "erasure.bin" inside the
 // bin directory, active only when ERASURE_TYPE not equal to 5
 
-
+extern int var_header_size;
+extern int fixed_header_size;
 /**************** The following is used for arbitrary erasures ******************/
 
 #define SEED_ARTIFICIAL_ERASURE 0       //the seed for generating artificial erasures
 
 //#define EPSILON 0.001       //probability of random erasures
-#define EPSILON 0.1       //probability of random erasures
+extern float EPSILON;
+//#define EPSILON 0.1       //probability of random erasures
 #define EPSILON_2 0       //probability of random erasures
 #define EPSILON_3 0.1       //probability of random erasures
 
@@ -98,6 +106,7 @@ extern int RELAYING_TYPE;
 #define DEBUG_COMM 0
 #define DEBUG_CHAR 1
 #define DEBUG_SAVE_SEQ_OF_DROPPED_TO_FILE 1
+#define DEBUG_SAVE_SEQ_OF_AFFECTED_TOFILE 0
 
 #if DEBUG_FEC
 #define DEBUG_MSG(str) do {std::cout << str << std::endl; } while( false )

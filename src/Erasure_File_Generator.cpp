@@ -65,16 +65,17 @@ namespace siphon {
     }
 
     void Erasure_File_Generator::generate_three_sections_IID(int number_of_erasure1, float erasure_prob1,int number_of_erasure2,
-                                                             float erasure_prob2,int number_of_erasure3, float erasure_prob3, string filename) {
+                                                             float erasure_prob2,int number_of_erasure3, float erasure_prob3, string filename,int seed) {
 
         ofstream file_write;
         file_write.open(filename, ios::out | ios::binary);
 
-        ofstream myfile;
+        ofstream myfile,myfile2;
         myfile.open (filename.substr (0,filename.length()-4)+".txt");
+        myfile2.open (filename.substr (0,filename.length()-4)+"_ind.txt");
 
 
-        mt19937 gen(SEED_ARTIFICIAL_ERASURE); //Standard mersenne_twister_engine seeded with rd()
+        mt19937 gen(seed); //Standard mersenne_twister_engine seeded with rd()
         std::uniform_real_distribution<> dist(0, 1);
 
         unsigned char zero = 0x0;
@@ -84,6 +85,7 @@ namespace siphon {
             if (dist(gen) < erasure_prob1) {
                 file_write.write((char *) &one, 1);
                 myfile << "1\n";
+                myfile2 << i << "\n";
             }
             else {
                 file_write.write((char *) &zero, 1);
@@ -95,6 +97,7 @@ namespace siphon {
             if (dist(gen) < erasure_prob2) {
                 file_write.write((char *) &one, 1);
                 myfile << "1\n";
+                myfile2 << i << "\n";
             }
             else {
                 file_write.write((char *) &zero, 1);
@@ -106,6 +109,7 @@ namespace siphon {
             if (dist(gen) < erasure_prob3) {
                 file_write.write((char *) &one, 1);
                 myfile << "1\n";
+                myfile2 << i << "\n";
             }
             else {
                 file_write.write((char *) &zero, 1);
@@ -113,6 +117,7 @@ namespace siphon {
             }
         }
         myfile.close();
+        myfile2.close();
         file_write.close();
 
         return;
@@ -120,12 +125,16 @@ namespace siphon {
     }
 
     void Erasure_File_Generator::generate_GE(int number_of_erasure, float alpha, float beta, float erasure_prob,
-                                             string filename) {
+                                             string filename,int seed) {
 
         ofstream file_write;
         file_write.open(filename, ios::out | ios::binary);
 
-        mt19937 gen(SEED_ARTIFICIAL_ERASURE); //Standard mersenne_twister_engine seeded with rd()
+        ofstream myfile2;
+        //myfile.open (filename.substr (0,filename.length()-4)+".txt");
+        myfile2.open (filename.substr (0,filename.length()-4)+"_ind.txt");
+
+        mt19937 gen(seed); //Standard mersenne_twister_engine seeded with rd()
         std::uniform_real_distribution<> dist(0, 1);
 
         unsigned char zero = 0x0;
@@ -134,12 +143,16 @@ namespace siphon {
         for (int i = 0; i < number_of_erasure; i++) {
 
             if (good_state) {
-                if (dist(gen) < erasure_prob)
+                if (dist(gen) < erasure_prob) {
                     file_write.write((char *) &one, 1);
+                    myfile2 << i << "\n";
+                }
                 else
                     file_write.write((char *) &zero, 1);
-            } else
+            } else {
                 file_write.write((char *) &one, 1);
+                myfile2 << i << "\n";
+            }
 
 
             //calculate the next state
@@ -154,18 +167,19 @@ namespace siphon {
         }
 
         file_write.close();
+        myfile2.close();
 
         return;
 
     }
 
     void Erasure_File_Generator::generate_GE_varying(int number_of_erasure, float alpha, float beta, float erasure_prob,
-                                                     string filename) {
+                                                     string filename,int seed) {
 
         ofstream file_write;
         file_write.open(filename, ios::out | ios::binary);
 
-        mt19937 gen(SEED_ARTIFICIAL_ERASURE); //Standard mersenne_twister_engine seeded with rd()
+        mt19937 gen(seed); //Standard mersenne_twister_engine seeded with rd()
         std::uniform_real_distribution<> dist(0, 1);
 
         unsigned char zero = 0x0;

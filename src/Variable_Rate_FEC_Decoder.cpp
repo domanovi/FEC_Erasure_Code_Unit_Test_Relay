@@ -2145,7 +2145,10 @@ namespace siphon {
 
         if ((T != message->T) || (B != message->B) || (N != message->N)) { //record when the double_coding begins
             seq_start_double_coding = received_seq - message->counter_for_start_and_end;
-            cout<<"Start double coding at the destination"<<endl;
+            if (RELAYING_TYPE>0 && receiver_index==0)
+                cout<<"Start double coding at the relay"<<endl;
+            else
+                cout<<"Start double coding at the destination"<<endl;
         }
 
         // first decode the old message using the old decoder
@@ -2254,6 +2257,7 @@ namespace siphon {
 
             } else {
                 int tempIndex=index+1;
+                bool failed_to_dec_using_old_dec=true;
                 if (decoder_old != NULL) {
                     decode_for_erased_codeword(recovered_message, seq, decoder_old);
 
@@ -2269,6 +2273,7 @@ namespace siphon {
                             memcpy(message_vector_to_transmit_stored[message_vector_to_transmit_stored_index],
                                    buffer_data, size_t(recovered_message->size));
                             message_vector_to_transmit_stored_seq[message_vector_to_transmit_stored_index]=recovered_message->seq_number;
+                            failed_to_dec_using_old_dec=false;
                         }else if (seq>=T && tempIndex==T-1){
                             burst_index++;
                             unsigned char *buffer_data = memory_object->allocate_memory(max_payload);
@@ -2290,20 +2295,24 @@ namespace siphon {
                     recovered_message_vector[tempIndex]->buffer=buffer_data;
                     recovered_message_vector[tempIndex]->seq_number=recovered_message->seq_number;
                     index=tempIndex;
-                    message_vector_to_transmit_stored_index++;
-                    memcpy(message_vector_to_transmit_stored[message_vector_to_transmit_stored_index],
-                           buffer_data, size_t(recovered_message->size));
-                    message_vector_to_transmit_stored_seq[message_vector_to_transmit_stored_index]=recovered_message->seq_number;
+                    if (failed_to_dec_using_old_dec==true) {
+//                    message_vector_to_transmit_stored_index++;
+                        memcpy(message_vector_to_transmit_stored[message_vector_to_transmit_stored_index],
+                               buffer_data, size_t(recovered_message->size));
+                        message_vector_to_transmit_stored_seq[message_vector_to_transmit_stored_index] = recovered_message->seq_number;
+                    }
                 }else if (seq>=T && tempIndex==T-1){
                     burst_index++;
                     unsigned char *buffer_data = memory_object->allocate_memory(max_payload);
                     memset(buffer_data, '\000', max_payload);
                     burst_erased_message_vector[burst_index]->buffer=buffer_data;
                     burst_erased_message_vector[burst_index]->seq_number=recovered_message->seq_number;
-                    message_vector_to_transmit_stored_index++;
-                    memcpy(message_vector_to_transmit_stored[message_vector_to_transmit_stored_index],
-                           buffer_data, max_payload);
-                    message_vector_to_transmit_stored_seq[message_vector_to_transmit_stored_index]=recovered_message->seq_number;
+                    if (failed_to_dec_using_old_dec==true) {
+//                    message_vector_to_transmit_stored_index++;
+                        memcpy(message_vector_to_transmit_stored[message_vector_to_transmit_stored_index],
+                               buffer_data, max_payload);
+                        message_vector_to_transmit_stored_seq[message_vector_to_transmit_stored_index] = recovered_message->seq_number;
+                    }
                 }
             }
 
@@ -2338,6 +2347,13 @@ namespace siphon {
                 memcpy(message_vector_to_transmit_stored[message_vector_to_transmit_stored_index],
                        message->buffer, size_t(message->size));
                 message_vector_to_transmit_stored_seq[message_vector_to_transmit_stored_index] = message->seq_number;
+            }else if (received_seq>=T) {//TODO: New addition 2020_07_29 to check !!!
+                unsigned char *buffer_data = memory_object->allocate_memory(max_payload);
+                memset(buffer_data, '\000', max_payload);
+                message_vector_to_transmit_stored_index++;
+                memcpy(message_vector_to_transmit_stored[message_vector_to_transmit_stored_index],
+                       buffer_data, max_payload);
+                message_vector_to_transmit_stored_seq[message_vector_to_transmit_stored_index]=message->seq_number;
             }
 
         } else {
@@ -2725,7 +2741,8 @@ namespace siphon {
                 }
                 if (flag==1) {
                     if (RELAYING_TYPE==3) {
-                        cout << "Packet # " << received_seq - T_TOT << " dropped" << endl;
+//                        cout << "Packet # " << received_seq - T_TOT << " dropped" << endl;
+                        DEBUG_MSG("Packet # " << received_seq - T_TOT << " dropped");
                         final_counter_loss_of_packets_swdf++;
                         if (DEBUG_SAVE_SEQ_OF_DROPPED_TO_FILE == 1) {
                             ofstream myfile;
@@ -2734,7 +2751,8 @@ namespace siphon {
                             myfile.close();
                         }
                     }else if (RELAYING_TYPE==2) {
-                        cout << "Packet # " << received_seq - T_TOT << " dropped" << endl;
+//                        cout << "Packet # " << received_seq - T_TOT << " dropped" << endl;
+                        DEBUG_MSG("Packet # " << received_seq - T_TOT << " dropped");
                         final_counter_loss_of_packets_swdf++;
                         if (DEBUG_SAVE_SEQ_OF_DROPPED_TO_FILE==1) {
                             ofstream myfile;
@@ -2743,7 +2761,8 @@ namespace siphon {
                             myfile.close();
                         }
                     }else if(RELAYING_TYPE==1) {
-                        cout << "Packet # " << received_seq -T_INITIAL_2-1 << " dropped" << endl;
+//                        cout << "Packet # " << received_seq -T_INITIAL_2-1 << " dropped" << endl;
+                        DEBUG_MSG("Packet # " << received_seq -T_INITIAL_2-1 << " dropped");
                         final_counter_loss_of_packets_swdf++;
                         if (DEBUG_SAVE_SEQ_OF_DROPPED_TO_FILE==1) {
                             ofstream myfile;
