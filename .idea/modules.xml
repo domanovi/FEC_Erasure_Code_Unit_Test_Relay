@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/FEC_Erasure_Code_Unit_Test_Relay.iml" filepath="$PROJECT_DIR$/.idea/FEC_Erasure_Code_Unit_Test_Relay.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/FEC_Erasure_Code.iml" filepath="$PROJECT_DIR$/.idea/FEC_Erasure_Code.iml" />
     </modules>
   </component>
 </project>

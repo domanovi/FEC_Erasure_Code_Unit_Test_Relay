@@ -8,34 +8,34 @@
 		<Option virtualFolders="CMake Files\;"/>
 		<Build>
 			<Target title="all">
-				<Option working_dir="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug"/>
+				<Option working_dir="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
-					<CompileFile command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="rebuild_cache">
-				<Option working_dir="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug"/>
+				<Option working_dir="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
-					<CompileFile command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="FEC_Erasure_Code_Local">
-				<Option output="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/bin/FEC_Erasure_Code_Local" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/bin"/>
+				<Option output="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/bin/FEC_Erasure_Code_Local" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/bin"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
 				<Option compiler="gcc"/>
 				<Compiler>
-					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/include"/>
-					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/src"/>
+					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/include"/>
+					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/src"/>
 					<Add directory="/usr/include/c++/9"/>
 					<Add directory="/usr/include/x86_64-linux-gnu/c++/9"/>
 					<Add directory="/usr/include/c++/9/backward"/>
@@ -46,21 +46,21 @@
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 FEC_Erasure_Code_Local"/>
-					<CompileFile command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 FEC_Erasure_Code_Local"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="FEC_Erasure_Code_Local/fast">
-				<Option output="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/bin/FEC_Erasure_Code_Local" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/bin"/>
+				<Option output="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/bin/FEC_Erasure_Code_Local" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/bin"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
 				<Option compiler="gcc"/>
 				<Compiler>
-					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/include"/>
-					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/src"/>
+					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/include"/>
+					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/src"/>
 					<Add directory="/usr/include/c++/9"/>
 					<Add directory="/usr/include/x86_64-linux-gnu/c++/9"/>
 					<Add directory="/usr/include/c++/9/backward"/>
@@ -71,21 +71,21 @@
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 FEC_Erasure_Code_Local/fast"/>
-					<CompileFile command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 FEC_Erasure_Code_Local/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="fec_part">
-				<Option output="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/libfec_part.a" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug"/>
+				<Option output="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/libfec_part.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug"/>
 				<Option object_output="./"/>
 				<Option type="2"/>
 				<Option compiler="gcc"/>
 				<Compiler>
-					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/include"/>
-					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/src"/>
+					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/include"/>
+					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/src"/>
 					<Add directory="/usr/include/c++/9"/>
 					<Add directory="/usr/include/x86_64-linux-gnu/c++/9"/>
 					<Add directory="/usr/include/c++/9/backward"/>
@@ -96,21 +96,21 @@
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 fec_part"/>
-					<CompileFile command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 fec_part"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="fec_part/fast">
-				<Option output="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/libfec_part.a" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug"/>
+				<Option output="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/libfec_part.a" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug"/>
 				<Option object_output="./"/>
 				<Option type="2"/>
 				<Option compiler="gcc"/>
 				<Compiler>
-					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/include"/>
-					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/src"/>
+					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/include"/>
+					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/src"/>
 					<Add directory="/usr/include/c++/9"/>
 					<Add directory="/usr/include/x86_64-linux-gnu/c++/9"/>
 					<Add directory="/usr/include/c++/9/backward"/>
@@ -121,31 +121,31 @@
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 fec_part/fast"/>
-					<CompileFile command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 fec_part/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="edit_cache">
-				<Option working_dir="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug"/>
+				<Option working_dir="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug"/>
 				<Option type="4"/>
 				<MakeCommands>
-					<Build command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
-					<CompileFile command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="FEC_Erasure_Code_Relay">
-				<Option output="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/bin/FEC_Erasure_Code_Relay" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/bin"/>
+				<Option output="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/bin/FEC_Erasure_Code_Relay" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/bin"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
 				<Option compiler="gcc"/>
 				<Compiler>
-					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/include"/>
-					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/src"/>
+					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/include"/>
+					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/src"/>
 					<Add directory="/usr/include/c++/9"/>
 					<Add directory="/usr/include/x86_64-linux-gnu/c++/9"/>
 					<Add directory="/usr/include/c++/9/backward"/>
@@ -156,21 +156,21 @@
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 FEC_Erasure_Code_Relay"/>
-					<CompileFile command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 FEC_Erasure_Code_Relay"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="FEC_Erasure_Code_Relay/fast">
-				<Option output="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/bin/FEC_Erasure_Code_Relay" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/bin"/>
+				<Option output="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/bin/FEC_Erasure_Code_Relay" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/bin"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
 				<Option compiler="gcc"/>
 				<Compiler>
-					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/include"/>
-					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/src"/>
+					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/include"/>
+					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/src"/>
 					<Add directory="/usr/include/c++/9"/>
 					<Add directory="/usr/include/x86_64-linux-gnu/c++/9"/>
 					<Add directory="/usr/include/c++/9/backward"/>
@@ -181,21 +181,21 @@
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 FEC_Erasure_Code_Relay/fast"/>
-					<CompileFile command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 FEC_Erasure_Code_Relay/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="FEC_Erasure_Code_Sender">
-				<Option output="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/bin/FEC_Erasure_Code_Sender" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/bin"/>
+				<Option output="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/bin/FEC_Erasure_Code_Sender" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/bin"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
 				<Option compiler="gcc"/>
 				<Compiler>
-					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/include"/>
-					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/src"/>
+					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/include"/>
+					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/src"/>
 					<Add directory="/usr/include/c++/9"/>
 					<Add directory="/usr/include/x86_64-linux-gnu/c++/9"/>
 					<Add directory="/usr/include/c++/9/backward"/>
@@ -206,21 +206,21 @@
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 FEC_Erasure_Code_Sender"/>
-					<CompileFile command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 FEC_Erasure_Code_Sender"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="FEC_Erasure_Code_Sender/fast">
-				<Option output="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/bin/FEC_Erasure_Code_Sender" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/bin"/>
+				<Option output="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/bin/FEC_Erasure_Code_Sender" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/bin"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
 				<Option compiler="gcc"/>
 				<Compiler>
-					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/include"/>
-					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/src"/>
+					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/include"/>
+					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/src"/>
 					<Add directory="/usr/include/c++/9"/>
 					<Add directory="/usr/include/x86_64-linux-gnu/c++/9"/>
 					<Add directory="/usr/include/c++/9/backward"/>
@@ -231,21 +231,21 @@
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 FEC_Erasure_Code_Sender/fast"/>
-					<CompileFile command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 FEC_Erasure_Code_Sender/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="FEC_Erasure_Code_Receiver">
-				<Option output="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/bin/FEC_Erasure_Code_Receiver" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/bin"/>
+				<Option output="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/bin/FEC_Erasure_Code_Receiver" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/bin"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
 				<Option compiler="gcc"/>
 				<Compiler>
-					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/include"/>
-					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/src"/>
+					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/include"/>
+					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/src"/>
 					<Add directory="/usr/include/c++/9"/>
 					<Add directory="/usr/include/x86_64-linux-gnu/c++/9"/>
 					<Add directory="/usr/include/c++/9/backward"/>
@@ -256,21 +256,21 @@
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 FEC_Erasure_Code_Receiver"/>
-					<CompileFile command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 FEC_Erasure_Code_Receiver"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 			<Target title="FEC_Erasure_Code_Receiver/fast">
-				<Option output="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/bin/FEC_Erasure_Code_Receiver" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/bin"/>
+				<Option output="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/bin/FEC_Erasure_Code_Receiver" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/bin"/>
 				<Option object_output="./"/>
 				<Option type="1"/>
 				<Option compiler="gcc"/>
 				<Compiler>
-					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/include"/>
-					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/src"/>
+					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/include"/>
+					<Add directory="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/src"/>
 					<Add directory="/usr/include/c++/9"/>
 					<Add directory="/usr/include/x86_64-linux-gnu/c++/9"/>
 					<Add directory="/usr/include/c++/9/backward"/>
@@ -281,95 +281,95 @@
 					<Add directory="/usr/include"/>
 				</Compiler>
 				<MakeCommands>
-					<Build command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 FEC_Erasure_Code_Receiver/fast"/>
-					<CompileFile command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
-					<Clean command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
-					<DistClean command="/usr/bin/make -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<Build command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 FEC_Erasure_Code_Receiver/fast"/>
+					<CompileFile command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/make -j4 -f &quot;/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
 				</MakeCommands>
 			</Target>
 		</Build>
-		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/application_local_simulation.cpp">
+		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/application_local_simulation.cpp">
 			<Option target="FEC_Erasure_Code_Local"/>
 		</Unit>
-		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/application_receiver_main.cpp">
+		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/application_receiver_main.cpp">
 			<Option target="FEC_Erasure_Code_Receiver"/>
 		</Unit>
-		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/application_relay_main.cpp">
+		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/application_relay_main.cpp">
 			<Option target="FEC_Erasure_Code_Relay"/>
 		</Unit>
-		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/application_sender_main.cpp">
+		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/application_sender_main.cpp">
 			<Option target="FEC_Erasure_Code_Sender"/>
 		</Unit>
-		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/include/Decoder_Symbol_Wise.h">
+		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/include/Decoder_Symbol_Wise.h">
 			<Option target="FEC_Erasure_Code_Local"/>
 		</Unit>
-		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/Application_Layer_Receiver.cpp">
+		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/src/Application_Layer_Receiver.cpp">
 			<Option target="fec_part"/>
 		</Unit>
-		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/Application_Layer_Sender.cpp">
+		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/src/Application_Layer_Sender.cpp">
 			<Option target="fec_part"/>
 		</Unit>
-		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/ConnectionManager.cpp">
+		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/src/ConnectionManager.cpp">
 			<Option target="fec_part"/>
 		</Unit>
-		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/Decoder.cpp">
+		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/src/Decoder.cpp">
 			<Option target="fec_part"/>
 		</Unit>
-		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/Decoder_Basic.cpp">
+		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/src/Decoder_Basic.cpp">
 			<Option target="fec_part"/>
 		</Unit>
-		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/Decoder_Block_Code.cpp">
+		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/src/Decoder_Block_Code.cpp">
 			<Option target="fec_part"/>
 		</Unit>
-		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/Decoder_Symbol_Wise.cpp">
+		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/src/Decoder_Symbol_Wise.cpp">
 			<Option target="fec_part"/>
 		</Unit>
-		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/Encoder.cpp">
+		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/src/Encoder.cpp">
 			<Option target="fec_part"/>
 		</Unit>
-		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/Encoder_Basic.cpp">
+		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/src/Encoder_Basic.cpp">
 			<Option target="fec_part"/>
 		</Unit>
-		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/Encoder_Block_Code.cpp">
+		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/src/Encoder_Block_Code.cpp">
 			<Option target="fec_part"/>
 		</Unit>
-		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/Erasure_File_Generator.cpp">
+		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/src/Erasure_File_Generator.cpp">
 			<Option target="fec_part"/>
 		</Unit>
-		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/Erasure_Simulator.cpp">
+		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/src/Erasure_Simulator.cpp">
 			<Option target="fec_part"/>
 		</Unit>
-		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/FEC_Decoder.cpp">
+		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/src/FEC_Decoder.cpp">
 			<Option target="fec_part"/>
 		</Unit>
-		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/FEC_Encoder.cpp">
+		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/src/FEC_Encoder.cpp">
 			<Option target="fec_part"/>
 		</Unit>
-		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/FEC_Message.cpp">
+		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/src/FEC_Message.cpp">
 			<Option target="fec_part"/>
 		</Unit>
-		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/Memory_Allocator.cpp">
+		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/src/Memory_Allocator.cpp">
 			<Option target="fec_part"/>
 		</Unit>
-		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/Parameter_Estimator.cpp">
+		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/src/Parameter_Estimator.cpp">
 			<Option target="fec_part"/>
 		</Unit>
-		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/Payload_Simulator.cpp">
+		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/src/Payload_Simulator.cpp">
 			<Option target="fec_part"/>
 		</Unit>
-		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/Variable_Rate_FEC_Decoder.cpp">
+		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/src/Variable_Rate_FEC_Decoder.cpp">
 			<Option target="fec_part"/>
 		</Unit>
-		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/Variable_Rate_FEC_Encoder.cpp">
+		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/src/Variable_Rate_FEC_Encoder.cpp">
 			<Option target="fec_part"/>
 		</Unit>
-		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/basicOperations.cpp">
+		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/src/basicOperations.cpp">
 			<Option target="fec_part"/>
 		</Unit>
-		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/src/codingOperations.cpp">
+		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/src/codingOperations.cpp">
 			<Option target="fec_part"/>
 		</Unit>
-		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay/CMakeLists.txt">
+		<Unit filename="/home/elad/FEC_Erasure_Code_Unit_Test_Relay_4/CMakeLists.txt">
 			<Option virtualFolder="CMake Files\"/>
 		</Unit>
 	</Project>

@@ -27,15 +27,15 @@ extern int RELAYING_TYPE;
 // if RELAYING_TYPE=2 symbol-wise decode and forward
 // if RELAYING_TYPE=3 SD-symbol-wise decode and forward
 
-#define FLAG_FOR_CONSTANT_TRANS 0
+#define FLAG_FOR_CONSTANT_TRANS 1
 
-#define T_TOT 6 // T_TOT needs to be >= T_INITAL+T_INTIAL_2, if RELAYING_TYPE=1 not used, if RELAYING_TYPE=2 ignoring T_INITIAL && N_INITIAL_2
-#define T_INITIAL 3
+#define T_TOT 10 // T_TOT needs to be >= T_INITAL+T_INTIAL_2, if RELAYING_TYPE=1 not used, if RELAYING_TYPE=2 ignoring T_INITIAL && N_INITIAL_2
+#define T_INITIAL 5
 #define B_INITIAL -1
 //#define N_INITIAL 2
 extern int N_INITIAL;
 
-#define T_INITIAL_2 3
+#define T_INITIAL_2 5
 #define B_INITIAL_2 2
 //#define N_INITIAL_2 2
 extern int N_INITIAL_2;
@@ -60,7 +60,7 @@ extern int N_INITIAL_2;
 //#define NUMBER_OF_ITERATIONS 100
 // 360000 packets = 3600 seconds =  60 minutes, 1 minute = 6000 packets
 
-#define ERASURE_TYPE 1
+#define ERASURE_TYPE 3
 // If ERASURE_TYPE=0, generate no artificial erasures;
 // if ERASURE_TYPE=1, iid erasures with Bernoulli(EPSILON) are introduced;
 // if ERASURE_TYPE=2, erasures are generated according Gilbert-Elliot channel (ALPHA, BETA, EPSILON);
@@ -86,9 +86,9 @@ extern float EPSILON;
 #define EPSILON_3 0.1       //probability of random erasures
 
 
-#define ALPHA 0.01            //probability of transitioning from GOOD state to BAD state
+#define ALPHA 0.005            //probability of transitioning from GOOD state to BAD state
 
-#define BETA 0.3         //probability of transitioning from BAD state to GOOD state, expected length of burst
+#define BETA 0.990         //probability of transitioning from BAD state to GOOD state, expected length of burst
 // erasure = 1/BETA
 
 #define ERASURE_T 20
@@ -96,6 +96,8 @@ extern float EPSILON;
 #define ERASURE_B 5
 
 #define ERASURE_N 1
+
+#define NUMBER_OF_STATES 6
 
 
 

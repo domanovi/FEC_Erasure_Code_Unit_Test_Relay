@@ -220,6 +220,57 @@ namespace siphon {
 
     }
 
+    void Erasure_File_Generator::generate_Fritchman_varying(int number_of_erasure, float alpha, float beta, float erasure_prob, int number_of_states,
+                                                            string filename,int seed) {
+
+        ofstream file_write;
+        file_write.open(filename, ios::out | ios::binary);
+
+        mt19937 gen(seed); //Standard mersenne_twister_engine seeded with rd()
+        std::uniform_real_distribution<> dist(0, 1);
+
+        unsigned char zero = 0x0;
+        unsigned char one = 0x1;
+        int state = 0; //initial state equals 0, meaning good
+
+        for (int i = 0; i < number_of_erasure; i++) {
+
+            if (state==0) {                     //good state
+                if (dist(gen) < erasure_prob)
+                    file_write.write((char *) &one, 1);
+                else
+                    file_write.write((char *) &zero, 1);
+            } else
+                file_write.write((char *) &one, 1);
+
+
+            //calculate the next state
+            if (state==0) {
+                if (dist(gen) < alpha)
+                    state = 1;
+            } else {
+//                bool middle = (i >= number_of_erasure / 3) && (i <= number_of_erasure * 2 / 3);
+                bool middle = (i >= number_of_erasure / 4) && (i <= number_of_erasure * 3 / 4);
+
+                double random_temp = dist(gen);
+                if (!middle) {
+                    //not in the middle
+                    if (random_temp < beta)
+                        state = (state+1)%number_of_states;              //with probability = beta, leave the current BAD state
+                } else                                   //in the middle
+                    //if (random_temp < 3*beta)
+                    //state = (state+1)%number_of_states;
+                    state=0;
+            }
+
+        }
+
+        file_write.close();
+
+        return;
+
+    }
+
     void Erasure_File_Generator::generate_periodic(int number_of_erasure, int T, int B, int N, string filename) {
 
         ofstream file_write;

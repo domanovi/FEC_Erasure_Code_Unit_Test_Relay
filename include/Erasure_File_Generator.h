@@ -34,6 +34,11 @@ namespace siphon {
         generate_three_sections_IID(int number_of_erasure1, float erasure_prob1, int number_of_erasure2,
                                     float erasure_prob2,
                                     int number_of_erasure3, float erasure_prob3, string filename,int seed);
+
+        void
+        generate_Fritchman_varying(int number_of_erasure, float alpha, float beta, float erasure_prob,
+                                   int number_of_states,
+                                   string filename, int seed);
     };
 
 }

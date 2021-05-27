@@ -89,6 +89,8 @@ int main(int argc, const char *argv[]) {
             int B2 = N_INITIAL_2;                       //if B=-1 and N=-1, then it is adaptive; otherwise, it is non-adaptive
             int N2 = N_INITIAL_2;
 
+            EPSILON=0.0001;
+
             bool adaptive_mode_MDS = false;
 
             int erasure_type = ERASURE_TYPE;
@@ -157,15 +159,24 @@ int main(int argc, const char *argv[]) {
 
             switch (erasure_type) {
                 case 1:
-                    erasure_generator.generate_IID(stream_duration + T + T2, EPSILON, "erasure.bin", 0);
-                    erasure_generator2.generate_IID(stream_duration + T + T2, EPSILON, "erasure2.bin", 0);
+//                    erasure_generator.generate_IID(stream_duration + T + T2, EPSILON, "erasure.bin", 0);
+//                    erasure_generator2.generate_IID(stream_duration + T + T2, EPSILON, "erasure2.bin", 0);
+                    erasure_generator.generate_three_sections_IID(30000, 0.05, 40000, 0,
+                                                                  stream_duration - 30000 - 40000 + T + T2,
+                                                                  0.05, "erasure.bin", 0);
+                    erasure_generator2.generate_three_sections_IID(40000, 0.05, 40000, 0,
+                                                                   stream_duration - 40000 - 40000 + T + T2,
+                                                                   0.05, "erasure2.bin", 1);
                     break;
                 case 2:
                     erasure_generator.generate_GE(stream_duration + T, ALPHA, BETA, EPSILON, "erasure.bin", 0);
+                    erasure_generator2.generate_GE(stream_duration + T, ALPHA, BETA, EPSILON, "erasure2.bin", 1);
                     break;
                 case 3:
-                    erasure_generator.generate_GE_varying(stream_duration + T + T2, ALPHA, BETA, EPSILON, "erasure.bin",
-                                                          0);
+//                    erasure_generator.generate_GE_varying(stream_duration + T + T2, ALPHA, BETA, EPSILON, "erasure.bin",0);
+                    erasure_generator.generate_Fritchman_varying(stream_duration + T, ALPHA, BETA, EPSILON,NUMBER_OF_STATES, "erasure.bin", 0);
+                    erasure_generator2.generate_Fritchman_varying(stream_duration + T, ALPHA, BETA, EPSILON,NUMBER_OF_STATES, "erasure2.bin", 1);
+
                     break;
                 case 4:
                     erasure_generator.generate_periodic(stream_duration + T, ERASURE_T, ERASURE_B, ERASURE_N,
@@ -181,35 +192,31 @@ int main(int argc, const char *argv[]) {
                 default:
                     erasure_generator.generate_periodic(stream_duration + T, T, 0, 0, "erasure.bin");
             }
-            erasure_generator.generate_three_sections_IID(30000, 0.05, 40000, 0,
-                                                          stream_duration - 30000 - 40000 + T + T2,
-                                                          0.05, "erasure.bin", 0);
+
 ////    erasure_generator.generate_three_sections_IID(4000,0,2000,0.33,stream_duration-4000-2000 + T+T2,0,"erasure.bin");
 //        erasure_generator2.generate_IID(stream_duration + T + T2, 0.1, "erasure2.bin", 2);
-            erasure_generator2.generate_three_sections_IID(40000, 0.05, 40000, 0,
-                                                           stream_duration - 40000 - 40000 + T + T2,
-                                                           0.05, "erasure2.bin", 1);
-            erasure_generator.generate_GE(stream_duration + T, ALPHA, BETA, EPSILON, "erasure.bin", 0);
-            erasure_generator2.generate_GE(stream_duration + T, ALPHA, BETA, EPSILON, "erasure2.bin", 1);
+
+//            erasure_generator.generate_GE(stream_duration + T, ALPHA, BETA, EPSILON, "erasure.bin", 0);
+//            erasure_generator2.generate_GE(stream_duration + T, ALPHA, BETA, EPSILON, "erasure2.bin", 1);
 //            erasure_generator.generate_GE_varying(stream_duration + T, ALPHA, BETA, EPSILON, "erasure.bin", 0);
 //            erasure_generator.generate_GE_varying(stream_duration + T, ALPHA, BETA, EPSILON, "erasure.bin", 1);
 
-        siphon::Erasure_Simulator erasure_simulator("../Experimental_Logs/erasure40.bin");
-        siphon::Erasure_Simulator erasure_simulator2("../Experimental_Logs/erasure50.bin");
-//            siphon::Erasure_Simulator erasure_simulator("erasure.bin");
-//            siphon::Erasure_Simulator erasure_simulator2("erasure2.bin");
+//        siphon::Erasure_Simulator erasure_simulator("../Experimental_Logs/erasure70.bin");
+//        siphon::Erasure_Simulator erasure_simulator2("../Experimental_Logs/erasure80.bin");
+            siphon::Erasure_Simulator erasure_simulator("erasure.bin");
+            siphon::Erasure_Simulator erasure_simulator2("erasure2.bin");
 
-            auto start_time = high_resolution_clock::now();;
+            auto start_time = high_resolution_clock::now();
 
 
 
-        for (int i=360000;i<erasure_simulator2.number_of_erasure;i++) {
-            erasure_simulator2.erasure_seq[i] = '\000';
-        }
-//
-        for (int i=360000;i<erasure_simulator.number_of_erasure;i++) {
-            erasure_simulator.erasure_seq[i] = '\000';
-        }
+//        for (int i=360000;i<erasure_simulator2.number_of_erasure;i++) {
+//            erasure_simulator2.erasure_seq[i] = '\000';
+//        }
+////
+//        for (int i=360000;i<erasure_simulator.number_of_erasure;i++) {
+//            erasure_simulator.erasure_seq[i] = '\000';
+//        }
 ////            for (int i=0;i<erasure_simulator2.number_of_erasure;i++) {
 ////                erasure_simulator2.erasure_seq[i] = '\000';
 ////            }
@@ -327,12 +334,12 @@ int main(int argc, const char *argv[]) {
 
                 // sent;
                 if (relaying_type == 0) {// P2P (no relay)
-                    application_layer_sender.generate_message_and_encode(udp_parameters, buffer,
-                                                                         &buffer_size); //udp_codeword is
+//                    application_layer_sender.generate_message_and_encode(udp_parameters, buffer,
+//                                                                         &buffer_size); //udp_codeword is
 
                     // P2P
                     application_layer_sender.generate_message_and_encode(udp_parameters, buffer,
-                                                                         &buffer_size); //udp_codeword is
+                                                                         &buffer_size);
 
                     seq_number = application_layer_relay_receiver->receive_message_and_decode(udp_parameters, nullptr,
                                                                                               buffer,
@@ -346,7 +353,7 @@ int main(int argc, const char *argv[]) {
                     // 3. Max burst size is MAX_BURST_SIZE_MWDF
                     // 4. Need to handle restart of reading from file in calc_missed_chars
                     application_layer_sender.generate_message_and_encode(udp_parameters, buffer,
-                                                                         &buffer_size); //udp_codeword is
+                                                                         &buffer_size);
 
                     //if (i >= T) {
 
